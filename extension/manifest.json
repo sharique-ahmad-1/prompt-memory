@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "PromptMemory Chrome Extension",
+  "version": "1.0.0",
+  "description": "Bridge between AI Conversations and PromptMemory SaaS",
+  "icons": {
+    "16": "icon128.png",
+    "48": "icon128.png",
+    "128": "icon128.png"
+  },
+  "permissions": ["sidePanel", "storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "src/background/index.ts",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "PromptMemory Quick Actions",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*"],
+      "js": ["src/content/chatgpt.ts"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": ["src/content/authBridge.ts"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": ["src/content/floatingLogo.ts"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "*://*.linkedin.com/*",
+        "*://*.instagram.com/*",
+        "*://*.twitter.com/*",
+        "*://*.x.com/*",
+        "*://*.youtube.com/*"
+      ],
+      "js": ["src/content/socialClipper.ts"],
+      "run_at": "document_end"
+    }
+  ]
+}
