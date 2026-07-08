@@ -1,0 +1,47 @@
+{
+  "../../../@crx/manifest": {
+    "file": "assets/crx-manifest.js-CI5SIBkn.js",
+    "name": "crx-manifest.js",
+    "src": "../../../@crx/manifest",
+    "isEntry": true
+  },
+  "popup.html": {
+    "file": "assets/popup.html-BbACKDyA.js",
+    "name": "popup.html",
+    "src": "popup.html",
+    "isEntry": true,
+    "css": [
+      "assets/popup-C7uUYXJR.css"
+    ]
+  },
+  "src/background/index.ts": {
+    "file": "assets/index.ts-hEZz9cyd.js",
+    "name": "index.ts",
+    "src": "src/background/index.ts",
+    "isEntry": true
+  },
+  "src/content/authBridge.ts": {
+    "file": "assets/authBridge.ts-C8SeKGJ3.js",
+    "name": "authBridge.ts",
+    "src": "src/content/authBridge.ts",
+    "isEntry": true
+  },
+  "src/content/chatgpt.ts": {
+    "file": "assets/chatgpt.ts-DYY0YQ4W.js",
+    "name": "chatgpt.ts",
+    "src": "src/content/chatgpt.ts",
+    "isEntry": true
+  },
+  "src/content/floatingLogo.ts": {
+    "file": "assets/floatingLogo.ts-j5x-QlHc.js",
+    "name": "floatingLogo.ts",
+    "src": "src/content/floatingLogo.ts",
+    "isEntry": true
+  },
+  "src/content/socialClipper.ts": {
+    "file": "assets/socialClipper.ts-BcNEaRa5.js",
+    "name": "socialClipper.ts",
+    "src": "src/content/socialClipper.ts",
+    "isEntry": true
+  }
+}

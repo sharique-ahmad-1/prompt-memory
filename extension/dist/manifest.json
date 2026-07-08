@@ -1,0 +1,115 @@
+{
+  "manifest_version": 3,
+  "name": "PromptMemory Chrome Extension",
+  "version": "1.0.0",
+  "description": "Bridge between AI Conversations and PromptMemory SaaS",
+  "icons": {
+    "16": "icon128.png",
+    "48": "icon128.png",
+    "128": "icon128.png"
+  },
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "PromptMemory Quick Actions",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "assets/chatgpt.ts-DYY0YQ4W.js"
+      ],
+      "matches": [
+        "https://chatgpt.com/*"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "js": [
+        "assets/authBridge.ts-C8SeKGJ3.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "js": [
+        "assets/floatingLogo.ts-j5x-QlHc.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "js": [
+        "assets/socialClipper.ts-BcNEaRa5.js"
+      ],
+      "matches": [
+        "*://*.linkedin.com/*",
+        "*://*.instagram.com/*",
+        "*://*.twitter.com/*",
+        "*://*.x.com/*",
+        "*://*.youtube.com/*"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://chatgpt.com/*"
+      ],
+      "resources": [
+        "assets/chatgpt.ts-DYY0YQ4W.js"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "resources": [
+        "assets/authBridge.ts-C8SeKGJ3.js"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "assets/floatingLogo.ts-j5x-QlHc.js"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "*://*.instagram.com/*",
+        "*://*.linkedin.com/*",
+        "*://*.twitter.com/*",
+        "*://*.x.com/*",
+        "*://*.youtube.com/*"
+      ],
+      "resources": [
+        "assets/socialClipper.ts-BcNEaRa5.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ]
+}
