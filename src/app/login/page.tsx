@@ -5,13 +5,20 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { supabase } from "@/lib/supabase"
-import { Sparkles, AlertCircle, Loader2, Quote, Zap, Database } from "lucide-react"
+import { Sparkles, AlertCircle, Loader2, Quote, Zap, Database, Mail, Lock, KeyRound, ArrowRight, ShieldCheck } from "lucide-react"
 import { motion } from "framer-motion"
 import { Logo } from "@/components/Logo"
+import { useRouter } from "next/navigation"
 
 export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
+  
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
     const hash = window.location.hash
@@ -26,6 +33,84 @@ export default function Login() {
     }
   }, [])
 
+  // ⚡ 1-Click Instant Demo / Hackathon Access
+  const handleDemoLogin = async () => {
+    try {
+      setDemoLoading(true)
+      setError(null)
+      const demoEmail = "hackathon@promptmemory.ai"
+      const demoPassword = "HackathonDemo2026!"
+
+      // First try to sign in
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      })
+
+      if (signInError) {
+        // If demo account doesn't exist yet, auto create and sign in
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: demoPassword,
+        })
+        if (signUpError && !signUpError.message.toLowerCase().includes('already registered')) {
+          throw signUpError
+        }
+        // Retry sign in
+        const { error: retryError } = await supabase.auth.signInWithPassword({
+          email: demoEmail,
+          password: demoPassword,
+        })
+        if (retryError) throw retryError
+      }
+
+      router.push('/')
+    } catch (err: any) {
+      setError(err.message || 'Could not launch demo session. Please try email login below.')
+    } finally {
+      setDemoLoading(false)
+    }
+  }
+
+  // Email & Password Sign In / Sign Up
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !password) {
+      setError('Please enter both email and password.')
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+
+      if (authMode === 'signin') {
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+        if (signInErr) throw signInErr
+        router.push('/')
+      } else {
+        const { data, error: signUpErr } = await supabase.auth.signUp({
+          email,
+          password,
+        })
+        if (signUpErr) throw signUpErr
+        if (data.user && !data.session) {
+          setError('Account created! Check your email inbox to confirm your account, or use ⚡ Instant Demo Access above.')
+        } else {
+          router.push('/')
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'Authentication error occurred.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Continue with Google OAuth
   const handleGoogleLogin = async () => {
     try {
       setLoading(true)
@@ -38,7 +123,7 @@ export default function Login() {
       })
       if (error) throw error
     } catch (err: any) {
-      setError(err.message || 'An error occurred during login.')
+      setError(err.message || 'An error occurred during Google login.')
       setLoading(false)
     }
   }
@@ -51,7 +136,7 @@ export default function Login() {
         <motion.div 
           animate={{ x: [0, 50, 0], y: [0, -50, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/20 blur-[120px] pointer-events-none" 
+          className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-pink-600/20 blur-[120px] pointer-events-none" 
         />
         <motion.div 
           animate={{ x: [0, -50, 0], y: [0, 50, 0] }}
@@ -62,11 +147,14 @@ export default function Login() {
         {/* Branding */}
         <div className="relative z-10 flex items-center gap-3">
           <Logo size={36} />
-          <span className="text-xl font-bold tracking-tight text-white">PromptMemory</span>
+          <span className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            PromptMemory
+            <span className="text-[10px] bg-gradient-to-r from-pink-500 to-purple-500 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">PRO</span>
+          </span>
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 space-y-6 max-w-lg mt-12">
+        <div className="relative z-10 space-y-6 max-w-lg mt-8">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -80,12 +168,12 @@ export default function Login() {
             transition={{ delay: 0.1 }}
             className="text-lg text-zinc-400"
           >
-            Save prompts, preserve project memory, and continue complex AI conversations instantly. Built for power users.
+            Save prompts, preserve project memory, and clip interactive media across sessions effortlessly. Built for power users & hackathon judges.
           </motion.p>
         </div>
 
         {/* Floating Feature Cards */}
-        <div className="relative z-10 grid grid-cols-2 gap-4 mt-12">
+        <div className="relative z-10 grid grid-cols-2 gap-4 mt-8">
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
@@ -95,80 +183,185 @@ export default function Login() {
             <div className="h-10 w-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
               <Database className="h-5 w-5 text-indigo-400" />
             </div>
-            <h3 className="font-bold text-white text-base tracking-tight">Project Memory</h3>
-            <p className="text-sm text-zinc-300 leading-relaxed font-normal">Keep goals, constraints, and tasks synced across sessions effortlessly.</p>
+            <h3 className="font-bold text-white text-base tracking-tight">Cloud Vault Sync</h3>
+            <p className="text-sm text-zinc-300 leading-relaxed font-normal">Keep prompts, workspaces, and media clips synced instantly across browser extensions.</p>
           </motion.div>
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ delay: 0.3 }} 
-            className="bg-zinc-900/90 backdrop-blur-xl border border-white/10 p-6 rounded-2xl flex flex-col gap-3 shadow-2xl hover:border-emerald-500/40 transition-all group"
+            className="bg-zinc-900/90 backdrop-blur-xl border border-white/10 p-6 rounded-2xl flex flex-col gap-3 shadow-2xl hover:border-pink-500/40 transition-all group"
           >
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
-              <Zap className="h-5 w-5 text-emerald-400" />
+            <div className="h-10 w-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+              <Zap className="h-5 w-5 text-pink-400" />
             </div>
-            <h3 className="font-bold text-white text-base tracking-tight">Instant Continuation</h3>
-            <p className="text-sm text-zinc-300 leading-relaxed font-normal">Resume complex conversations seamlessly with 1-click recall.</p>
+            <h3 className="font-bold text-white text-base tracking-tight">Custom Theater Mode</h3>
+            <p className="text-sm text-zinc-300 leading-relaxed font-normal">Explore your saved YouTube Reels and Shorts in an infinite TikTok-style player.</p>
           </motion.div>
         </div>
 
         {/* Trust Indicator */}
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          className="relative z-10 flex items-center gap-4 mt-auto pt-12 text-sm text-zinc-500"
+          className="relative z-10 flex items-center gap-4 mt-auto pt-8 text-sm text-zinc-500"
         >
           <Quote className="h-5 w-5 text-zinc-700" />
-          <p>"The missing piece for professional AI workflows."</p>
+          <p>"The ultimate memory hub for enterprise AI workflows and hackathons."</p>
         </motion.div>
       </div>
 
-      {/* Right side: Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+      {/* Right side: Multi-Option Auth Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-y-auto">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className="w-full max-w-sm"
+          className="w-full max-w-md space-y-6"
         >
-          <div className="text-center mb-12 lg:hidden flex flex-col items-center">
-            <Logo size={48} className="mb-4" />
-            <h1 className="text-2xl font-bold tracking-tight">PromptMemory</h1>
+          <div className="text-center lg:hidden flex flex-col items-center">
+            <Logo size={48} className="mb-3" />
+            <h1 className="text-2xl font-bold tracking-tight">PromptMemory Vault</h1>
           </div>
           
-          <div className="space-y-8">
-            <div className="space-y-2 text-center lg:text-left">
-              <h2 className="text-3xl font-bold tracking-tight">Welcome back</h2>
-              <p className="text-muted-foreground">Sign in to your workspace to continue.</p>
+          <div className="space-y-2 text-center sm:text-left">
+            <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Sign In / Access Hub</h2>
+            <p className="text-sm text-muted-foreground">Select how you want to enter your cloud productivity vault.</p>
+          </div>
+
+          {error && (
+            <Alert variant="destructive" className="bg-destructive/15 text-destructive border border-destructive/30 rounded-xl py-3">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <AlertDescription className="ml-2 text-xs font-medium leading-relaxed">{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* ⚡ INSTANT DEMO / HACKATHON ACCESS CARD */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-600/15 via-purple-600/15 to-indigo-600/15 border border-pink-500/30 shadow-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-pink-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-pink-500/30">
+                  ⚡
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-pink-400">Hackathon / Quick Access</h4>
+                  <p className="text-[11px] text-muted-foreground">Skip setup & enter directly with demo workspace session</p>
+                </div>
+              </div>
+            </div>
+            <Button
+              onClick={handleDemoLogin}
+              disabled={demoLoading || loading}
+              className="w-full h-11 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 transition-all"
+            >
+              {demoLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4 animate-pulse" />
+              )}
+              <span>{demoLoading ? 'Launching Demo Vault...' : '⚡ Launch Instant Demo Access'}</span>
+              <ArrowRight className="h-3.5 w-3.5 ml-1" />
+            </Button>
+          </div>
+
+          <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-border"></div>
+            <span className="flex-shrink mx-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Or sign in with email</span>
+            <div className="flex-grow border-t border-border"></div>
+          </div>
+
+          {/* Email / Password Tabs */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="grid grid-cols-2 p-1 bg-muted/60 rounded-xl gap-1">
+              <button
+                type="button"
+                onClick={() => { setAuthMode('signin'); setError(null); }}
+                className={`py-2 rounded-lg text-xs font-bold transition-all ${authMode === 'signin' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAuthMode('signup'); setError(null); }}
+                className={`py-2 rounded-lg text-xs font-bold transition-all ${authMode === 'signup' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Create Account
+              </button>
             </div>
 
-            {error && (
-              <Alert variant="destructive" className="bg-destructive/10 text-destructive border-none">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="ml-2">{error}</AlertDescription>
-              </Alert>
-            )}
+            <form onSubmit={handleEmailAuth} className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5" /> Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500/30 transition-all font-medium"
+                />
+              </div>
 
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5" /> Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500/30 transition-all font-medium"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading || demoLoading}
+                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl shadow-md transition-all mt-2"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <KeyRound className="h-4 w-4 mr-2" />
+                )}
+                {loading ? 'Authenticating...' : authMode === 'signin' ? 'Sign In to Workspace' : 'Create Free Workspace'}
+              </Button>
+            </form>
+          </div>
+
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-border"></div>
+            <span className="flex-shrink mx-3 text-xs font-semibold text-muted-foreground">Optional OAuth</span>
+            <div className="flex-grow border-t border-border"></div>
+          </div>
+
+          {/* Continue with Google */}
+          <div className="space-y-2">
             <Button 
-              className="w-full h-12 text-base font-medium shadow-lg hover:shadow-xl transition-all" 
+              variant="outline"
+              className="w-full h-11 text-xs font-bold rounded-xl border-border hover:bg-muted/50 transition-all flex items-center justify-center gap-3" 
               onClick={handleGoogleLogin}
-              disabled={loading}
+              disabled={loading || demoLoading}
             >
-              {loading ? (
-                <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-              ) : (
-                <svg viewBox="0 0 24 24" className="h-5 w-5 mr-3 bg-white rounded-full p-[2px]" fill="currentColor">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-              )}
-              {loading ? 'Connecting...' : 'Continue with Google'}
+              <svg viewBox="0 0 24 24" className="h-4 w-4 bg-white rounded-full p-[1px]" fill="currentColor">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              <span>Continue with Google OAuth</span>
             </Button>
-            
-            <p className="text-center text-sm text-muted-foreground mt-8">
-              By clicking continue, you agree to our <a href="#" className="underline hover:text-primary transition-colors">Terms of Service</a> and <a href="#" className="underline hover:text-primary transition-colors">Privacy Policy</a>.
+            <p className="text-[10px] text-center text-muted-foreground px-4">
+              Note: If Google login says <code className="text-pink-400 bg-muted px-1 rounded">Unsupported provider</code>, please enable Google Auth in your Supabase Dashboard or use the <strong>⚡ Instant Demo Access</strong> above!
             </p>
+          </div>
+          
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground pt-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <span>256-Bit Encrypted Supabase Cloud Session</span>
           </div>
         </motion.div>
       </div>
