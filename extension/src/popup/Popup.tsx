@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { 
   Folder, Search, ExternalLink, Video, Sparkles, 
-  RefreshCw, AlertCircle, FileText, Bookmark, Play
+  RefreshCw, AlertCircle, FileText, Bookmark, Play, Layers
 } from 'lucide-react';
 
 interface Workspace {
@@ -32,6 +32,7 @@ export const Popup: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'all' | 'workspaces' | 'clips' | 'prompts'>('all');
 
   useEffect(() => {
     fetchDashboardData();
@@ -91,7 +92,7 @@ export const Popup: React.FC = () => {
   });
 
   return (
-    <div className="w-[430px] min-h-[560px] max-h-[600px] bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden">
+    <div className="w-[440px] min-h-[580px] max-h-[600px] bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden">
       {/* Top Glass Header */}
       <div className="px-4 py-3 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-2.5">
@@ -145,6 +146,38 @@ export const Popup: React.FC = () => {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Distinct Dashboard Navigation Tabs */}
+      <div className="px-3 py-2 bg-slate-900/60 border-b border-slate-800/80 flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+        <button
+          onClick={() => setActiveTab('all')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${activeTab === 'all' ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md shadow-pink-500/20' : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          <span>Overview</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('workspaces')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${activeTab === 'workspaces' ? 'bg-pink-600 text-white shadow-md shadow-pink-500/20' : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+        >
+          <Folder className="w-3.5 h-3.5" />
+          <span>Workspaces ({workspaces.length})</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('clips')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${activeTab === 'clips' ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20' : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+        >
+          <Video className="w-3.5 h-3.5" />
+          <span>Social Clips ({recentClips.length})</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('prompts')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${activeTab === 'prompts' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+        >
+          <Bookmark className="w-3.5 h-3.5" />
+          <span>Prompts ({recentPrompts.length})</span>
+        </button>
       </div>
 
       {/* Error Alert Banner */}
@@ -207,143 +240,146 @@ export const Popup: React.FC = () => {
             )}
           </div>
         ) : (
-          /* 3 Distinct Quick-Access Sections */
+          /* Multi-Section Dashboard View or Tabbed View */
           <>
-            {/* Section 1: Recent Workspaces/Tabs */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5">
-                <span className="flex items-center gap-1.5">
-                  <Folder className="w-3.5 h-3.5 text-pink-400" />
-                  📑 Recent Workspaces / Tabs
-                </span>
-                <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/workspaces')} className="text-[10px] text-pink-400 hover:text-pink-300 flex items-center gap-0.5">
-                  <span>View All</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-1.5">
-                {workspaces.slice(0, 3).map((ws) => (
-                  <div
-                    key={ws.id}
-                    onClick={() => openAppUrl(`https://prompt-memory.vercel.app/workspaces/${ws.id}`)}
-                    className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-pink-500/40 transition-all cursor-pointer flex items-center justify-between group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-pink-500/15 border border-pink-500/30 text-pink-400 flex items-center justify-center shrink-0">
-                        <Folder className="w-3.5 h-3.5" />
+            {(activeTab === 'all' || activeTab === 'workspaces') && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <Folder className="w-3.5 h-3.5 text-pink-400" />
+                    📑 Recent Windows & Tabs (Workspaces)
+                  </span>
+                  <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/workspaces')} className="text-[10px] text-pink-400 hover:text-pink-300 flex items-center gap-0.5">
+                    <span>View All</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-1.5">
+                  {workspaces.slice(0, activeTab === 'all' ? 3 : 20).map((ws) => (
+                    <div
+                      key={ws.id}
+                      onClick={() => openAppUrl(`https://prompt-memory.vercel.app/workspaces/${ws.id}`)}
+                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-pink-500/40 transition-all cursor-pointer flex items-center justify-between group"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-pink-500/15 border border-pink-500/30 text-pink-400 flex items-center justify-center shrink-0">
+                          <Folder className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-semibold text-xs text-slate-200 group-hover:text-pink-300 transition-colors truncate">
+                            {ws.title || ws.name || 'Cloud Vault Workspace'}
+                          </h4>
+                          {ws.description && <p className="text-[10px] text-slate-400 truncate">{ws.description}</p>}
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="font-semibold text-xs text-slate-200 group-hover:text-pink-300 transition-colors truncate">
-                          {ws.title || ws.name || 'Cloud Vault Workspace'}
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-pink-400 shrink-0 transition-colors" />
+                    </div>
+                  ))}
+                  {workspaces.length === 0 && (
+                    <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
+                      No recent workspaces. Click below to open web dashboard!
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {(activeTab === 'all' || activeTab === 'clips') && (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <Video className="w-3.5 h-3.5 text-purple-400" />
+                    📸 Recent Social Clips (Reels/Shorts)
+                  </span>
+                  <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/clips')} className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-0.5">
+                    <span>Open Theater</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-1.5">
+                  {recentClips.slice(0, activeTab === 'all' ? 3 : 20).map((clip) => (
+                    <div
+                      key={clip.id}
+                      onClick={() => openAppUrl(`https://prompt-memory.vercel.app/clips?id=${clip.id}`)}
+                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-purple-500/40 transition-all cursor-pointer flex items-center gap-3 group"
+                    >
+                      <div className="w-11 h-11 rounded-lg overflow-hidden bg-slate-800 shrink-0 relative border border-slate-700/80 flex items-center justify-center">
+                        {clip.image_url ? (
+                          <img src={clip.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        ) : (
+                          <Play className="w-4 h-4 text-purple-400 fill-current" />
+                        )}
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Play className="w-3.5 h-3.5 text-white fill-current drop-shadow" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <h4 className="font-semibold text-xs text-slate-200 group-hover:text-purple-300 transition-colors truncate">
+                            {clip.title || 'Untitled Reel / Short'}
+                          </h4>
+                          <span className="text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.2 rounded uppercase shrink-0">
+                            {clip.platform || 'Clip'}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
+                          {clip.content || clip.source_link || 'Captured playable media item'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  {recentClips.length === 0 && (
+                    <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
+                      No social clips yet. Visit YouTube or Instagram to clip!
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {(activeTab === 'all' || activeTab === 'prompts') && (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <Bookmark className="w-3.5 h-3.5 text-indigo-400" />
+                    🧠 Recent Prompts
+                  </span>
+                  <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/vault')} className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
+                    <span>View Vault</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-1.5">
+                  {recentPrompts.slice(0, activeTab === 'all' ? 3 : 20).map((prompt) => (
+                    <div
+                      key={prompt.id}
+                      onClick={() => openAppUrl(`https://prompt-memory.vercel.app/vault?id=${prompt.id}`)}
+                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-indigo-500/40 transition-all cursor-pointer flex items-start gap-2.5 group"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
+                        <FileText className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-xs text-slate-200 group-hover:text-indigo-300 transition-colors truncate">
+                          {prompt.title || 'Untitled Prompt'}
                         </h4>
-                        {ws.description && <p className="text-[10px] text-slate-400 truncate">{ws.description}</p>}
+                        <p className="text-[10px] text-slate-400 line-clamp-2 mt-0.5 font-mono bg-slate-950/40 p-1.5 rounded border border-slate-800/50">
+                          {prompt.content || 'No text content available.'}
+                        </p>
                       </div>
                     </div>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-pink-400 shrink-0 transition-colors" />
-                  </div>
-                ))}
-                {workspaces.length === 0 && (
-                  <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
-                    No recent workspaces. Click below to open web dashboard!
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Section 2: Recent Social Clips */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5">
-                <span className="flex items-center gap-1.5">
-                  <Video className="w-3.5 h-3.5 text-purple-400" />
-                  📸 Recent Social Clips
-                </span>
-                <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/clips')} className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-0.5">
-                  <span>Open Theater</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
-                </button>
-              </div>
-
-              <div className="space-y-1.5">
-                {recentClips.slice(0, 3).map((clip) => (
-                  <div
-                    key={clip.id}
-                    onClick={() => openAppUrl(`https://prompt-memory.vercel.app/clips?id=${clip.id}`)}
-                    className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-purple-500/40 transition-all cursor-pointer flex items-center gap-3 group"
-                  >
-                    <div className="w-11 h-11 rounded-lg overflow-hidden bg-slate-800 shrink-0 relative border border-slate-700/80 flex items-center justify-center">
-                      {clip.image_url ? (
-                        <img src={clip.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      ) : (
-                        <Play className="w-4 h-4 text-purple-400 fill-current" />
-                      )}
-                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Play className="w-3.5 h-3.5 text-white fill-current drop-shadow" />
-                      </div>
+                  ))}
+                  {recentPrompts.length === 0 && (
+                    <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
+                      No AI prompts saved. Highlight any page text to clip!
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1.5">
-                        <h4 className="font-semibold text-xs text-slate-200 group-hover:text-purple-300 transition-colors truncate">
-                          {clip.title || 'Untitled Reel / Short'}
-                        </h4>
-                        <span className="text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.2 rounded uppercase shrink-0">
-                          {clip.platform || 'Clip'}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
-                        {clip.content || clip.source_link || 'Captured playable media item'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {recentClips.length === 0 && (
-                  <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
-                    No social clips yet. Visit YouTube or Instagram to clip!
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-
-            {/* Section 3: Recent Prompts */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5">
-                <span className="flex items-center gap-1.5">
-                  <Bookmark className="w-3.5 h-3.5 text-indigo-400" />
-                  🧠 Recent Prompts
-                </span>
-                <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/vault')} className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
-                  <span>View Vault</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
-                </button>
-              </div>
-
-              <div className="space-y-1.5">
-                {recentPrompts.slice(0, 3).map((prompt) => (
-                  <div
-                    key={prompt.id}
-                    onClick={() => openAppUrl(`https://prompt-memory.vercel.app/vault?id=${prompt.id}`)}
-                    className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-indigo-500/40 transition-all cursor-pointer flex items-start gap-2.5 group"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
-                      <FileText className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-xs text-slate-200 group-hover:text-indigo-300 transition-colors truncate">
-                        {prompt.title || 'Untitled Prompt'}
-                      </h4>
-                      <p className="text-[10px] text-slate-400 line-clamp-2 mt-0.5 font-mono bg-slate-950/40 p-1.5 rounded border border-slate-800/50">
-                        {prompt.content || 'No text content available.'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {recentPrompts.length === 0 && (
-                  <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
-                    No AI prompts saved. Highlight any page text to clip!
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </>
         )}
       </div>

@@ -191,17 +191,33 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           query = query.eq('user_id', user.id);
         }
 
-        const { data, error } = await query;
-        if (error) {
+        const { data: promptsData, error } = await query;
+        let clipsQuery = supabase.from('workspace_items').select('*').order('created_at', { ascending: false }).limit(30);
+        if (user && user.id) {
+          clipsQuery = clipsQuery.eq('user_id', user.id);
+        }
+        const { data: clipsData } = await clipsQuery;
+
+        if (error && !clipsData) {
           console.error('[Antigravity Background] fetchDashboardData error:', error);
           sendResponse({ success: false, error: error.message });
         } else {
-          sendResponse({ success: true, data: data || [] });
+          const combined = [...(promptsData || []), ...(clipsData || [])].sort((a, b) => {
+            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+          });
+          // Deduplicate by ID just in case
+          const seen = new Set();
+          const deduped = combined.filter(item => {
+            if (seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+          });
+          sendResponse({ success: true, data: deduped });
         }
       } else if (request.action === 'deleteItem') {
         const { itemId } = request;
-        const { error } = await supabase.from('prompts').delete().eq('id', itemId);
-        if (error) throw error;
+        await supabase.from('prompts').delete().eq('id', itemId).then(() => {}, () => {});
+        await supabase.from('workspace_items').delete().eq('id', itemId).then(() => {}, () => {});
         sendResponse({ success: true });
       } else if (request.action === 'SAVE_PROMPT' || request.action === 'clipCurrentPage' || request.action === 'SAVE_CONTEXT_PROMPT') {
         // High-fidelity clipping from socialClipper.ts, floatingLogo.ts, or chatgpt.ts
@@ -231,6 +247,20 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             console.error('[Antigravity Background] Supabase insert error:', error);
             sendResponse({ success: false, error: error.message || 'Database insertion failed.' });
             return;
+          }
+
+          if (insertPayload.category === 'Social Clip' || insertPayload.image_url || insertPayload.embed_url) {
+            await supabase.from('workspace_items').insert([{
+              user_id: user.id,
+              title: insertPayload.title,
+              content: insertPayload.content,
+              image_url: insertPayload.image_url,
+              embed_url: insertPayload.embed_url,
+              source_link: insertPayload.source_link,
+              platform: insertPayload.platform,
+              category: insertPayload.category,
+              tags: insertPayload.tags
+            }]).then(() => {}, () => {});
           }
 
           sendResponse({ success: true, data });

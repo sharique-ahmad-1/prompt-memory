@@ -60,13 +60,28 @@ export default function ClipsPage() {
   const fetchClips = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      const { data: wsItems } = await supabase
         .from('workspace_items')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) throw error
-      setClips(data || [])
+      const { data: promptClips } = await supabase
+        .from('prompts')
+        .select('*')
+        .or('category.eq.Social Clip,image_url.not.is.null,embed_url.not.is.null')
+        .order('created_at', { ascending: false })
+
+      const combined = [...(wsItems || []), ...(promptClips || [])].sort(
+        (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+      )
+      const seen = new Set()
+      const deduped = combined.filter((item) => {
+        if (seen.has(item.id)) return false
+        seen.add(item.id)
+        return true
+      })
+
+      setClips(deduped)
     } catch (err) {
       console.error('Error fetching clips:', err)
     } finally {
@@ -77,8 +92,8 @@ export default function ClipsPage() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
-      const { error } = await supabase.from('workspace_items').delete().eq('id', deleteId)
-      if (error) throw error
+      await supabase.from('workspace_items').delete().eq('id', deleteId).catch(() => {})
+      await supabase.from('prompts').delete().eq('id', deleteId).catch(() => {})
       setClips(clips.filter((c) => c.id !== deleteId))
       setDeleteId(null)
     } catch (err) {
@@ -88,8 +103,8 @@ export default function ClipsPage() {
 
   const deleteClipById = async (id: string) => {
     try {
-      const { error } = await supabase.from('workspace_items').delete().eq('id', id)
-      if (error) throw error
+      await supabase.from('workspace_items').delete().eq('id', id).catch(() => {})
+      await supabase.from('prompts').delete().eq('id', id).catch(() => {})
       setClips((prev) => prev.filter((c) => c.id !== id))
     } catch (err) {
       console.error('Failed to delete media clip:', err)

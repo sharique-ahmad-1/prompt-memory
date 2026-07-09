@@ -290,13 +290,51 @@ function injectFloatingLogo() {
     });
   }, true);
 
+  const itemSaveSelection = createMenuItem('✂️', 'Save Selection', 'purple', () => {
+    const sel = window.getSelection()?.toString() || '';
+    if (!sel.trim()) {
+      showToastMsg("No text selected!", true);
+      return;
+    }
+    itemSaveSelection.innerHTML = `<span>⏳</span><span style="flex: 1;">Saving...</span>`;
+    chrome.runtime.sendMessage({
+      action: 'SAVE_PROMPT',
+      payload: {
+        title: sel.slice(0, 40) + '...',
+        content: sel,
+        source_link: window.location.href,
+        category: 'Highlight',
+        platform: window.location.hostname,
+        tags: ['#Highlight', '#Selected']
+      }
+    }, (res) => {
+      if (chrome.runtime.lastError || !res?.success) {
+        showToastMsg("Error saving selection", true);
+      } else {
+        itemSaveSelection.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Saved!</span>`;
+        showToastMsg("Selection saved to Vault!");
+      }
+      setTimeout(() => {
+        itemSaveSelection.innerHTML = `<span>✂️</span><span style="flex: 1;">Save Selection</span>`;
+      }, 2500);
+    });
+  }, true);
+
+  const itemOpenSidePanel = createMenuItem('🖥️', 'Open Side Panel Helper', 'default', () => {
+    chrome.runtime.sendMessage({ action: 'OPEN_SIDE_PANEL' });
+  });
+
   const itemOpenVault = createMenuItem('💎', 'Open Vault', 'default', () => {
     window.open('https://prompt-memory.vercel.app/clips', '_blank');
   });
 
   popover.appendChild(itemSaveMedia);
   popover.appendChild(createSeparator());
+  popover.appendChild(itemSaveSelection);
+  popover.appendChild(createSeparator());
   popover.appendChild(itemSavePageText);
+  popover.appendChild(createSeparator());
+  popover.appendChild(itemOpenSidePanel);
   popover.appendChild(createSeparator());
   popover.appendChild(itemOpenVault);
   container.appendChild(popover);
