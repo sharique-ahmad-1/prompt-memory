@@ -207,7 +207,7 @@ export function SidePanel() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const BASE_WEB_URL = import.meta.env.VITE_WEB_APP_URL || 'https://prompt-memory.vercel.app';
+  const BASE_WEB_URL = import.meta.env.VITE_WEB_APP_URL || 'https://prompt-memory-prompt-memory-1.vercel.app';
 
   const handleLogin = () => {
     chrome.tabs.create({ url: `${BASE_WEB_URL}/login` });

@@ -321,7 +321,7 @@ function injectFloatingLogo() {
   }, true);
 
   const itemOpenVault = createMenuItem('💎', 'Open Vault', 'default', () => {
-    window.open('https://prompt-memory.vercel.app/clips', '_blank');
+    window.open('https://prompt-memory-prompt-memory-1.vercel.app/clips', '_blank');
   });
 
   const headerEl = document.createElement('div');

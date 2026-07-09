@@ -117,7 +117,7 @@ export const Popup: React.FC = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-pink-400' : ''}`} />
           </button>
           <button
-            onClick={() => openAppUrl('https://prompt-memory.vercel.app/clips')}
+            onClick={() => openAppUrl('https://prompt-memory-prompt-memory-1.vercel.app/clips')}
             className="px-2.5 py-1 rounded-lg bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 text-[11px] font-bold flex items-center gap-1 transition-all"
           >
             <span>Theater</span>
@@ -215,7 +215,7 @@ export const Popup: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    onClick={() => openAppUrl(isClip ? `https://prompt-memory.vercel.app/clips?id=${item.id}` : `https://prompt-memory.vercel.app/vault?id=${item.id}`)}
+                    onClick={() => openAppUrl(isClip ? `https://prompt-memory-prompt-memory-1.vercel.app/clips?id=${item.id}` : `https://prompt-memory-prompt-memory-1.vercel.app/vault?id=${item.id}`)}
                     className="p-3 rounded-xl bg-slate-900/70 hover:bg-slate-800/80 border border-slate-800/80 hover:border-pink-500/40 transition-all cursor-pointer group flex items-start gap-3 shadow-sm"
                   >
                     <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center ${isClip ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'}`}>
@@ -249,7 +249,7 @@ export const Popup: React.FC = () => {
                     <Folder className="w-3.5 h-3.5 text-pink-400" />
                     📑 Recent Windows & Tabs (Workspaces)
                   </span>
-                  <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/workspaces')} className="text-[10px] text-pink-400 hover:text-pink-300 flex items-center gap-0.5">
+                  <button onClick={() => openAppUrl('https://prompt-memory-prompt-memory-1.vercel.app/workspaces')} className="text-[10px] text-pink-400 hover:text-pink-300 flex items-center gap-0.5">
                     <span>View All</span>
                     <ExternalLink className="w-2.5 h-2.5" />
                   </button>
@@ -259,7 +259,7 @@ export const Popup: React.FC = () => {
                   {workspaces.slice(0, activeTab === 'all' ? 3 : 20).map((ws) => (
                     <div
                       key={ws.id}
-                      onClick={() => openAppUrl(`https://prompt-memory.vercel.app/workspaces/${ws.id}`)}
+                      onClick={() => openAppUrl(`https://prompt-memory-prompt-memory-1.vercel.app/workspaces/${ws.id}`)}
                       className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-pink-500/40 transition-all cursor-pointer flex items-center justify-between group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
@@ -292,7 +292,7 @@ export const Popup: React.FC = () => {
                     <Video className="w-3.5 h-3.5 text-purple-400" />
                     📸 Recent Social Clips (Reels/Shorts)
                   </span>
-                  <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/clips')} className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-0.5">
+                  <button onClick={() => openAppUrl('https://prompt-memory-prompt-memory-1.vercel.app/clips')} className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-0.5">
                     <span>Open Theater</span>
                     <ExternalLink className="w-2.5 h-2.5" />
                   </button>
@@ -302,7 +302,7 @@ export const Popup: React.FC = () => {
                   {recentClips.slice(0, activeTab === 'all' ? 3 : 20).map((clip) => (
                     <div
                       key={clip.id}
-                      onClick={() => openAppUrl(`https://prompt-memory.vercel.app/clips?id=${clip.id}`)}
+                      onClick={() => openAppUrl(`https://prompt-memory-prompt-memory-1.vercel.app/clips?id=${clip.id}`)}
                       className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-purple-500/40 transition-all cursor-pointer flex items-center gap-3 group"
                     >
                       <div className="w-11 h-11 rounded-lg overflow-hidden bg-slate-800 shrink-0 relative border border-slate-700/80 flex items-center justify-center">
@@ -346,7 +346,7 @@ export const Popup: React.FC = () => {
                     <Bookmark className="w-3.5 h-3.5 text-indigo-400" />
                     🧠 Recent Prompts
                   </span>
-                  <button onClick={() => openAppUrl('https://prompt-memory.vercel.app/vault')} className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
+                  <button onClick={() => openAppUrl('https://prompt-memory-prompt-memory-1.vercel.app/vault')} className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
                     <span>View Vault</span>
                     <ExternalLink className="w-2.5 h-2.5" />
                   </button>
@@ -356,7 +356,7 @@ export const Popup: React.FC = () => {
                   {recentPrompts.slice(0, activeTab === 'all' ? 3 : 20).map((prompt) => (
                     <div
                       key={prompt.id}
-                      onClick={() => openAppUrl(`https://prompt-memory.vercel.app/vault?id=${prompt.id}`)}
+                      onClick={() => openAppUrl(`https://prompt-memory-prompt-memory-1.vercel.app/vault?id=${prompt.id}`)}
                       className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-indigo-500/40 transition-all cursor-pointer flex items-start gap-2.5 group"
                     >
                       <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
@@ -391,7 +391,7 @@ export const Popup: React.FC = () => {
           <span>Cloud Synced</span>
         </div>
         <button
-          onClick={() => openAppUrl('https://prompt-memory.vercel.app')}
+          onClick={() => openAppUrl('https://prompt-memory-prompt-memory-1.vercel.app')}
           className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/20 flex items-center justify-center gap-1.5"
         >
           <span>🚀 Open Full Web Dashboard</span>
