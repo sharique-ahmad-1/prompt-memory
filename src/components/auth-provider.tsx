@@ -153,41 +153,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkAndSetAuth = (session: Session | null) => {
-      const isDemoBypass = typeof window !== 'undefined' && localStorage.getItem('pm_demo_bypass') === 'true'
-      
-      let effectiveSession = session
-      let effectiveUser = session?.user ?? null
-
-      if (!effectiveSession && isDemoBypass) {
-        effectiveUser = {
-          id: 'demo-hackathon-user-2026',
-          app_metadata: { provider: 'demo' },
-          user_metadata: { name: 'Hackathon Judge (Demo Mode)' },
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-          email: 'hackathon@promptmemory.ai',
-          phone: '',
-          role: 'authenticated',
-          updated_at: new Date().toISOString(),
-        } as any
-
-        effectiveSession = {
-          access_token: 'mock-demo-access-token',
-          refresh_token: 'mock-demo-refresh-token',
-          expires_in: 3600,
-          token_type: 'bearer',
-          user: effectiveUser!
-        }
-      }
-
-      setSession(effectiveSession)
-      setUser(effectiveUser)
+      setSession(session)
+      setUser(session?.user ?? null)
       setLoading(false)
-      if (effectiveUser) fetchTeams(effectiveUser.id);
+      if (session?.user) fetchTeams(session.user.id);
 
-      if (!effectiveSession && !isDemoBypass && pathname !== '/login') {
+      if (!session && pathname !== '/login') {
         router.push('/login')
-      } else if ((effectiveSession || isDemoBypass) && pathname === '/login') {
+      } else if (session && pathname === '/login') {
         router.push('/')
       }
     }

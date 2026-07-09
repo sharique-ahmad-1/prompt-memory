@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation"
 export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [demoLoading, setDemoLoading] = useState(false)
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   
   const [email, setEmail] = useState('')
@@ -33,43 +32,6 @@ export default function Login() {
     }
   }, [])
 
-  // ⚡ 1-Click Instant Demo / Hackathon Access
-  const handleDemoLogin = async () => {
-    try {
-      setDemoLoading(true)
-      setError(null)
-      const demoEmail = "hackathon@promptmemory.ai"
-      const demoPassword = "HackathonDemo2026!"
-
-      // First try to sign in with Supabase
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: demoPassword,
-      })
-
-      if (signInError) {
-        // If account doesn't exist, try to sign up ignoring any verification errors
-        await supabase.auth.signUp({
-          email: demoEmail,
-          password: demoPassword,
-        }).catch(() => {})
-      }
-
-      // Always activate demo bypass flag so AuthProvider grants immediate entry without email verification errors
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('pm_demo_bypass', 'true')
-        window.location.href = '/'
-      }
-    } catch (err: any) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('pm_demo_bypass', 'true')
-        window.location.href = '/'
-      }
-    } finally {
-      setDemoLoading(false)
-    }
-  }
-
   // Email & Password Sign In / Sign Up
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,51 +49,24 @@ export default function Login() {
           email,
           password,
         })
-        if (signInErr) {
-          if (signInErr.message.toLowerCase().includes('email not confirmed')) {
-            // Auto bypass unverified email so user is never blocked by "Email not confirmed"
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('pm_demo_bypass', 'true')
-              window.location.href = '/'
-            }
-            return
-          }
-          throw signInErr
-        }
+        if (signInErr) throw signInErr
         if (typeof window !== 'undefined') {
           window.location.href = '/'
         }
       } else {
-        const { data, error: signUpErr } = await supabase.auth.signUp({
+        const { error: signUpErr } = await supabase.auth.signUp({
           email,
           password,
         })
-        if (signUpErr) {
-          if (signUpErr.message.toLowerCase().includes('email not confirmed')) {
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('pm_demo_bypass', 'true')
-              window.location.href = '/'
-            }
-            return
-          }
-          throw signUpErr
-        }
-        // Whether Supabase has confirm email ON (!data.session) or OFF, log right in!
+        if (signUpErr) throw signUpErr
         if (typeof window !== 'undefined') {
-          localStorage.setItem('pm_demo_bypass', 'true')
           window.location.href = '/'
         }
       }
     } catch (err: any) {
       const msg = err.message || 'Authentication error occurred.'
-      if (msg.toLowerCase().includes('email not confirmed')) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('pm_demo_bypass', 'true')
-          window.location.href = '/'
-        }
-        return
-      } else if (msg.toLowerCase().includes('invalid login credentials')) {
-        setError('Incorrect password or account not found! If you are new, switch to "Create Account" tab above, OR click "⚡ Launch Instant Demo Access" right above to enter instantly!')
+      if (msg.toLowerCase().includes('invalid login credentials')) {
+        setError('Incorrect email or password. If you are a new user, please switch to the "Create Account" tab above.')
       } else {
         setError(msg)
       }
@@ -154,7 +89,7 @@ export default function Login() {
     } catch (err: any) {
       const msg = err.message || 'An error occurred during Google login.'
       if (msg.toLowerCase().includes('unsupported provider') || msg.toLowerCase().includes('provider is not enabled')) {
-        setError('Google OAuth is turned OFF in your Supabase Dashboard. To fix: enable Google in Supabase (Authentication -> Providers -> Google) OR click "⚡ Launch Instant Demo Access" right above!')
+        setError('Google Auth is not enabled in the Supabase Dashboard. Please contact the administrator or sign in with Email/Password.')
       } else {
         setError(msg)
       }
@@ -202,7 +137,7 @@ export default function Login() {
             transition={{ delay: 0.1 }}
             className="text-lg text-zinc-400"
           >
-            Save prompts, preserve project memory, and clip interactive media across sessions effortlessly. Built for power users & hackathon judges.
+            Save prompts, preserve project memory, and clip interactive media across sessions effortlessly. Built for enterprise AI power users.
           </motion.p>
         </div>
 
@@ -240,7 +175,7 @@ export default function Login() {
           className="relative z-10 flex items-center gap-4 mt-auto pt-8 text-sm text-zinc-500"
         >
           <Quote className="h-5 w-5 text-zinc-700" />
-          <p>"The ultimate memory hub for enterprise AI workflows and hackathons."</p>
+          <p>"The ultimate memory hub for enterprise AI workflows and productivity."</p>
         </motion.div>
       </div>
 
@@ -268,40 +203,6 @@ export default function Login() {
               <AlertDescription className="ml-2 text-xs font-medium leading-relaxed">{error}</AlertDescription>
             </Alert>
           )}
-
-          {/* ⚡ INSTANT DEMO / HACKATHON ACCESS CARD */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-600/15 via-purple-600/15 to-indigo-600/15 border border-pink-500/30 shadow-xl space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-pink-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-pink-500/30">
-                  ⚡
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-pink-400">Hackathon / Quick Access</h4>
-                  <p className="text-[11px] text-muted-foreground">Skip setup & enter directly with demo workspace session</p>
-                </div>
-              </div>
-            </div>
-            <Button
-              onClick={handleDemoLogin}
-              disabled={demoLoading || loading}
-              className="w-full h-11 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 transition-all"
-            >
-              {demoLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4 animate-pulse" />
-              )}
-              <span>{demoLoading ? 'Launching Demo Vault...' : '⚡ Launch Instant Demo Access'}</span>
-              <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
-          </div>
-
-          <div className="relative flex py-2 items-center">
-            <div className="flex-grow border-t border-border"></div>
-            <span className="flex-shrink mx-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Or sign in with email</span>
-            <div className="flex-grow border-t border-border"></div>
-          </div>
 
           {/* Email / Password Tabs */}
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4">
@@ -353,7 +254,7 @@ export default function Login() {
 
               <Button
                 type="submit"
-                disabled={loading || demoLoading}
+                disabled={loading}
                 className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl shadow-md transition-all mt-2"
               >
                 {loading ? (
@@ -378,7 +279,7 @@ export default function Login() {
               variant="outline"
               className="w-full h-11 text-xs font-bold rounded-xl border-border hover:bg-muted/50 transition-all flex items-center justify-center gap-3" 
               onClick={handleGoogleLogin}
-              disabled={loading || demoLoading}
+              disabled={loading}
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4 bg-white rounded-full p-[1px]" fill="currentColor">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -389,7 +290,7 @@ export default function Login() {
               <span>Continue with Google OAuth</span>
             </Button>
             <p className="text-[10px] text-center text-muted-foreground px-4">
-              Note: If Google login says <code className="text-pink-400 bg-muted px-1 rounded">Unsupported provider</code>, please enable Google Auth in your Supabase Dashboard or use the <strong>⚡ Instant Demo Access</strong> above!
+              Note: If Google login says <code className="text-pink-400 bg-muted px-1 rounded">Unsupported provider</code>, please make sure Google Auth is enabled in the Supabase Dashboard.
             </p>
           </div>
           
