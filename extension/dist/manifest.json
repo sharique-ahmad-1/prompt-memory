@@ -38,17 +38,19 @@
     },
     {
       "js": [
-        "assets/authBridge.ts-B0uLgZxG.js"
+        "assets/authBridge.ts-DcYW9Vs-.js"
       ],
       "matches": [
         "https://prompt-memory.vercel.app/*",
+        "https://prompt-memory-*.vercel.app/*",
+        "https://*.vercel.app/*",
         "http://localhost:3000/*"
       ],
       "run_at": "document_end"
     },
     {
       "js": [
-        "assets/floatingLogo.ts-nD7E-WGw.js"
+        "assets/floatingLogo.ts-CRQBNSQ7.js"
       ],
       "matches": [
         "<all_urls>"
@@ -94,10 +96,12 @@
     {
       "matches": [
         "http://localhost:3000/*",
+        "https://*.vercel.app/*",
+        "https://prompt-memory-*.vercel.app/*",
         "https://prompt-memory.vercel.app/*"
       ],
       "resources": [
-        "assets/authBridge.ts-B0uLgZxG.js"
+        "assets/authBridge.ts-DcYW9Vs-.js"
       ],
       "use_dynamic_url": false
     },
@@ -106,7 +110,7 @@
         "<all_urls>"
       ],
       "resources": [
-        "assets/floatingLogo.ts-nD7E-WGw.js"
+        "assets/floatingLogo.ts-CRQBNSQ7.js"
       ],
       "use_dynamic_url": false
     },

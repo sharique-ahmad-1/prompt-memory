@@ -80,7 +80,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   try {
     if (info.menuItemId === 'pm-open-vault') {
-      chrome.tabs.create({ url: 'https://prompt-memory.vercel.app/clips' });
+      const storage = (await chrome.storage.local.get(['pm_web_origin'])) as Record<string, any>;
+      const origin = storage?.pm_web_origin || 'https://prompt-memory-prompt-memory-1.vercel.app';
+      chrome.tabs.create({ url: `${origin}/clips` });
       return;
     }
 
@@ -161,7 +163,13 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             access_token: payload.access_token,
             refresh_token: payload.refresh_token
           });
-          await chrome.storage.local.set({ pm_session: payload });
+          const storageUpdate: Record<string, any> = { pm_session: payload };
+          if (payload.origin || (_sender?.tab?.url && _sender.tab.url.startsWith('http'))) {
+            try {
+              storageUpdate.pm_web_origin = payload.origin || new URL(_sender.tab!.url!).origin;
+            } catch {}
+          }
+          await chrome.storage.local.set(storageUpdate);
         }
         sendResponse({ success: true });
         return;
@@ -196,16 +204,12 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ success: false, error: 'Cloud sync timed out.' }), 3200));
           const fetchPromise = (async () => {
             const user = await getCurrentUser();
-            let query = supabase.from('prompts').select('*').order('created_at', { ascending: false }).limit(30);
-            if (user && user.id) {
-              query = query.eq('user_id', user.id);
+            if (!user || !user.id) {
+              return { success: false, error: 'Offline Mode: Please log into your PromptMemory web dashboard to sync.' };
             }
-
+            let query = supabase.from('prompts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
             const { data: promptsData, error } = await query;
-            let clipsQuery = supabase.from('workspace_items').select('*').order('created_at', { ascending: false }).limit(30);
-            if (user && user.id) {
-              clipsQuery = clipsQuery.eq('user_id', user.id);
-            }
+            let clipsQuery = supabase.from('workspace_items').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
             const { data: clipsData } = await clipsQuery;
 
             if (error && !clipsData) {

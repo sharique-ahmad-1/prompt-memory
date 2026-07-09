@@ -448,8 +448,13 @@ function injectFloatingLogo() {
     toggleMiniDashboardWindow();
   });
 
-  const itemOpenVault = createMenuItem('💎', 'Open Full Vault', 'default', () => {
-    window.open('https://prompt-memory.vercel.app/clips', '_blank');
+  const itemOpenVault = createMenuItem('💎', 'Open Full Vault', 'default', async () => {
+    let origin = 'https://prompt-memory-prompt-memory-1.vercel.app';
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      const storage = (await chrome.storage.local.get(['pm_web_origin'])) as Record<string, any>;
+      if (storage?.pm_web_origin) origin = storage.pm_web_origin;
+    }
+    window.open(`${origin}/clips`, '_blank');
   });
 
   const headerEl = document.createElement('div');
@@ -479,6 +484,7 @@ function injectFloatingLogo() {
   container.appendChild(popover);
 
   let isPopoverOpen = false;
+  let popoverTimer: any = null;
 
   const closePopover = () => {
     isPopoverOpen = false;
@@ -488,6 +494,10 @@ function injectFloatingLogo() {
   };
 
   const openPopover = () => {
+    if (popoverTimer) {
+      clearTimeout(popoverTimer);
+      popoverTimer = null;
+    }
     isPopoverOpen = true;
     popover.style.opacity = '1';
     popover.style.pointerEvents = 'auto';
@@ -501,17 +511,35 @@ function injectFloatingLogo() {
   });
 
   container.onmouseenter = () => {
-    if (!isDragging && !isPopoverOpen) {
+    if (!isDragging) {
       container.style.transform = 'scale(1.1) rotate(5deg)';
       container.style.boxShadow = '0 6px 16px rgba(99,102,241,0.4)';
+      openPopover();
     }
   };
   
   container.onmouseleave = () => {
-    if (!isDragging && !isPopoverOpen) {
+    if (!isDragging) {
       container.style.transform = 'scale(1) rotate(0deg)';
       container.style.boxShadow = '0 4px 12px rgba(99,102,241,0.3)';
+      popoverTimer = setTimeout(() => {
+        if (isPopoverOpen) closePopover();
+      }, 300);
     }
+  };
+
+  popover.onmouseenter = () => {
+    if (popoverTimer) {
+      clearTimeout(popoverTimer);
+      popoverTimer = null;
+    }
+    openPopover();
+  };
+
+  popover.onmouseleave = () => {
+    popoverTimer = setTimeout(() => {
+      if (isPopoverOpen) closePopover();
+    }, 250);
   };
 
   container.oncontextmenu = (e) => {

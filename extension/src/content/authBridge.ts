@@ -14,11 +14,18 @@ function syncSession() {
     }
 
     if (sessionRaw) {
-      const session = JSON.parse(sessionRaw);
+      const parsed = JSON.parse(sessionRaw);
+      const session = parsed?.access_token ? parsed : (parsed?.session || parsed?.currentSession || null);
       if (session && session.access_token) {
+        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+          chrome.storage.local.set({ pm_web_origin: window.location.origin }).catch(() => {});
+        }
         chrome.runtime.sendMessage({
           action: 'SYNC_SESSION',
-          payload: session
+          payload: {
+            ...session,
+            origin: window.location.origin
+          }
         }, () => {
           void chrome.runtime.lastError;
         });

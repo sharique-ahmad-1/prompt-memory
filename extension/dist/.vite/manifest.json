@@ -1,27 +1,27 @@
 {
   "../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-DhDnhus6.js",
+    "file": "assets/crx-manifest.js-DTnDP014.js",
     "name": "crx-manifest.js",
     "src": "../../../@crx/manifest",
     "isEntry": true
   },
   "popup.html": {
-    "file": "assets/popup.html-AxCyxJvy.js",
+    "file": "assets/popup.html-CVEZXRY6.js",
     "name": "popup.html",
     "src": "popup.html",
     "isEntry": true,
     "css": [
-      "assets/popup-ChcZrdB7.css"
+      "assets/popup-i6DZW2KE.css"
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-cDaomMtn.js",
+    "file": "assets/index.ts-D2y_5Tfd.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true
   },
   "src/content/authBridge.ts": {
-    "file": "assets/authBridge.ts-B0uLgZxG.js",
+    "file": "assets/authBridge.ts-DcYW9Vs-.js",
     "name": "authBridge.ts",
     "src": "src/content/authBridge.ts",
     "isEntry": true
@@ -33,7 +33,7 @@
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-nD7E-WGw.js",
+    "file": "assets/floatingLogo.ts-CRQBNSQ7.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true
