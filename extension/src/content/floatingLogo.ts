@@ -331,8 +331,8 @@ function injectFloatingLogo() {
     const mRight = container && container.style.right ? parseInt(container.style.right, 10) : 24;
     const mBottom = container && container.style.bottom ? parseInt(container.style.bottom, 10) : 24;
 
-    const winBottom = Math.min(window.innerHeight - 490, Math.max(10, mBottom + 58));
-    const winRight = Math.min(window.innerWidth - 370, Math.max(10, mRight));
+    const winBottom = Math.min(window.innerHeight - 430, Math.max(10, mBottom + 58));
+    const winRight = Math.min(window.innerWidth - 350, Math.max(10, mRight));
 
     const win = document.createElement('div');
     win.id = 'pm-mini-dashboard-window';
@@ -340,10 +340,10 @@ function injectFloatingLogo() {
       position: fixed;
       bottom: ${winBottom}px;
       right: ${winRight}px;
-      width: 360px;
+      width: 340px;
       max-width: 92vw;
-      height: 480px;
-      max-height: 480px;
+      height: 420px;
+      max-height: 420px;
       background: #0b0f19;
       border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.18);
@@ -565,8 +565,8 @@ function injectFloatingLogo() {
       // Dynamically anchor and move the mini-dashboard window if open
       const miniWin = document.getElementById('pm-mini-dashboard-window');
       if (miniWin) {
-        const winBottom = Math.min(window.innerHeight - 490, Math.max(10, newBottom + 58));
-        const winRight = Math.min(window.innerWidth - 370, Math.max(10, newRight));
+        const winBottom = Math.min(window.innerHeight - 430, Math.max(10, newBottom + 58));
+        const winRight = Math.min(window.innerWidth - 350, Math.max(10, newRight));
         miniWin.style.bottom = `${winBottom}px`;
         miniWin.style.right = `${winRight}px`;
       }

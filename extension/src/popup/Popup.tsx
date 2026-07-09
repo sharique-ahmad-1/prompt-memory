@@ -138,7 +138,7 @@ export const Popup: React.FC = () => {
   });
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden flex-1 m-0 p-0">
+    <div style={{ width: '360px', height: '480px', maxWidth: '360px', maxHeight: '480px', overflowX: 'hidden' }} className="w-full h-full bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden flex-1 m-0 p-0">
       {/* Top Glass Header */}
       <div className="px-4 py-3 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 flex items-center justify-between sticky top-0 z-20 flex-shrink-0">
         <div className="flex items-center gap-2.5">

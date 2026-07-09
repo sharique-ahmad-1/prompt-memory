@@ -72,7 +72,7 @@ export default function Login() {
           email,
           password,
           options: {
-            emailRedirectTo: typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:3000/' : 'https://prompt-memory.vercel.app/',
+            emailRedirectTo: 'https://prompt-memory.vercel.app/',
           }
         })
         if (signUpErr) throw signUpErr
@@ -118,7 +118,7 @@ export default function Login() {
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:3000/' : 'https://prompt-memory.vercel.app/',
+          emailRedirectTo: 'https://prompt-memory.vercel.app/',
         }
       })
       if (resendErr) throw resendErr
@@ -137,9 +137,7 @@ export default function Login() {
       setError(null)
       setVerificationNotice(null)
       
-      const targetRedirect = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
-        ? 'http://localhost:3000/' 
-        : 'https://prompt-memory.vercel.app/'
+      const targetRedirect = 'https://prompt-memory.vercel.app/'
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
