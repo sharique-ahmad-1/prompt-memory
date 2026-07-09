@@ -29,8 +29,7 @@
     {
       "matches": [
         "https://prompt-memory.vercel.app/*",
-        "https://*.vercel.app/*",
-        "http://localhost:3000/*"
+        "https://*.vercel.app/*"
       ],
       "js": ["src/content/authBridge.ts"],
       "run_at": "document_end"

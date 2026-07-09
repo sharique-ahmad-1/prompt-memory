@@ -342,8 +342,8 @@ function injectFloatingLogo() {
       right: ${winRight}px !important;
       width: 320px !important;
       max-width: 320px !important;
-      height: 400px !important;
-      max-height: 400px !important;
+      height: 438px !important;
+      max-height: 438px !important;
       background: #0b0f19 !important;
       border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.18);

@@ -42,14 +42,13 @@
       ],
       "matches": [
         "https://prompt-memory.vercel.app/*",
-        "https://*.vercel.app/*",
-        "http://localhost:3000/*"
+        "https://*.vercel.app/*"
       ],
       "run_at": "document_end"
     },
     {
       "js": [
-        "assets/floatingLogo.ts-CRQBNSQ7.js"
+        "assets/floatingLogo.ts-DUZP9bzg.js"
       ],
       "matches": [
         "<all_urls>"
@@ -94,7 +93,6 @@
     },
     {
       "matches": [
-        "http://localhost:3000/*",
         "https://*.vercel.app/*",
         "https://prompt-memory.vercel.app/*"
       ],
@@ -108,7 +106,7 @@
         "<all_urls>"
       ],
       "resources": [
-        "assets/floatingLogo.ts-CRQBNSQ7.js"
+        "assets/floatingLogo.ts-DUZP9bzg.js"
       ],
       "use_dynamic_url": false
     },

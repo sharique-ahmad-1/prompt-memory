@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Folder, Search, ExternalLink, Video, 
   RefreshCw, AlertCircle, FileText, Bookmark, Play, Layers
@@ -146,7 +147,7 @@ export const Popup: React.FC = () => {
   });
 
   return (
-    <div style={{ width: '320px', height: '400px', maxWidth: '320px', maxHeight: '400px', overflow: 'hidden' }} className="w-full h-full bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden flex-1 m-0 p-0">
+    <div style={{ width: '100%', height: '100%', maxWidth: '320px', maxHeight: '400px', overflow: 'hidden' }} className="w-full h-full bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden flex-1 m-0 p-0">
       {/* Compact Global Search & Sync Bar */}
       <div className="px-3 py-2 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 flex items-center gap-2 flex-shrink-0 sticky top-0 z-20">
         <div className="relative flex-1">
@@ -178,34 +179,42 @@ export const Popup: React.FC = () => {
 
       {/* Distinct Dashboard Navigation Tabs */}
       <div className="px-3 py-2 bg-slate-900/60 border-b border-slate-800/80 flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setActiveTab('all')}
           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${activeTab === 'all' ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md shadow-pink-500/20' : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
         >
           <Layers className="w-3.5 h-3.5" />
           <span>Overview</span>
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setActiveTab('workspaces')}
           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${activeTab === 'workspaces' ? 'bg-pink-600 text-white shadow-md shadow-pink-500/20' : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
         >
           <Folder className="w-3.5 h-3.5" />
           <span>Workspaces ({workspaces.length})</span>
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setActiveTab('clips')}
           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${activeTab === 'clips' ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20' : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
         >
           <Video className="w-3.5 h-3.5" />
           <span>Social Clips ({recentClips.length})</span>
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setActiveTab('prompts')}
           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${activeTab === 'prompts' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
         >
           <Bookmark className="w-3.5 h-3.5" />
           <span>Prompts ({recentPrompts.length})</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* Error Alert Banner */}
@@ -294,11 +303,16 @@ export const Popup: React.FC = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 gap-1.5">
-                  {workspaces.slice(0, activeTab === 'all' ? 3 : 20).map((ws) => (
-                    <div
+                  {workspaces.slice(0, activeTab === 'all' ? 3 : 20).map((ws, idx) => (
+                    <motion.div
+                      whileHover={{ scale: 1.015, y: -1 }}
+                      whileTap={{ scale: 0.96 }}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.15, delay: idx * 0.03 }}
                       key={ws.id}
                       onClick={() => openAppUrl(`https://prompt-memory.vercel.app/workspaces/${ws.id}`)}
-                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-pink-500/40 transition-all cursor-pointer flex items-center justify-between group"
+                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-pink-500/40 transition-all cursor-pointer flex items-center justify-between group shadow-sm"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-7 h-7 rounded-lg bg-pink-500/15 border border-pink-500/30 text-pink-400 flex items-center justify-center shrink-0">
@@ -312,7 +326,7 @@ export const Popup: React.FC = () => {
                         </div>
                       </div>
                       <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-pink-400 shrink-0 transition-colors" />
-                    </div>
+                    </motion.div>
                   ))}
                   {workspaces.length === 0 && (
                     <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
@@ -337,11 +351,16 @@ export const Popup: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  {recentClips.slice(0, activeTab === 'all' ? 3 : 20).map((clip) => (
-                    <div
+                  {recentClips.slice(0, activeTab === 'all' ? 3 : 20).map((clip, idx) => (
+                    <motion.div
+                      whileHover={{ scale: 1.015, y: -1 }}
+                      whileTap={{ scale: 0.96 }}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.15, delay: idx * 0.03 }}
                       key={clip.id}
                       onClick={() => openAppUrl(`https://prompt-memory.vercel.app/clips?id=${clip.id}`)}
-                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-purple-500/40 transition-all cursor-pointer flex items-center gap-3 group"
+                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-purple-500/40 transition-all cursor-pointer flex items-center gap-3 group shadow-sm"
                     >
                       <div className="w-11 h-11 rounded-lg overflow-hidden bg-slate-800 shrink-0 relative border border-slate-700/80 flex items-center justify-center">
                         {clip.image_url ? (
@@ -366,7 +385,7 @@ export const Popup: React.FC = () => {
                           {clip.content || clip.source_link || 'Captured playable media item'}
                         </p>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                   {recentClips.length === 0 && (
                     <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
@@ -391,11 +410,16 @@ export const Popup: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  {recentPrompts.slice(0, activeTab === 'all' ? 3 : 20).map((prompt) => (
-                    <div
+                  {recentPrompts.slice(0, activeTab === 'all' ? 3 : 20).map((prompt, idx) => (
+                    <motion.div
+                      whileHover={{ scale: 1.015, y: -1 }}
+                      whileTap={{ scale: 0.96 }}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.15, delay: idx * 0.03 }}
                       key={prompt.id}
                       onClick={() => openAppUrl(`https://prompt-memory.vercel.app/vault?id=${prompt.id}`)}
-                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-indigo-500/40 transition-all cursor-pointer flex items-start gap-2.5 group"
+                      className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/70 border border-slate-800/80 hover:border-indigo-500/40 transition-all cursor-pointer flex items-start gap-2.5 group shadow-sm"
                     >
                       <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
                         <FileText className="w-3.5 h-3.5" />
@@ -408,7 +432,7 @@ export const Popup: React.FC = () => {
                           {prompt.content || 'No text content available.'}
                         </p>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                   {recentPrompts.length === 0 && (
                     <div className="p-3 text-center rounded-xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-[11px]">
@@ -424,13 +448,15 @@ export const Popup: React.FC = () => {
 
       {/* Bottom Launcher Bar */}
       <div className="p-2 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-2 shrink-0">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => openAppUrl('https://prompt-memory.vercel.app')}
           className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/20 flex items-center justify-center gap-1.5 shrink-0"
         >
           <span>🚀 Open Full Web Dashboard</span>
           <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-        </button>
+        </motion.button>
       </div>
     </div>
   );
