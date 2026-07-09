@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Folder, Search, ExternalLink, Video, 
-  RefreshCw, AlertCircle, FileText, Bookmark, Play, Layers, Scissors, CheckCircle, Sparkles
+  RefreshCw, AlertCircle, FileText, Bookmark, Play, Layers, CheckCircle, Sparkles
 } from 'lucide-react';
 
 interface Workspace {
@@ -39,6 +39,24 @@ export const Popup: React.FC = () => {
 
   useEffect(() => {
     fetchDashboardData();
+
+    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: string) => {
+      if (areaName === 'local') {
+        if (changes.pm_cached_dashboard_items && changes.pm_cached_dashboard_items.newValue && Array.isArray(changes.pm_cached_dashboard_items.newValue)) {
+          setItems(changes.pm_cached_dashboard_items.newValue as VaultItem[]);
+        }
+        if (changes.pm_cached_workspaces && changes.pm_cached_workspaces.newValue && Array.isArray(changes.pm_cached_workspaces.newValue)) {
+          setWorkspaces(changes.pm_cached_workspaces.newValue as Workspace[]);
+        }
+      }
+    };
+
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+      chrome.storage.onChanged.addListener(handleStorageChange);
+      return () => {
+        chrome.storage.onChanged.removeListener(handleStorageChange);
+      };
+    }
   }, []);
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
@@ -287,7 +305,7 @@ export const Popup: React.FC = () => {
   });
 
   return (
-    <div style={{ width: '100%', height: '100%', maxWidth: '360px', maxHeight: '440px', overflow: 'hidden' }} className="w-full h-full bg-[#1e1e2f]/90 backdrop-blur-2xl text-slate-100 flex flex-row font-sans selection:bg-pink-500 selection:text-white border border-white/10 shadow-2xl shadow-purple-500/10 overflow-hidden flex-1 m-0 p-0 relative">
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }} className="w-full h-full bg-[#2a2a35]/85 backdrop-blur-2xl text-slate-100 flex flex-row font-sans selection:bg-pink-500 selection:text-white border border-white/10 shadow-2xl shadow-purple-500/10 overflow-hidden flex-1 m-0 p-0 relative">
       {/* Toast Notification */}
       {toastMsg && (
         <motion.div
@@ -301,15 +319,15 @@ export const Popup: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Sleek, Narrow Vertical Icon-Only Sidebar on the LEFT */}
-      <div className="w-13 bg-slate-900/70 backdrop-blur-2xl border-r border-white/10 flex flex-col items-center py-2.5 gap-2 shrink-0 z-30">
+      {/* Sleek, Narrow Vertical Icon-Only Sidebar on the LEFT (Only 2 Icons) */}
+      <div className="w-13 bg-slate-900/70 backdrop-blur-2xl border-r border-white/10 flex flex-col items-center py-2.5 gap-2.5 shrink-0 z-30">
         <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center shadow-md shadow-pink-500/20 mb-1 cursor-default shrink-0">
           <Sparkles className="w-4 h-4 text-white" />
         </div>
 
         <div className="w-6 h-[1px] bg-white/10 my-0.5 shrink-0" />
 
-        {/* Save Current Tab */}
+        {/* Icon 1: Save Current Tab */}
         <div className="relative group shrink-0">
           <motion.button
             whileHover={{ scale: 1.15 }}
@@ -321,11 +339,11 @@ export const Popup: React.FC = () => {
             <Bookmark className="w-4 h-4" />
           </motion.button>
           <span className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-purple-950/95 text-purple-200 border border-purple-500/40 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 backdrop-blur-xl flex items-center gap-1.5">
-            <span>Bookmark Current Tab</span>
+            <span>Save Current Tab</span>
           </span>
         </div>
 
-        {/* Save Window Tabs */}
+        {/* Icon 2: Save All Open Tabs */}
         <div className="relative group shrink-0">
           <motion.button
             whileHover={{ scale: 1.15 }}
@@ -337,39 +355,7 @@ export const Popup: React.FC = () => {
             <Folder className="w-4 h-4" />
           </motion.button>
           <span className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-purple-950/95 text-purple-200 border border-purple-500/40 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 backdrop-blur-xl flex items-center gap-1.5">
-            <span>Save All Window Tabs</span>
-          </span>
-        </div>
-
-        {/* Save Selection */}
-        <div className="relative group shrink-0">
-          <motion.button
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleQuickAction('selection')}
-            disabled={!!activeAction}
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${activeAction === 'selection' ? 'bg-pink-500 text-white animate-pulse shadow-lg shadow-pink-500/40' : 'bg-white/5 hover:bg-pink-500/20 text-slate-300 hover:text-pink-300 border border-white/5 hover:border-pink-500/30'}`}
-          >
-            <Scissors className="w-4 h-4" />
-          </motion.button>
-          <span className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-purple-950/95 text-purple-200 border border-purple-500/40 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 backdrop-blur-xl flex items-center gap-1.5">
-            <span>Save Selected Text</span>
-          </span>
-        </div>
-
-        {/* Save Media */}
-        <div className="relative group shrink-0">
-          <motion.button
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleQuickAction('media')}
-            disabled={!!activeAction}
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${activeAction === 'media' ? 'bg-amber-500 text-white animate-pulse shadow-lg shadow-amber-500/40' : 'bg-white/5 hover:bg-amber-500/20 text-slate-300 hover:text-amber-300 border border-white/5 hover:border-amber-500/30'}`}
-          >
-            <Video className="w-4 h-4" />
-          </motion.button>
-          <span className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-purple-950/95 text-purple-200 border border-purple-500/40 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 backdrop-blur-xl flex items-center gap-1.5">
-            <span>Extract & Save Media</span>
+            <span>Save All Open Tabs</span>
           </span>
         </div>
 
@@ -455,16 +441,16 @@ export const Popup: React.FC = () => {
           </motion.button>
         </div>
 
-        {/* Error Alert Banner */}
+        {/* Error / Offline Alert Banner */}
         {error && (
-          <div className="mx-2.5 mt-2 p-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] flex items-center justify-between gap-2 shadow-sm flex-shrink-0">
-            <div className="flex items-center gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-400" />
+          <div className={`mx-2.5 mt-2 p-2.5 rounded-xl border text-[11px] flex items-center justify-between gap-2 shadow-sm flex-shrink-0 backdrop-blur-xl ${error.includes('Offline') || error.includes('log in') ? 'bg-purple-950/40 border-purple-500/30 text-purple-200' : 'bg-rose-500/15 border-rose-500/30 text-rose-300'}`}>
+            <div className="flex items-center gap-2">
+              <AlertCircle className={`w-3.5 h-3.5 shrink-0 ${error.includes('Offline') || error.includes('log in') ? 'text-purple-400' : 'text-rose-400'}`} />
               <span className="font-medium leading-tight">{error}</span>
             </div>
             <button
               onClick={() => openAppUrl('https://prompt-memory.vercel.app/login')}
-              className="px-2 py-1 rounded-lg bg-rose-500/25 hover:bg-rose-500/35 text-rose-100 font-bold text-[10px] flex items-center gap-1 shrink-0 transition-all border border-rose-500/40"
+              className={`px-2.5 py-1 rounded-lg font-bold text-[10px] flex items-center gap-1 shrink-0 transition-all border ${error.includes('Offline') || error.includes('log in') ? 'bg-purple-500 text-white border-purple-400/50 hover:bg-purple-600 shadow-md shadow-purple-500/20' : 'bg-rose-500/25 hover:bg-rose-500/35 text-rose-100 border-rose-500/40'}`}
             >
               Log In
             </button>

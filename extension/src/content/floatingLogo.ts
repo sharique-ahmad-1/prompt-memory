@@ -83,8 +83,8 @@ function injectFloatingLogo() {
     const mRight = container && container.style.right ? parseInt(container.style.right, 10) : 24;
     const mBottom = container && container.style.bottom ? parseInt(container.style.bottom, 10) : 24;
 
-    const winBottom = Math.min(window.innerHeight - 440, Math.max(10, mBottom + 58));
-    const winRight = Math.min(window.innerWidth - 365, Math.max(10, mRight));
+    const winBottom = Math.min(window.innerHeight - 460, Math.max(10, mBottom + 58));
+    const winRight = Math.min(window.innerWidth - 380, Math.max(10, mRight));
 
     const win = document.createElement('div');
     win.id = 'pm-mini-dashboard-window';
@@ -92,16 +92,19 @@ function injectFloatingLogo() {
       position: fixed !important;
       bottom: ${winBottom}px !important;
       right: ${winRight}px !important;
-      width: 360px !important;
-      max-width: 360px !important;
-      height: 440px !important;
-      max-height: 440px !important;
-      background: rgba(30, 30, 47, 0.92) !important;
+      width: 380px !important;
+      height: 460px !important;
+      min-width: 320px !important;
+      min-height: 400px !important;
+      max-width: 500px !important;
+      max-height: 700px !important;
+      resize: both !important;
+      background: rgba(42, 42, 53, 0.85) !important;
       backdrop-filter: blur(24px) !important;
       -webkit-backdrop-filter: blur(24px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
       border-radius: 16px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 40px rgba(168, 85, 247, 0.15) !important;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(168, 85, 247, 0.18) !important;
       z-index: 2147483647;
       overflow: hidden;
       display: flex;
@@ -114,8 +117,8 @@ function injectFloatingLogo() {
     const closeHeader = document.createElement('div');
     closeHeader.style.cssText = `
       padding: 8px 14px;
-      background: rgba(30, 30, 47, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(42, 42, 53, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -124,6 +127,7 @@ function injectFloatingLogo() {
       font-weight: 700;
       font-family: -apple-system, sans-serif;
       flex-shrink: 0;
+      cursor: move;
     `;
     closeHeader.innerHTML = `
       <div style="display: flex; align-items: center; gap: 6px;">
@@ -138,6 +142,10 @@ function injectFloatingLogo() {
     iframe.src = chrome.runtime.getURL('popup.html');
     iframe.style.cssText = 'width: 100%; height: 100%; flex: 1; border: none; margin: 0; padding: 0; background: transparent; overflow: hidden; display: block;';
     win.appendChild(iframe);
+
+    const resizeHandle = document.createElement('div');
+    resizeHandle.style.cssText = 'position: absolute; bottom: 3px; right: 3px; width: 14px; height: 14px; pointer-events: none; opacity: 0.6; z-index: 100; background: radial-gradient(circle at 100% 100%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.5) 20%, transparent 20%, transparent 40%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.5) 60%, transparent 60%);';
+    win.appendChild(resizeHandle);
 
     document.body.appendChild(win);
 

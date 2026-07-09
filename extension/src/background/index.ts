@@ -53,20 +53,27 @@ async function getCurrentUser() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user && user.id) return user;
 
-    // Restore from storage if available
     const storage = (await chrome.storage.local.get(['pm_session'])) as Record<string, any>;
     const pmSession = storage?.pm_session;
-    if (pmSession && pmSession.access_token && pmSession.refresh_token) {
-      const { data: sessionData } = await supabase.auth.setSession({
-        access_token: pmSession.access_token,
-        refresh_token: pmSession.refresh_token
-      });
-      if (sessionData?.user) return sessionData.user;
-    }
-
-    // Check storage user ID direct
-    if (pmSession?.user?.id) {
-      return pmSession.user;
+    if (pmSession) {
+      if (pmSession.user && pmSession.user.id) {
+        return pmSession.user;
+      }
+      if (pmSession.access_token) {
+        try {
+          const payload = JSON.parse(atob(pmSession.access_token.split('.')[1]));
+          if (payload && payload.sub) {
+            return { id: payload.sub, email: payload.email || '' };
+          }
+        } catch (e) {}
+      }
+      if (pmSession.access_token && pmSession.refresh_token) {
+        const { data: sessionData } = await supabase.auth.setSession({
+          access_token: pmSession.access_token,
+          refresh_token: pmSession.refresh_token
+        });
+        if (sessionData?.user) return sessionData.user;
+      }
     }
   } catch (err) {
     console.warn('[Antigravity Background] Auth get user warning:', err);
@@ -201,10 +208,23 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         }
       } else if (request.action === 'fetchItems' || request.action === 'fetchDashboardData') {
         try {
-          const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ success: false, error: 'Cloud sync timed out.' }), 3200));
+          const storage = (await chrome.storage.local.get(['pm_cached_dashboard_items'])) as Record<string, any>;
+          const cachedItems = Array.isArray(storage?.pm_cached_dashboard_items) ? storage.pm_cached_dashboard_items : [];
+
+          const timeoutPromise = new Promise((resolve) => setTimeout(() => {
+            if (cachedItems.length > 0) {
+              resolve({ success: true, data: cachedItems });
+            } else {
+              resolve({ success: false, error: 'Cloud sync timed out.' });
+            }
+          }, 4500));
+
           const fetchPromise = (async () => {
             const user = await getCurrentUser();
             if (!user || !user.id) {
+              if (cachedItems.length > 0) {
+                return { success: true, data: cachedItems };
+              }
               return { success: false, error: 'Offline Mode: Please log into your PromptMemory web dashboard to sync.' };
             }
             let query = supabase.from('prompts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
@@ -212,10 +232,10 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             let clipsQuery = supabase.from('workspace_items').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
             const { data: clipsData } = await clipsQuery;
 
-            if (error && !clipsData) {
+            if (error && !clipsData && cachedItems.length === 0) {
               return { success: false, error: error.message };
             }
-            const combined = [...(promptsData || []), ...(clipsData || [])].sort((a, b) => {
+            const combined = [...(promptsData || []), ...(clipsData || []), ...cachedItems].sort((a, b) => {
               return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
             });
             const seen = new Set();
@@ -224,6 +244,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
               seen.add(item.id);
               return true;
             });
+            if (typeof chrome !== 'undefined' && chrome.storage?.local && deduped.length > 0) {
+              chrome.storage.local.set({ pm_cached_dashboard_items: deduped }).catch(() => {});
+            }
             return { success: true, data: deduped };
           })();
 
