@@ -331,20 +331,20 @@ function injectFloatingLogo() {
     const mRight = container && container.style.right ? parseInt(container.style.right, 10) : 24;
     const mBottom = container && container.style.bottom ? parseInt(container.style.bottom, 10) : 24;
 
-    const winBottom = Math.min(window.innerHeight - 430, Math.max(10, mBottom + 58));
-    const winRight = Math.min(window.innerWidth - 350, Math.max(10, mRight));
+    const winBottom = Math.min(window.innerHeight - 410, Math.max(10, mBottom + 58));
+    const winRight = Math.min(window.innerWidth - 330, Math.max(10, mRight));
 
     const win = document.createElement('div');
     win.id = 'pm-mini-dashboard-window';
     win.style.cssText = `
-      position: fixed;
-      bottom: ${winBottom}px;
-      right: ${winRight}px;
-      width: 340px;
-      max-width: 92vw;
-      height: 420px;
-      max-height: 420px;
-      background: #0b0f19;
+      position: fixed !important;
+      bottom: ${winBottom}px !important;
+      right: ${winRight}px !important;
+      width: 320px !important;
+      max-width: 320px !important;
+      height: 400px !important;
+      max-height: 400px !important;
+      background: #0b0f19 !important;
       border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.18);
       z-index: 2147483647;
@@ -565,10 +565,10 @@ function injectFloatingLogo() {
       // Dynamically anchor and move the mini-dashboard window if open
       const miniWin = document.getElementById('pm-mini-dashboard-window');
       if (miniWin) {
-        const winBottom = Math.min(window.innerHeight - 430, Math.max(10, newBottom + 58));
-        const winRight = Math.min(window.innerWidth - 350, Math.max(10, newRight));
-        miniWin.style.bottom = `${winBottom}px`;
-        miniWin.style.right = `${winRight}px`;
+        const winBottom = Math.min(window.innerHeight - 410, Math.max(10, newBottom + 58));
+        const winRight = Math.min(window.innerWidth - 330, Math.max(10, newRight));
+        miniWin.style.setProperty('bottom', `${winBottom}px`, 'important');
+        miniWin.style.setProperty('right', `${winRight}px`, 'important');
       }
     }
   });
