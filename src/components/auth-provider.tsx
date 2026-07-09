@@ -152,33 +152,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session)
-      const u = session?.user ?? null
-      setUser(u)
-      setLoading(false)
-      if (u) fetchTeams(u.id);
+    const checkAndSetAuth = (session: Session | null) => {
+      const isDemoBypass = typeof window !== 'undefined' && localStorage.getItem('pm_demo_bypass') === 'true'
+      
+      let effectiveSession = session
+      let effectiveUser = session?.user ?? null
 
-      if (!session && pathname !== '/login') {
+      if (!effectiveSession && isDemoBypass) {
+        effectiveUser = {
+          id: 'demo-hackathon-user-2026',
+          app_metadata: { provider: 'demo' },
+          user_metadata: { name: 'Hackathon Judge (Demo Mode)' },
+          aud: 'authenticated',
+          created_at: new Date().toISOString(),
+          email: 'hackathon@promptmemory.ai',
+          phone: '',
+          role: 'authenticated',
+          updated_at: new Date().toISOString(),
+        } as any
+
+        effectiveSession = {
+          access_token: 'mock-demo-access-token',
+          refresh_token: 'mock-demo-refresh-token',
+          expires_in: 3600,
+          token_type: 'bearer',
+          user: effectiveUser!
+        }
+      }
+
+      setSession(effectiveSession)
+      setUser(effectiveUser)
+      setLoading(false)
+      if (effectiveUser) fetchTeams(effectiveUser.id);
+
+      if (!effectiveSession && !isDemoBypass && pathname !== '/login') {
         router.push('/login')
-      } else if (session && pathname === '/login') {
+      } else if ((effectiveSession || isDemoBypass) && pathname === '/login') {
         router.push('/')
       }
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      checkAndSetAuth(session)
     })
 
     // Initial check
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      const u = session?.user ?? null
-      setUser(u)
-      setLoading(false)
-      if (u) fetchTeams(u.id);
-      
-      if (!session && pathname !== '/login') {
-        router.push('/login')
-      } else if (session && pathname === '/login') {
-        router.push('/')
-      }
+      checkAndSetAuth(session)
     })
 
     return () => {
