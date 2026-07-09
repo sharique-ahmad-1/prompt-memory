@@ -6,16 +6,16 @@
     "isEntry": true
   },
   "popup.html": {
-    "file": "assets/popup.html-DXEhQ1YY.js",
+    "file": "assets/popup.html-c_UVDMJI.js",
     "name": "popup.html",
     "src": "popup.html",
     "isEntry": true,
     "css": [
-      "assets/popup-PHahkjlE.css"
+      "assets/popup-D_2eC4tF.css"
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-Bfng8iPF.js",
+    "file": "assets/index.ts-CAn89MZs.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true
@@ -33,7 +33,7 @@
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-BQRvfeub.js",
+    "file": "assets/floatingLogo.ts-D5PGoSrZ.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true

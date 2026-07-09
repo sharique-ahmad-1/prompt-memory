@@ -42,6 +42,15 @@ export const Popup: React.FC = () => {
     setLoading(true);
     setError(null);
 
+    let finished = false;
+    const timeoutId = setTimeout(() => {
+      if (!finished) {
+        finished = true;
+        setLoading(false);
+        setError('Cloud sync timed out (3s). Check internet connection or Supabase login.');
+      }
+    }, 3000);
+
     chrome.runtime.sendMessage({ action: 'fetchWorkspaces' }, (response) => {
       if (response?.success && response.data) {
         setWorkspaces(response.data);
@@ -49,7 +58,11 @@ export const Popup: React.FC = () => {
     });
 
     chrome.runtime.sendMessage({ action: 'fetchDashboardData' }, (response) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeoutId);
       setLoading(false);
+
       if (chrome.runtime.lastError) {
         setError('Service Error: ' + chrome.runtime.lastError.message);
         return;
@@ -92,9 +105,9 @@ export const Popup: React.FC = () => {
   });
 
   return (
-    <div className="w-[440px] min-h-[580px] max-h-[600px] bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden">
+    <div className="w-full h-full min-h-[420px] max-h-screen bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden">
       {/* Top Glass Header */}
-      <div className="px-4 py-3 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 flex items-center justify-between sticky top-0 z-20">
+      <div className="px-4 py-3 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 flex items-center justify-between sticky top-0 z-20 flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-pink-600 via-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-pink-500/20">
             <Sparkles className="w-4 h-4 text-white animate-pulse" />
@@ -102,7 +115,6 @@ export const Popup: React.FC = () => {
           <div>
             <h1 className="font-extrabold text-sm tracking-tight text-white flex items-center gap-1.5">
               PromptMemory Vault
-              <span className="text-[10px] bg-gradient-to-r from-pink-500 to-purple-500 text-white px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">PRO</span>
             </h1>
             <p className="text-[10px] text-slate-400 font-medium">Enterprise Cloud Memory Hub</p>
           </div>
@@ -182,22 +194,32 @@ export const Popup: React.FC = () => {
 
       {/* Error Alert Banner */}
       {error && (
-        <div className="mx-4 mt-2.5 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
-          <div className="flex-1">
-            <span className="font-bold block">Sync Error</span>
-            <span>{error}</span>
+        <div className="mx-4 mt-2.5 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between gap-2 shadow-sm flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+            <span className="font-medium leading-tight">{error}</span>
           </div>
-          <button onClick={() => setError(null)} className="text-slate-400 hover:text-white text-xs">✕</button>
+          <button
+            onClick={fetchDashboardData}
+            className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-100 font-bold text-[11px] flex items-center gap-1 shrink-0 transition-all border border-rose-500/30"
+          >
+            <RefreshCw className="w-3 h-3" /> Retry
+          </button>
         </div>
       )}
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {loading && items.length === 0 ? (
-          <div className="py-12 flex flex-col items-center justify-center text-slate-400 space-y-2">
+          <div className="py-10 flex flex-col items-center justify-center text-slate-400 space-y-3">
             <RefreshCw className="w-6 h-6 animate-spin text-pink-500" />
             <span className="text-xs font-medium">Syncing active memory hub...</span>
+            <button
+              onClick={fetchDashboardData}
+              className="mt-1 px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-[11px] font-bold border border-slate-700 flex items-center gap-1.5 transition-all"
+            >
+              <RefreshCw className="w-3 h-3" /> Force Retry
+            </button>
           </div>
         ) : searchQuery.trim() ? (
           /* Live Search Results View */
@@ -385,7 +407,7 @@ export const Popup: React.FC = () => {
       </div>
 
       {/* Bottom Launcher Bar */}
-      <div className="p-3 bg-slate-900/90 border-t border-slate-800/80 flex items-center justify-between gap-2">
+      <div className="p-3 bg-slate-900/90 border-t border-slate-800/80 flex items-center justify-between gap-2 flex-shrink-0">
         <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-semibold px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Cloud Synced</span>

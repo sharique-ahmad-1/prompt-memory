@@ -166,53 +166,68 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         sendResponse({ success: true });
         return;
       } else if (request.action === 'fetchWorkspaces') {
-        // Try workspaces table, if fail or empty try projects
-        let { data, error } = await supabase
-          .from('workspaces')
-          .select('*')
-          .order('created_at', { ascending: false });
+        try {
+          const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ data: [], error: null }), 3200));
+          const fetchPromise = (async () => {
+            let { data, error } = await supabase
+              .from('workspaces')
+              .select('*')
+              .order('created_at', { ascending: false });
 
-        if (error || !data || data.length === 0) {
-          const { data: projData } = await supabase
-            .from('projects')
-            .select('*')
-            .order('created_at', { ascending: false });
-          if (projData && projData.length > 0) {
-            data = projData;
-            error = null;
-          }
+            if (error || !data || data.length === 0) {
+              const { data: projData } = await supabase
+                .from('projects')
+                .select('*')
+                .order('created_at', { ascending: false });
+              if (projData && projData.length > 0) {
+                data = projData;
+              }
+            }
+            return { data: data || [], error: null };
+          })();
+
+          const res = (await Promise.race([fetchPromise, timeoutPromise])) as any;
+          sendResponse({ success: true, data: res.data || [] });
+        } catch (err: any) {
+          sendResponse({ success: true, data: [] });
         }
-
-        sendResponse({ success: true, data: data || [] });
       } else if (request.action === 'fetchItems' || request.action === 'fetchDashboardData') {
-        const user = await getCurrentUser();
-        let query = supabase.from('prompts').select('*').order('created_at', { ascending: false }).limit(30);
-        if (user && user.id) {
-          query = query.eq('user_id', user.id);
-        }
+        try {
+          const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ success: false, error: 'Cloud sync timed out.' }), 3200));
+          const fetchPromise = (async () => {
+            const user = await getCurrentUser();
+            let query = supabase.from('prompts').select('*').order('created_at', { ascending: false }).limit(30);
+            if (user && user.id) {
+              query = query.eq('user_id', user.id);
+            }
 
-        const { data: promptsData, error } = await query;
-        let clipsQuery = supabase.from('workspace_items').select('*').order('created_at', { ascending: false }).limit(30);
-        if (user && user.id) {
-          clipsQuery = clipsQuery.eq('user_id', user.id);
-        }
-        const { data: clipsData } = await clipsQuery;
+            const { data: promptsData, error } = await query;
+            let clipsQuery = supabase.from('workspace_items').select('*').order('created_at', { ascending: false }).limit(30);
+            if (user && user.id) {
+              clipsQuery = clipsQuery.eq('user_id', user.id);
+            }
+            const { data: clipsData } = await clipsQuery;
 
-        if (error && !clipsData) {
-          console.error('[Antigravity Background] fetchDashboardData error:', error);
-          sendResponse({ success: false, error: error.message });
-        } else {
-          const combined = [...(promptsData || []), ...(clipsData || [])].sort((a, b) => {
-            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-          });
-          // Deduplicate by ID just in case
-          const seen = new Set();
-          const deduped = combined.filter(item => {
-            if (seen.has(item.id)) return false;
-            seen.add(item.id);
-            return true;
-          });
-          sendResponse({ success: true, data: deduped });
+            if (error && !clipsData) {
+              return { success: false, error: error.message };
+            }
+            const combined = [...(promptsData || []), ...(clipsData || [])].sort((a, b) => {
+              return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+            });
+            const seen = new Set();
+            const deduped = combined.filter(item => {
+              if (seen.has(item.id)) return false;
+              seen.add(item.id);
+              return true;
+            });
+            return { success: true, data: deduped };
+          })();
+
+          const result = (await Promise.race([fetchPromise, timeoutPromise])) as any;
+          sendResponse(result);
+        } catch (err: any) {
+          console.error('[Antigravity Background] fetchDashboardData exception:', err);
+          sendResponse({ success: false, error: err.message || 'Error syncing data.' });
         }
       } else if (request.action === 'deleteItem') {
         const { itemId } = request;

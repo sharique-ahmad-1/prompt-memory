@@ -14,6 +14,9 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
+  const [verificationNotice, setVerificationNotice] = useState<string | null>(null)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -43,6 +46,8 @@ export default function Login() {
     try {
       setLoading(true)
       setError(null)
+      setVerificationNotice(null)
+      setResendSuccess(false)
 
       if (authMode === 'signin') {
         const { error: signInErr } = await supabase.auth.signInWithPassword({
@@ -54,23 +59,65 @@ export default function Login() {
           window.location.href = '/'
         }
       } else {
-        const { error: signUpErr } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:3000/' : 'https://prompt-memory.vercel.app/',
+          }
         })
         if (signUpErr) throw signUpErr
-        if (typeof window !== 'undefined') {
-          window.location.href = '/'
+
+        if (signUpData?.user && signUpData?.user?.identities && signUpData.user.identities.length === 0) {
+          setError('An account with this email already exists. Please switch to "Sign In" above.')
+          setLoading(false)
+          return
+        }
+
+        // Check if session exists immediately or if verification email was sent
+        if (signUpData?.session) {
+          if (typeof window !== 'undefined') {
+            window.location.href = '/'
+          }
+        } else {
+          setVerificationNotice(`Account created! A confirmation link has been sent to ${email}. Please verify your email to continue.`)
+          setLoading(false)
         }
       }
     } catch (err: any) {
       const msg = err.message || 'Authentication error occurred.'
       if (msg.toLowerCase().includes('invalid login credentials')) {
         setError('Incorrect email or password. If you are a new user, please switch to the "Create Account" tab above.')
+      } else if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('not verified')) {
+        setVerificationNotice(`Your email (${email}) is not verified yet. Please check your inbox or click below to resend confirmation link.`)
       } else {
         setError(msg)
       }
       setLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError('Please enter your email above to resend verification.')
+      return
+    }
+    try {
+      setResendLoading(true)
+      setError(null)
+      const { error: resendErr } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:3000/' : 'https://prompt-memory.vercel.app/',
+        }
+      })
+      if (resendErr) throw resendErr
+      setResendSuccess(true)
+    } catch (err: any) {
+      setError(err.message || 'Could not resend verification email.')
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -79,17 +126,23 @@ export default function Login() {
     try {
       setLoading(true)
       setError(null)
+      setVerificationNotice(null)
+      
+      const targetRedirect = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+        ? 'http://localhost:3000/' 
+        : 'https://prompt-memory.vercel.app/'
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: targetRedirect,
         }
       })
       if (error) throw error
     } catch (err: any) {
       const msg = err.message || 'An error occurred during Google login.'
-      if (msg.toLowerCase().includes('unsupported provider') || msg.toLowerCase().includes('provider is not enabled')) {
-        setError('Google Auth is not enabled in the Supabase Dashboard. Please contact the administrator or sign in with Email/Password.')
+      if (msg.toLowerCase().includes('unsupported provider') || msg.toLowerCase().includes('provider is not enabled') || msg.includes('400')) {
+        setError('Google OAuth (400 Unsupported provider) is currently disabled in your Supabase Dashboard settings. Please sign in instantly with Email & Password above, or enable Google Auth under Supabase -> Authentication -> Providers.')
       } else {
         setError(msg)
       }
@@ -204,19 +257,45 @@ export default function Login() {
             </Alert>
           )}
 
+          {verificationNotice && (
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-200 text-xs space-y-3">
+              <div className="flex items-start gap-2.5">
+                <Mail className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-amber-300">Email Verification Notice</p>
+                  <p className="mt-1 leading-relaxed text-amber-200/90">{verificationNotice}</p>
+                </div>
+              </div>
+              <div className="pt-2 flex items-center justify-between border-t border-amber-500/20">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading || resendSuccess}
+                  className="h-8 text-[11px] bg-amber-500/20 border-amber-500/40 text-amber-200 hover:bg-amber-500/30 hover:text-white font-bold px-3"
+                >
+                  {resendLoading ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Mail className="h-3 w-3 mr-1.5" />}
+                  {resendSuccess ? 'Verification Resent!' : 'Resend Confirmation Email'}
+                </Button>
+                {resendSuccess && <span className="text-[10px] text-emerald-400 font-bold">Check your inbox!</span>}
+              </div>
+            </div>
+          )}
+
           {/* Email / Password Tabs */}
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4">
             <div className="grid grid-cols-2 p-1 bg-muted/60 rounded-xl gap-1">
               <button
                 type="button"
-                onClick={() => { setAuthMode('signin'); setError(null); }}
+                onClick={() => { setAuthMode('signin'); setError(null); setVerificationNotice(null); }}
                 className={`py-2 rounded-lg text-xs font-bold transition-all ${authMode === 'signin' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Sign In
               </button>
               <button
                 type="button"
-                onClick={() => { setAuthMode('signup'); setError(null); }}
+                onClick={() => { setAuthMode('signup'); setError(null); setVerificationNotice(null); }}
                 className={`py-2 rounded-lg text-xs font-bold transition-all ${authMode === 'signup' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Create Account

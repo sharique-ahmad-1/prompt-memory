@@ -327,49 +327,59 @@ function injectFloatingLogo() {
       return;
     }
 
+    const container = document.getElementById('pm-floating-logo');
+    const mRight = container && container.style.right ? parseInt(container.style.right, 10) : 24;
+    const mBottom = container && container.style.bottom ? parseInt(container.style.bottom, 10) : 24;
+
+    const winBottom = Math.min(window.innerHeight - 510, Math.max(10, mBottom + 58));
+    const winRight = Math.min(window.innerWidth - 390, Math.max(10, mRight));
+
     const win = document.createElement('div');
     win.id = 'pm-mini-dashboard-window';
     win.style.cssText = `
       position: fixed;
-      bottom: 82px;
-      right: 24px;
-      width: 440px;
-      height: 600px;
+      bottom: ${winBottom}px;
+      right: ${winRight}px;
+      width: 380px;
+      max-width: 92vw;
+      height: 500px;
+      max-height: 80vh;
       background: #0b0f19;
-      border-radius: 20px;
+      border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.18);
       z-index: 2147483647;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     `;
 
     const closeHeader = document.createElement('div');
     closeHeader.style.cssText = `
-      padding: 10px 16px;
-      background: rgba(15, 23, 42, 0.95);
+      padding: 8px 14px;
+      background: rgba(15, 23, 42, 0.96);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: space-between;
       color: white;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       font-family: -apple-system, sans-serif;
+      flex-shrink: 0;
     `;
     closeHeader.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 16px;">✨</span>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 14px;">✨</span>
         <span style="background: linear-gradient(to right, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PromptMemory Mini-Dashboard</span>
       </div>
-      <button id="pm-close-mini-win" style="background: rgba(255,255,255,0.1); border: none; color: #94a3b8; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s;">✕</button>
+      <button id="pm-close-mini-win" style="background: rgba(255,255,255,0.1); border: none; color: #94a3b8; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s;">✕</button>
     `;
     win.appendChild(closeHeader);
 
     const iframe = document.createElement('iframe');
     iframe.src = chrome.runtime.getURL('popup.html');
-    iframe.style.cssText = 'width: 100%; flex: 1; border: none; background: #0b0f19;';
+    iframe.style.cssText = 'width: 100%; flex: 1; border: none; background: #0b0f19; overflow: hidden;';
     win.appendChild(iframe);
 
     document.body.appendChild(win);
@@ -382,7 +392,7 @@ function injectFloatingLogo() {
     }
 
     const clickOutside = (e: MouseEvent) => {
-      if (!win.contains(e.target as Node) && !container.contains(e.target as Node)) {
+      if (!win.contains(e.target as Node) && (!container || !container.contains(e.target as Node))) {
         win.remove();
         document.removeEventListener('mousedown', clickOutside);
       }
@@ -497,6 +507,15 @@ function injectFloatingLogo() {
       const newBottom = initialBottom - dy;
       container.style.right = `${newRight}px`;
       container.style.bottom = `${newBottom}px`;
+
+      // Dynamically anchor and move the mini-dashboard window if open
+      const miniWin = document.getElementById('pm-mini-dashboard-window');
+      if (miniWin) {
+        const winBottom = Math.min(window.innerHeight - 510, Math.max(10, newBottom + 58));
+        const winRight = Math.min(window.innerWidth - 390, Math.max(10, newRight));
+        miniWin.style.bottom = `${winBottom}px`;
+        miniWin.style.right = `${winRight}px`;
+      }
     }
   });
 
