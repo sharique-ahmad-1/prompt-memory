@@ -73,253 +73,6 @@ function injectFloatingLogo() {
     </svg>
   `;
 
-  const popover = document.createElement('div');
-  popover.style.cssText = `
-    position: absolute;
-    bottom: 60px;
-    right: 0;
-    background: rgba(10, 10, 15, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 16px;
-    padding: 10px;
-    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(10px) scale(0.95);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: bottom right;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 220px;
-    z-index: 2147483647;
-  `;
-
-  const createMenuItem = (icon: string, text: string, theme: 'default' | 'purple' | 'indigo', onClick: () => void, keepOpen = false) => {
-    const item = document.createElement('div');
-    item.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      color: #e4e4e7;
-      font-size: 13px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      background: transparent;
-      border: 1px solid transparent;
-      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-      user-select: none;
-    `;
-
-    item.onmouseenter = () => {
-      if (theme === 'purple') {
-        item.style.background = 'rgba(168, 85, 247, 0.18)';
-        item.style.borderColor = 'rgba(168, 85, 247, 0.35)';
-        item.style.boxShadow = '0 0 20px rgba(168, 85, 247, 0.25)';
-        item.style.color = '#f3e8ff';
-      } else if (theme === 'indigo') {
-        item.style.background = 'rgba(99, 102, 241, 0.18)';
-        item.style.borderColor = 'rgba(99, 102, 241, 0.35)';
-        item.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.25)';
-        item.style.color = '#e0e7ff';
-      } else {
-        item.style.background = 'rgba(255, 255, 255, 0.1)';
-        item.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-        item.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25)';
-        item.style.color = '#ffffff';
-      }
-    };
-
-    item.onmouseleave = () => {
-      item.style.background = 'transparent';
-      item.style.borderColor = 'transparent';
-      item.style.boxShadow = 'none';
-      item.style.color = '#e4e4e7';
-      item.style.transform = 'scale(1)';
-    };
-
-    item.onmousedown = (e) => {
-      e.stopPropagation();
-      item.style.transform = 'scale(0.98)';
-    };
-
-    item.onmouseup = () => {
-      item.style.transform = 'scale(1)';
-    };
-
-    item.onclick = (e) => {
-      e.stopPropagation();
-      onClick();
-      if (!keepOpen) {
-        closePopover();
-      }
-    };
-
-    item.innerHTML = `<span>${icon}</span><span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${text}</span>`;
-    return item;
-  };
-
-  const createSeparator = () => {
-    const sep = document.createElement('div');
-    sep.style.cssText = 'height: 1px; background: rgba(255, 255, 255, 0.08); margin: 2px 0;';
-    return sep;
-  };
-
-  const showToastMsg = (msg: string, isErr = false) => {
-    const toast = document.createElement('div');
-    toast.style.cssText = `position: fixed; bottom: 24px; right: 24px; background: ${isErr ? 'rgba(239, 68, 68, 0.95)' : 'rgba(16, 185, 129, 0.95)'}; color: white; padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 2147483647; box-shadow: 0 10px 25px rgba(0,0,0,0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s; font-family: -apple-system, sans-serif;`;
-    toast.innerHTML = `<span>${isErr ? '❌' : '✅'}</span><span style="margin-left: 8px;">${msg}</span>`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
-  };
-
-  const itemSaveMedia = createMenuItem('🎬', 'Save Media', 'purple', async () => {
-    itemSaveMedia.innerHTML = `<span>⏳</span><span style="flex: 1;">Extracting Media...</span>`;
-    
-    try {
-      const extractionResult = await Promise.race([
-        new Promise<{ embedUrl: string; imageUrl: string | null }>((resolve) => {
-          let embedUrl = window.location.href;
-          let imageUrl: string | null = null;
-          
-          if (document.querySelector('video')) {
-            const vid = document.querySelector('video');
-            embedUrl = vid?.src || window.location.href;
-          } else if (document.querySelector('img[src*="instagram"], img[src*="ytimg"]')) {
-            const img = document.querySelector('img[src*="instagram"], img[src*="ytimg"]') as HTMLImageElement;
-            imageUrl = img?.src || null;
-          }
-
-          if (!imageUrl && embedUrl === window.location.href) {
-            const ogImg = document.querySelector('meta[property="og:image"], meta[name="og:image"]')?.getAttribute('content');
-            if (ogImg && !ogImg.startsWith('data:')) imageUrl = ogImg;
-          }
-
-          if (imageUrl || (embedUrl && embedUrl !== window.location.href)) {
-            resolve({ embedUrl, imageUrl });
-          } else {
-            // Check once more after brief DOM yield
-            setTimeout(() => {
-              const anyImg = document.querySelector('img') as HTMLImageElement;
-              if (anyImg && anyImg.src && !anyImg.src.startsWith('data:') && (anyImg.naturalWidth || 0) > 100) {
-                resolve({ embedUrl: window.location.href, imageUrl: anyImg.src });
-              } else {
-                resolve({ embedUrl: window.location.href, imageUrl: null });
-              }
-            }, 500);
-          }
-        }),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_NO_MEDIA')), 3000))
-      ]);
-
-      if (!extractionResult.imageUrl && extractionResult.embedUrl === window.location.href) {
-        throw new Error('TIMEOUT_NO_MEDIA');
-      }
-
-      await new Promise<void>((resolve, reject) => {
-        chrome.runtime.sendMessage({
-          action: 'SAVE_PROMPT',
-          payload: {
-            title: `Captured Media: ${document.title.slice(0, 30)}`,
-            content: `Media captured from ${window.location.href}`,
-            image_url: extractionResult.imageUrl,
-            embed_url: extractionResult.embedUrl,
-            source_link: window.location.href,
-            category: 'Social Clip',
-            platform: window.location.hostname,
-            tags: ['#Media', '#Clipped']
-          }
-        }, (res) => {
-          if (chrome.runtime.lastError || !res?.success) {
-            reject(new Error(chrome.runtime.lastError?.message || res?.error || 'Save failed'));
-          } else {
-            resolve();
-          }
-        });
-      });
-
-      itemSaveMedia.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Media Saved!</span>`;
-      showToastMsg("Media saved to PromptMemory Vault!");
-    } catch (err: any) {
-      if (err.message === 'TIMEOUT_NO_MEDIA' || err.message?.includes('TIMEOUT')) {
-        itemSaveMedia.innerHTML = `<span>🎬</span><span style="flex: 1;">Save Media</span>`;
-        showToastMsg("No media found on this page.", true);
-        return;
-      }
-      const errMsg = err.message || 'Save failed';
-      itemSaveMedia.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error</span>`;
-      showToastMsg(`Error: ${errMsg.slice(0, 35)}`, true);
-    } finally {
-      setTimeout(() => {
-        itemSaveMedia.innerHTML = `<span>🎬</span><span style="flex: 1;">Save Media</span>`;
-      }, 2500);
-    }
-  }, true);
-
-  const itemSavePageText = createMenuItem('📄', 'Save Page Text', 'indigo', () => {
-    itemSavePageText.innerHTML = `<span>⏳</span><span style="flex: 1;">Saving Text...</span>`;
-    const selection = window.getSelection()?.toString() || document.body?.innerText?.slice(0, 5000) || '';
-    
-    chrome.runtime.sendMessage({
-      action: 'SAVE_PROMPT',
-      payload: {
-        title: document.title || 'Page Text Capture',
-        content: selection,
-        source_link: window.location.href,
-        category: 'Web Clip',
-        platform: window.location.hostname,
-        tags: ['#PageText', '#Highlight']
-      }
-    }, (res) => {
-      if (chrome.runtime.lastError || !res?.success) {
-        const errMsg = chrome.runtime.lastError?.message || res?.error || 'Save failed';
-        itemSavePageText.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error</span>`;
-        showToastMsg(`Error: ${errMsg.slice(0, 35)}`, true);
-      } else {
-        itemSavePageText.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Text Saved!</span>`;
-        showToastMsg("Page text saved to Vault!");
-      }
-      setTimeout(() => {
-        itemSavePageText.innerHTML = `<span>📄</span><span style="flex: 1;">Save Page Text</span>`;
-      }, 2500);
-    });
-  }, true);
-
-  const itemSaveSelection = createMenuItem('✂️', 'Save Selection', 'purple', () => {
-    const sel = window.getSelection()?.toString() || '';
-    if (!sel.trim()) {
-      showToastMsg("No text selected!", true);
-      return;
-    }
-    itemSaveSelection.innerHTML = `<span>⏳</span><span style="flex: 1;">Saving...</span>`;
-    chrome.runtime.sendMessage({
-      action: 'SAVE_PROMPT',
-      payload: {
-        title: sel.slice(0, 40) + '...',
-        content: sel,
-        source_link: window.location.href,
-        category: 'Highlight',
-        platform: window.location.hostname,
-        tags: ['#Highlight', '#Selected']
-      }
-    }, (res) => {
-      if (chrome.runtime.lastError || !res?.success) {
-        showToastMsg("Error saving selection", true);
-      } else {
-        itemSaveSelection.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Saved!</span>`;
-        showToastMsg("Selection saved to Vault!");
-      }
-      setTimeout(() => {
-        itemSaveSelection.innerHTML = `<span>✂️</span><span style="flex: 1;">Save Selection</span>`;
-      }, 2500);
-    });
-  }, true);
-
   function toggleMiniDashboardWindow() {
     const existing = document.getElementById('pm-mini-dashboard-window');
     if (existing) {
@@ -327,12 +80,11 @@ function injectFloatingLogo() {
       return;
     }
 
-    const container = document.getElementById('pm-floating-logo');
     const mRight = container && container.style.right ? parseInt(container.style.right, 10) : 24;
     const mBottom = container && container.style.bottom ? parseInt(container.style.bottom, 10) : 24;
 
-    const winBottom = Math.min(window.innerHeight - 410, Math.max(10, mBottom + 58));
-    const winRight = Math.min(window.innerWidth - 330, Math.max(10, mRight));
+    const winBottom = Math.min(window.innerHeight - 440, Math.max(10, mBottom + 58));
+    const winRight = Math.min(window.innerWidth - 365, Math.max(10, mRight));
 
     const win = document.createElement('div');
     win.id = 'pm-mini-dashboard-window';
@@ -340,13 +92,16 @@ function injectFloatingLogo() {
       position: fixed !important;
       bottom: ${winBottom}px !important;
       right: ${winRight}px !important;
-      width: 320px !important;
-      max-width: 320px !important;
-      height: 438px !important;
-      max-height: 438px !important;
-      background: #0b0f19 !important;
+      width: 360px !important;
+      max-width: 360px !important;
+      height: 440px !important;
+      max-height: 440px !important;
+      background: rgba(30, 30, 47, 0.92) !important;
+      backdrop-filter: blur(24px) !important;
+      -webkit-backdrop-filter: blur(24px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
       border-radius: 16px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.18);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 40px rgba(168, 85, 247, 0.15) !important;
       z-index: 2147483647;
       overflow: hidden;
       display: flex;
@@ -359,7 +114,7 @@ function injectFloatingLogo() {
     const closeHeader = document.createElement('div');
     closeHeader.style.cssText = `
       padding: 8px 14px;
-      background: rgba(15, 23, 42, 0.96);
+      background: rgba(30, 30, 47, 0.95);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
@@ -373,7 +128,7 @@ function injectFloatingLogo() {
     closeHeader.innerHTML = `
       <div style="display: flex; align-items: center; gap: 6px;">
         <span style="font-size: 14px;">✨</span>
-        <span style="background: linear-gradient(to right, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PromptMemory Mini-Dashboard</span>
+        <span style="background: linear-gradient(to right, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PromptMemory Vault</span>
       </div>
       <button id="pm-close-mini-win" style="background: rgba(255,255,255,0.1); border: none; color: #94a3b8; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s;">✕</button>
     `;
@@ -381,7 +136,7 @@ function injectFloatingLogo() {
 
     const iframe = document.createElement('iframe');
     iframe.src = chrome.runtime.getURL('popup.html');
-    iframe.style.cssText = 'width: 100%; height: 100%; flex: 1; border: none; margin: 0; padding: 0; background: #0b0f19; overflow: hidden; display: block;';
+    iframe.style.cssText = 'width: 100%; height: 100%; flex: 1; border: none; margin: 0; padding: 0; background: transparent; overflow: hidden; display: block;';
     win.appendChild(iframe);
 
     document.body.appendChild(win);
@@ -402,119 +157,10 @@ function injectFloatingLogo() {
     setTimeout(() => document.addEventListener('mousedown', clickOutside), 100);
   }
 
-  const itemSaveTab = createMenuItem('🔖', 'Save Current Tab', 'indigo', () => {
-    itemSaveTab.innerHTML = `<span>⏳</span><span style="flex: 1;">Saving Tab...</span>`;
-    chrome.runtime.sendMessage({
-      action: 'SAVE_PROMPT',
-      payload: {
-        title: document.title || 'Saved Tab',
-        content: `Bookmark URL: ${window.location.href}\nDescription: ${document.querySelector('meta[name="description"], meta[property="og:description"]')?.getAttribute('content') || 'No description available.'}`,
-        source_link: window.location.href,
-        category: 'Bookmark',
-        platform: window.location.hostname,
-        tags: ['#SavedTab', '#Bookmark']
-      }
-    }, (res) => {
-      if (chrome.runtime.lastError || !res?.success) {
-        itemSaveTab.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error</span>`;
-        showToastMsg('Error saving tab to Vault', true);
-      } else {
-        itemSaveTab.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Tab Saved!</span>`;
-        showToastMsg('Current tab saved to PromptMemory Vault!');
-      }
-      setTimeout(() => {
-        itemSaveTab.innerHTML = `<span>🔖</span><span style="flex: 1;">Save Current Tab</span>`;
-      }, 2500);
-    });
-  }, true);
-
-  const itemSaveWindow = createMenuItem('🗂️', 'Save Window Tabs', 'purple', () => {
-    itemSaveWindow.innerHTML = `<span>⏳</span><span style="flex: 1;">Saving Window...</span>`;
-    chrome.runtime.sendMessage({ action: 'SAVE_WINDOW' }, (res) => {
-      if (chrome.runtime.lastError || !res?.success) {
-        itemSaveWindow.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error</span>`;
-        showToastMsg('Error saving window tabs', true);
-      } else {
-        itemSaveWindow.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Window Saved!</span>`;
-        showToastMsg('All window tabs saved to Vault!');
-      }
-      setTimeout(() => {
-        itemSaveWindow.innerHTML = `<span>🗂️</span><span style="flex: 1;">Save Window Tabs</span>`;
-      }, 2500);
-    });
-  }, true);
-
-  const itemOpenMiniDashboard = createMenuItem('✨', 'Open Mini-Dashboard', 'purple', () => {
-    toggleMiniDashboardWindow();
-  });
-
-  const itemOpenVault = createMenuItem('💎', 'Open Full Vault', 'default', async () => {
-    let origin = 'https://prompt-memory-prompt-memory-1.vercel.app';
-    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-      const storage = (await chrome.storage.local.get(['pm_web_origin'])) as Record<string, any>;
-      if (storage?.pm_web_origin) origin = storage.pm_web_origin;
-    }
-    window.open(`${origin}/clips`, '_blank');
-  });
-
-  const headerEl = document.createElement('div');
-  headerEl.style.cssText = 'padding: 6px 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px; display:flex; align-items:center; justify-content:space-between;';
-  headerEl.innerHTML = `<span style="font-size: 11px; font-weight: 700; color: #a855f7; letter-spacing: 0.5px; text-transform: uppercase;">Quick Actions</span><span style="font-size: 10px; color: #71717a;">PromptMemory</span>`;
-
-  const subHeaderTabs = document.createElement('div');
-  subHeaderTabs.style.cssText = 'padding: 4px 12px 2px; font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.6px; text-transform: uppercase;';
-  subHeaderTabs.innerText = 'Tabs & Window';
-
-  const subHeaderClips = document.createElement('div');
-  subHeaderClips.style.cssText = 'padding: 4px 12px 2px; font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.6px; text-transform: uppercase;';
-  subHeaderClips.innerText = 'Clipping Tools';
-
-  popover.appendChild(headerEl);
-  popover.appendChild(itemOpenMiniDashboard);
-  popover.appendChild(itemOpenVault);
-  popover.appendChild(createSeparator());
-  popover.appendChild(subHeaderTabs);
-  popover.appendChild(itemSaveTab);
-  popover.appendChild(itemSaveWindow);
-  popover.appendChild(createSeparator());
-  popover.appendChild(subHeaderClips);
-  popover.appendChild(itemSaveMedia);
-  popover.appendChild(itemSavePageText);
-  popover.appendChild(itemSaveSelection);
-  container.appendChild(popover);
-
-  let isPopoverOpen = false;
-  let popoverTimer: any = null;
-
-  const closePopover = () => {
-    isPopoverOpen = false;
-    popover.style.opacity = '0';
-    popover.style.pointerEvents = 'none';
-    popover.style.transform = 'translateY(10px) scale(0.95)';
-  };
-
-  const openPopover = () => {
-    if (popoverTimer) {
-      clearTimeout(popoverTimer);
-      popoverTimer = null;
-    }
-    isPopoverOpen = true;
-    popover.style.opacity = '1';
-    popover.style.pointerEvents = 'auto';
-    popover.style.transform = 'translateY(0) scale(1)';
-  };
-
-  document.addEventListener('mousedown', (e) => {
-    if (isPopoverOpen && !container.contains(e.target as Node)) {
-      closePopover();
-    }
-  });
-
   container.onmouseenter = () => {
     if (!isDragging) {
       container.style.transform = 'scale(1.1) rotate(5deg)';
-      container.style.boxShadow = '0 6px 16px rgba(99,102,241,0.4)';
-      openPopover();
+      container.style.boxShadow = '0 6px 16px rgba(168,85,247,0.5)';
     }
   };
   
@@ -522,33 +168,12 @@ function injectFloatingLogo() {
     if (!isDragging) {
       container.style.transform = 'scale(1) rotate(0deg)';
       container.style.boxShadow = '0 4px 12px rgba(99,102,241,0.3)';
-      popoverTimer = setTimeout(() => {
-        if (isPopoverOpen) closePopover();
-      }, 300);
     }
-  };
-
-  popover.onmouseenter = () => {
-    if (popoverTimer) {
-      clearTimeout(popoverTimer);
-      popoverTimer = null;
-    }
-    openPopover();
-  };
-
-  popover.onmouseleave = () => {
-    popoverTimer = setTimeout(() => {
-      if (isPopoverOpen) closePopover();
-    }, 250);
   };
 
   container.oncontextmenu = (e) => {
     e.preventDefault();
-    if (isPopoverOpen) {
-      closePopover();
-    } else {
-      openPopover();
-    }
+    toggleMiniDashboardWindow();
   };
 
   let isDragging = false;
@@ -569,7 +194,6 @@ function injectFloatingLogo() {
 
     container.style.cursor = 'grabbing';
     container.style.transition = 'none'; 
-    if (isPopoverOpen) closePopover();
     
     e.preventDefault(); 
   });
@@ -593,8 +217,8 @@ function injectFloatingLogo() {
       // Dynamically anchor and move the mini-dashboard window if open
       const miniWin = document.getElementById('pm-mini-dashboard-window');
       if (miniWin) {
-        const winBottom = Math.min(window.innerHeight - 410, Math.max(10, newBottom + 58));
-        const winRight = Math.min(window.innerWidth - 330, Math.max(10, newRight));
+        const winBottom = Math.min(window.innerHeight - 440, Math.max(10, newBottom + 58));
+        const winRight = Math.min(window.innerWidth - 365, Math.max(10, newRight));
         miniWin.style.setProperty('bottom', `${winBottom}px`, 'important');
         miniWin.style.setProperty('right', `${winRight}px`, 'important');
       }

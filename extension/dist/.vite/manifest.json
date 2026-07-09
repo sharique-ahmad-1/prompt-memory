@@ -6,12 +6,12 @@
     "isEntry": true
   },
   "popup.html": {
-    "file": "assets/popup.html-BiVOuzeq.js",
+    "file": "assets/popup.html-BpdDDAFN.js",
     "name": "popup.html",
     "src": "popup.html",
     "isEntry": true,
     "css": [
-      "assets/popup-i6DZW2KE.css"
+      "assets/popup-BluUn_r6.css"
     ]
   },
   "src/background/index.ts": {
@@ -33,7 +33,7 @@
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-DUZP9bzg.js",
+    "file": "assets/floatingLogo.ts-eoHpmzTb.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true
