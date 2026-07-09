@@ -320,21 +320,20 @@ function injectFloatingLogo() {
     });
   }, true);
 
-  const itemOpenSidePanel = createMenuItem('🖥️', 'Open Side Panel Helper', 'default', () => {
-    chrome.runtime.sendMessage({ action: 'OPEN_SIDE_PANEL' });
-  });
-
   const itemOpenVault = createMenuItem('💎', 'Open Vault', 'default', () => {
     window.open('https://prompt-memory.vercel.app/clips', '_blank');
   });
 
+  const headerEl = document.createElement('div');
+  headerEl.style.cssText = 'padding: 6px 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px; display:flex; align-items:center; justify-content:space-between;';
+  headerEl.innerHTML = `<span style="font-size: 11px; font-weight: 700; color: #a855f7; letter-spacing: 0.5px; text-transform: uppercase;">Quick Actions</span><span style="font-size: 10px; color: #71717a;">PromptMemory</span>`;
+
+  popover.appendChild(headerEl);
   popover.appendChild(itemSaveMedia);
-  popover.appendChild(createSeparator());
-  popover.appendChild(itemSaveSelection);
   popover.appendChild(createSeparator());
   popover.appendChild(itemSavePageText);
   popover.appendChild(createSeparator());
-  popover.appendChild(itemOpenSidePanel);
+  popover.appendChild(itemSaveSelection);
   popover.appendChild(createSeparator());
   popover.appendChild(itemOpenVault);
   container.appendChild(popover);

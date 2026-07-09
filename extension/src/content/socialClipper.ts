@@ -693,7 +693,10 @@ function injectClipperButtons() {
                 chrome.runtime.sendMessage({
                   action: 'SAVE_PROMPT',
                   payload: { platform: platform, role: 'user', content: text, image_url: imageUrl, embed_url: embedUrl, source_link: sourceLink, tags: tags, category: 'Social Clip' }
-                }, (res) => resolve(res || { success: false }));
+                }, (res) => {
+                  if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
+                  else resolve(res || { success: false });
+                });
               });
               if (infoToast && infoToast.parentNode) infoToast.remove();
               if (response && response.success) {
@@ -797,7 +800,10 @@ function injectClipperButtons() {
                     tags: ['#YouTube', '#Short', '#Video', '#Vertical'],
                     category: 'Social Clip'
                   }
-                }, (res) => resolve(res || { success: false }));
+                }, (res) => {
+                  if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
+                  else resolve(res || { success: false });
+                });
               });
 
               if (infoToast && infoToast.parentNode) infoToast.remove();
@@ -1039,7 +1045,10 @@ const ytMenuObserver = new MutationObserver(() => {
               tags: ['#YouTube', '#Video', '#SavedFromHome'],
               category: 'Social Clip'
             }
-          }, (res) => resolve(res || { success: false }));
+          }, (res) => {
+                  if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
+                  else resolve(res || { success: false });
+                });
         });
 
         if (infoToast && infoToast.parentNode) infoToast.remove();

@@ -1,6 +1,6 @@
 {
   "../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-CI5SIBkn.js",
+    "file": "assets/crx-manifest.js-DGZ1b494.js",
     "name": "crx-manifest.js",
     "src": "../../../@crx/manifest",
     "isEntry": true
@@ -21,25 +21,25 @@
     "isEntry": true
   },
   "src/content/authBridge.ts": {
-    "file": "assets/authBridge.ts-C8SeKGJ3.js",
+    "file": "assets/authBridge.ts-B0uLgZxG.js",
     "name": "authBridge.ts",
     "src": "src/content/authBridge.ts",
     "isEntry": true
   },
   "src/content/chatgpt.ts": {
-    "file": "assets/chatgpt.ts-DYY0YQ4W.js",
+    "file": "assets/chatgpt.ts-BL2P_YUv.js",
     "name": "chatgpt.ts",
     "src": "src/content/chatgpt.ts",
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-BN8d3UFH.js",
+    "file": "assets/floatingLogo.ts-vdBAg00a.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true
   },
   "src/content/socialClipper.ts": {
-    "file": "assets/socialClipper.ts-R5CidRPD.js",
+    "file": "assets/socialClipper.ts-BbN4N1Rq.js",
     "name": "socialClipper.ts",
     "src": "src/content/socialClipper.ts",
     "isEntry": true

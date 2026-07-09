@@ -92,8 +92,8 @@ export default function ClipsPage() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
-      await supabase.from('workspace_items').delete().eq('id', deleteId).catch(() => {})
-      await supabase.from('prompts').delete().eq('id', deleteId).catch(() => {})
+      await supabase.from('workspace_items').delete().eq('id', deleteId).then(() => {}, () => {})
+      await supabase.from('prompts').delete().eq('id', deleteId).then(() => {}, () => {})
       setClips(clips.filter((c) => c.id !== deleteId))
       setDeleteId(null)
     } catch (err) {
@@ -103,8 +103,8 @@ export default function ClipsPage() {
 
   const deleteClipById = async (id: string) => {
     try {
-      await supabase.from('workspace_items').delete().eq('id', id).catch(() => {})
-      await supabase.from('prompts').delete().eq('id', id).catch(() => {})
+      await supabase.from('workspace_items').delete().eq('id', id).then(() => {}, () => {})
+      await supabase.from('prompts').delete().eq('id', id).then(() => {}, () => {})
       setClips((prev) => prev.filter((c) => c.id !== id))
     } catch (err) {
       console.error('Failed to delete media clip:', err)

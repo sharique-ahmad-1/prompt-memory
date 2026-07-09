@@ -73,6 +73,8 @@ function injectSaveButtons() {
           role: role,
           content: textContent.trim()
         }
+      }, () => {
+        void chrome.runtime.lastError;
       });
 
       // Provide visual feedback

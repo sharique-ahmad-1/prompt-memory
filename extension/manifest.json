@@ -28,8 +28,9 @@
     },
     {
       "matches": [
-        "http://*/*",
-        "https://*/*"
+        "https://prompt-memory.vercel.app/*",
+        "https://prompt-memory-*.vercel.app/*",
+        "http://localhost:3000/*"
       ],
       "js": ["src/content/authBridge.ts"],
       "run_at": "document_end"

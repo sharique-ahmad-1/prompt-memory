@@ -19,6 +19,8 @@ function syncSession() {
         chrome.runtime.sendMessage({
           action: 'SYNC_SESSION',
           payload: session
+        }, () => {
+          void chrome.runtime.lastError;
         });
       }
     }

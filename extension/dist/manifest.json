@@ -29,7 +29,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/chatgpt.ts-DYY0YQ4W.js"
+        "assets/chatgpt.ts-BL2P_YUv.js"
       ],
       "matches": [
         "https://chatgpt.com/*"
@@ -38,17 +38,18 @@
     },
     {
       "js": [
-        "assets/authBridge.ts-C8SeKGJ3.js"
+        "assets/authBridge.ts-B0uLgZxG.js"
       ],
       "matches": [
-        "http://*/*",
-        "https://*/*"
+        "https://prompt-memory.vercel.app/*",
+        "https://prompt-memory-*.vercel.app/*",
+        "http://localhost:3000/*"
       ],
       "run_at": "document_end"
     },
     {
       "js": [
-        "assets/floatingLogo.ts-BN8d3UFH.js"
+        "assets/floatingLogo.ts-vdBAg00a.js"
       ],
       "matches": [
         "<all_urls>"
@@ -57,7 +58,7 @@
     },
     {
       "js": [
-        "assets/socialClipper.ts-R5CidRPD.js"
+        "assets/socialClipper.ts-BbN4N1Rq.js"
       ],
       "matches": [
         "*://*.linkedin.com/*",
@@ -75,17 +76,18 @@
         "https://chatgpt.com/*"
       ],
       "resources": [
-        "assets/chatgpt.ts-DYY0YQ4W.js"
+        "assets/chatgpt.ts-BL2P_YUv.js"
       ],
       "use_dynamic_url": false
     },
     {
       "matches": [
-        "http://*/*",
-        "https://*/*"
+        "http://localhost:3000/*",
+        "https://prompt-memory-*.vercel.app/*",
+        "https://prompt-memory.vercel.app/*"
       ],
       "resources": [
-        "assets/authBridge.ts-C8SeKGJ3.js"
+        "assets/authBridge.ts-B0uLgZxG.js"
       ],
       "use_dynamic_url": false
     },
@@ -94,7 +96,7 @@
         "<all_urls>"
       ],
       "resources": [
-        "assets/floatingLogo.ts-BN8d3UFH.js"
+        "assets/floatingLogo.ts-vdBAg00a.js"
       ],
       "use_dynamic_url": false
     },
@@ -107,7 +109,7 @@
         "*://*.youtube.com/*"
       ],
       "resources": [
-        "assets/socialClipper.ts-R5CidRPD.js"
+        "assets/socialClipper.ts-BbN4N1Rq.js"
       ],
       "use_dynamic_url": false
     }
