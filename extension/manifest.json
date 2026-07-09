@@ -53,5 +53,11 @@
       "js": ["src/content/socialClipper.ts"],
       "run_at": "document_end"
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html", "assets/*", "icon128.png"],
+      "matches": ["<all_urls>"]
+    }
   ]
 }

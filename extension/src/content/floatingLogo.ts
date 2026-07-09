@@ -320,7 +320,81 @@ function injectFloatingLogo() {
     });
   }, true);
 
-  const itemOpenVault = createMenuItem('💎', 'Open Vault', 'default', () => {
+  function toggleMiniDashboardWindow() {
+    const existing = document.getElementById('pm-mini-dashboard-window');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+
+    const win = document.createElement('div');
+    win.id = 'pm-mini-dashboard-window';
+    win.style.cssText = `
+      position: fixed;
+      bottom: 82px;
+      right: 24px;
+      width: 440px;
+      height: 600px;
+      background: #0b0f19;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.18);
+      z-index: 2147483647;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    `;
+
+    const closeHeader = document.createElement('div');
+    closeHeader.style.cssText = `
+      padding: 10px 16px;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: -apple-system, sans-serif;
+    `;
+    closeHeader.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 16px;">✨</span>
+        <span style="background: linear-gradient(to right, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PromptMemory Mini-Dashboard</span>
+      </div>
+      <button id="pm-close-mini-win" style="background: rgba(255,255,255,0.1); border: none; color: #94a3b8; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s;">✕</button>
+    `;
+    win.appendChild(closeHeader);
+
+    const iframe = document.createElement('iframe');
+    iframe.src = chrome.runtime.getURL('popup.html');
+    iframe.style.cssText = 'width: 100%; flex: 1; border: none; background: #0b0f19;';
+    win.appendChild(iframe);
+
+    document.body.appendChild(win);
+
+    const closeBtn = document.getElementById('pm-close-mini-win');
+    if (closeBtn) {
+      closeBtn.onclick = () => win.remove();
+      closeBtn.onmouseenter = () => { closeBtn.style.background = 'rgba(239, 68, 68, 0.3)'; closeBtn.style.color = '#fff'; };
+      closeBtn.onmouseleave = () => { closeBtn.style.background = 'rgba(255,255,255,0.1)'; closeBtn.style.color = '#94a3b8'; };
+    }
+
+    const clickOutside = (e: MouseEvent) => {
+      if (!win.contains(e.target as Node) && !container.contains(e.target as Node)) {
+        win.remove();
+        document.removeEventListener('mousedown', clickOutside);
+      }
+    };
+    setTimeout(() => document.addEventListener('mousedown', clickOutside), 100);
+  }
+
+  const itemOpenMiniDashboard = createMenuItem('✨', 'Open Mini-Dashboard', 'purple', () => {
+    toggleMiniDashboardWindow();
+  });
+
+  const itemOpenVault = createMenuItem('💎', 'Open Full Vault', 'default', () => {
     window.open('https://prompt-memory-prompt-memory-1.vercel.app/clips', '_blank');
   });
 
@@ -329,6 +403,8 @@ function injectFloatingLogo() {
   headerEl.innerHTML = `<span style="font-size: 11px; font-weight: 700; color: #a855f7; letter-spacing: 0.5px; text-transform: uppercase;">Quick Actions</span><span style="font-size: 10px; color: #71717a;">PromptMemory</span>`;
 
   popover.appendChild(headerEl);
+  popover.appendChild(itemOpenMiniDashboard);
+  popover.appendChild(createSeparator());
   popover.appendChild(itemSaveMedia);
   popover.appendChild(createSeparator());
   popover.appendChild(itemSavePageText);
@@ -374,12 +450,22 @@ function injectFloatingLogo() {
     }
   };
 
+  container.oncontextmenu = (e) => {
+    e.preventDefault();
+    if (isPopoverOpen) {
+      closePopover();
+    } else {
+      openPopover();
+    }
+  };
+
   let isDragging = false;
   let hasDragged = false;
   let startX = 0, startY = 0;
   let initialRight = 24, initialBottom = 24;
 
   container.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return; // Only left click drags
     isDragging = true;
     hasDragged = false;
     startX = e.clientX;
@@ -414,8 +500,8 @@ function injectFloatingLogo() {
     }
   });
 
-  document.addEventListener('mouseup', () => {
-    if (isDragging) {
+  document.addEventListener('mouseup', (e) => {
+    if (isDragging && e.button === 0) {
       isDragging = false;
       container.style.cursor = 'grab';
       container.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease'; 
@@ -426,11 +512,7 @@ function injectFloatingLogo() {
           container.style.transform = 'scale(1.1)';
         }, 100);
         
-        if (isPopoverOpen) {
-          closePopover();
-        } else {
-          openPopover();
-        }
+        toggleMiniDashboardWindow();
       }
     }
   });

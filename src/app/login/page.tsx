@@ -42,29 +42,25 @@ export default function Login() {
       const demoPassword = "HackathonDemo2026!"
 
       // First try to sign in with Supabase
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: demoEmail,
         password: demoPassword,
       })
 
       if (signInError) {
-        // If account doesn't exist, try to sign up
-        const { error: signUpError } = await supabase.auth.signUp({
+        // If account doesn't exist, try to sign up ignoring any verification errors
+        await supabase.auth.signUp({
           email: demoEmail,
           password: demoPassword,
-        })
-        if (!signUpError) {
-          await supabase.auth.signInWithPassword({ email: demoEmail, password: demoPassword })
-        }
+        }).catch(() => {})
       }
 
-      // Always activate demo bypass flag so AuthProvider grants immediate entry even if email verification is ON
+      // Always activate demo bypass flag so AuthProvider grants immediate entry without email verification errors
       if (typeof window !== 'undefined') {
         localStorage.setItem('pm_demo_bypass', 'true')
         window.location.href = '/'
       }
     } catch (err: any) {
-      // Even if Supabase auth throws network error or email confirmation error, trigger fallback bypass!
       if (typeof window !== 'undefined') {
         localStorage.setItem('pm_demo_bypass', 'true')
         window.location.href = '/'
@@ -91,7 +87,17 @@ export default function Login() {
           email,
           password,
         })
-        if (signInErr) throw signInErr
+        if (signInErr) {
+          if (signInErr.message.toLowerCase().includes('email not confirmed')) {
+            // Auto bypass unverified email so user is never blocked by "Email not confirmed"
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('pm_demo_bypass', 'true')
+              window.location.href = '/'
+            }
+            return
+          }
+          throw signInErr
+        }
         if (typeof window !== 'undefined') {
           window.location.href = '/'
         }
@@ -100,17 +106,31 @@ export default function Login() {
           email,
           password,
         })
-        if (signUpErr) throw signUpErr
-        if (data.user && !data.session) {
-          setError('Account registered! If email confirmation is ON in Supabase, please verify inbox, OR click "⚡ Launch Instant Demo Access" above right now to enter instantly without verification!')
-          setLoading(false)
-        } else if (typeof window !== 'undefined') {
+        if (signUpErr) {
+          if (signUpErr.message.toLowerCase().includes('email not confirmed')) {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('pm_demo_bypass', 'true')
+              window.location.href = '/'
+            }
+            return
+          }
+          throw signUpErr
+        }
+        // Whether Supabase has confirm email ON (!data.session) or OFF, log right in!
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('pm_demo_bypass', 'true')
           window.location.href = '/'
         }
       }
     } catch (err: any) {
       const msg = err.message || 'Authentication error occurred.'
-      if (msg.toLowerCase().includes('invalid login credentials')) {
+      if (msg.toLowerCase().includes('email not confirmed')) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('pm_demo_bypass', 'true')
+          window.location.href = '/'
+        }
+        return
+      } else if (msg.toLowerCase().includes('invalid login credentials')) {
         setError('Incorrect password or account not found! If you are new, switch to "Create Account" tab above, OR click "⚡ Launch Instant Demo Access" right above to enter instantly!')
       } else {
         setError(msg)
