@@ -24,14 +24,23 @@ export default function Login() {
 
   useEffect(() => {
     const hash = window.location.hash
-    if (hash && hash.includes('error=')) {
-      const params = new URLSearchParams(hash.replace('#', '?'))
-      const errorDesc = params.get('error_description')
+    const search = window.location.search
+    if ((hash && hash.includes('error=')) || (search && search.includes('error='))) {
+      const params = new URLSearchParams((hash || search).replace('#', '?'))
+      const errorDesc = params.get('error_description') || params.get('msg') || params.get('error')
       if (errorDesc) {
-        setError(errorDesc.replace(/\+/g, ' '))
+        const decoded = errorDesc.replace(/\+/g, ' ')
+        if (decoded.toLowerCase().includes('unsupported provider') || decoded.toLowerCase().includes('provider is not enabled') || decoded.includes('400')) {
+          setError('Google OAuth is currently disabled in cloud settings (400 validation_failed). Please sign in or create an account with Email & Password above right now!')
+        } else {
+          setError(decoded)
+        }
       } else {
-        setError('Authentication failed. Please try again.')
+        setError('Authentication failed. Please try again or use Email sign-in.')
       }
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname)
+      } catch {}
     }
   }, [])
 
@@ -132,16 +141,41 @@ export default function Login() {
         ? 'http://localhost:3000/' 
         : 'https://prompt-memory.vercel.app/'
 
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
+          skipBrowserRedirect: true,
           redirectTo: targetRedirect,
         }
       })
       if (error) throw error
+      if (!data?.url) throw new Error('Could not generate Google Auth URL')
+
+      try {
+        const checkRes = await fetch(data.url, { method: 'GET', redirect: 'manual' })
+        if (checkRes.status === 400) {
+          throw new Error('Unsupported provider: provider is not enabled')
+        }
+        if (checkRes.status === 200) {
+          try {
+            const txt = await checkRes.text()
+            if (txt.includes('validation_failed') || txt.includes('Unsupported provider') || txt.includes('"code":400')) {
+              throw new Error('Unsupported provider: provider is not enabled')
+            }
+          } catch (e: any) {
+            if (e.message?.includes('Unsupported provider')) throw e
+          }
+        }
+      } catch (checkErr: any) {
+        if (checkErr.message && (checkErr.message.includes('Unsupported provider') || checkErr.message.includes('validation_failed'))) {
+          throw checkErr
+        }
+      }
+
+      window.location.href = data.url
     } catch (err: any) {
       const msg = err.message || 'An error occurred during Google login.'
-      if (msg.toLowerCase().includes('unsupported provider') || msg.toLowerCase().includes('provider is not enabled') || msg.includes('400')) {
+      if (msg.toLowerCase().includes('unsupported provider') || msg.toLowerCase().includes('provider is not enabled') || msg.includes('400') || msg.toLowerCase().includes('validation_failed')) {
         setError('Google OAuth (400 Unsupported provider) is currently disabled in your Supabase Dashboard settings. Please sign in instantly with Email & Password above, or enable Google Auth under Supabase -> Authentication -> Providers.')
       } else {
         setError(msg)
@@ -251,34 +285,37 @@ export default function Login() {
           </div>
 
           {error && (
-            <Alert variant="destructive" className="bg-destructive/15 text-destructive border border-destructive/30 rounded-xl py-3">
-              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-              <AlertDescription className="ml-2 text-xs font-medium leading-relaxed">{error}</AlertDescription>
-            </Alert>
+            <div className="bg-zinc-950 border-2 border-red-500/80 rounded-xl p-4 text-white shadow-2xl space-y-2">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5 animate-pulse" />
+                <div className="flex-1">
+                  <p className="font-extrabold text-red-400 text-xs uppercase tracking-wider">Notice / Authentication Error</p>
+                  <p className="text-xs font-semibold text-white mt-1 leading-relaxed">{error}</p>
+                </div>
+              </div>
+            </div>
           )}
 
           {verificationNotice && (
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-200 text-xs space-y-3">
-              <div className="flex items-start gap-2.5">
-                <Mail className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold text-amber-300">Email Verification Notice</p>
-                  <p className="mt-1 leading-relaxed text-amber-200/90">{verificationNotice}</p>
+            <div className="bg-zinc-950 border-2 border-amber-500/80 rounded-xl p-4 text-white shadow-2xl space-y-3.5">
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-amber-400 shrink-0 mt-0.5 animate-bounce" />
+                <div className="flex-1">
+                  <p className="font-extrabold text-amber-400 text-xs uppercase tracking-wider">Email Verification Notice</p>
+                  <p className="text-xs font-semibold text-white mt-1 leading-relaxed">{verificationNotice}</p>
                 </div>
               </div>
-              <div className="pt-2 flex items-center justify-between border-t border-amber-500/20">
+              <div className="pt-2 flex items-center justify-between border-t border-zinc-800">
                 <Button
                   type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={handleResendVerification}
                   disabled={resendLoading || resendSuccess}
-                  className="h-8 text-[11px] bg-amber-500/20 border-amber-500/40 text-amber-200 hover:bg-amber-500/30 hover:text-white font-bold px-3"
+                  className="h-9 text-xs bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold px-4 rounded-lg shadow-lg transition-all"
                 >
-                  {resendLoading ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Mail className="h-3 w-3 mr-1.5" />}
-                  {resendSuccess ? 'Verification Resent!' : 'Resend Confirmation Email'}
+                  {resendLoading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Mail className="h-3.5 w-3.5 mr-1.5" />}
+                  {resendSuccess ? 'Verification Resent to Inbox!' : 'Resend Confirmation Email'}
                 </Button>
-                {resendSuccess && <span className="text-[10px] text-emerald-400 font-bold">Check your inbox!</span>}
+                {resendSuccess && <span className="text-xs text-emerald-400 font-extrabold">Check your inbox now!</span>}
               </div>
             </div>
           )}

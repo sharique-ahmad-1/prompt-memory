@@ -39,21 +39,41 @@ export const Popup: React.FC = () => {
   }, []);
 
   const fetchDashboardData = () => {
-    setLoading(true);
     setError(null);
 
+    // Instant local cache restoration so user never sees blank screen or spinners if cached
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['pm_cached_dashboard_items', 'pm_cached_workspaces'], (res) => {
+        if (res?.pm_cached_dashboard_items && Array.isArray(res.pm_cached_dashboard_items)) {
+          setItems(res.pm_cached_dashboard_items);
+        }
+        if (res?.pm_cached_workspaces && Array.isArray(res.pm_cached_workspaces)) {
+          setWorkspaces(res.pm_cached_workspaces);
+        }
+      });
+    }
+
+    setLoading(true);
     let finished = false;
     const timeoutId = setTimeout(() => {
       if (!finished) {
         finished = true;
         setLoading(false);
-        setError('Cloud sync timed out (3s). Check internet connection or Supabase login.');
+        setItems((currentItems) => {
+          if (currentItems.length === 0) {
+            setError('Offline Mode: Cloud sync delayed. Check internet connection or log into PromptMemory.');
+          }
+          return currentItems;
+        });
       }
-    }, 3000);
+    }, 3800);
 
     chrome.runtime.sendMessage({ action: 'fetchWorkspaces' }, (response) => {
       if (response?.success && response.data) {
         setWorkspaces(response.data);
+        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+          chrome.storage.local.set({ pm_cached_workspaces: response.data }).catch(() => {});
+        }
       }
     });
 
@@ -64,13 +84,26 @@ export const Popup: React.FC = () => {
       setLoading(false);
 
       if (chrome.runtime.lastError) {
-        setError('Service Error: ' + chrome.runtime.lastError.message);
+        setItems((currentItems) => {
+          if (currentItems.length === 0) {
+            setError('Service Notice: ' + chrome.runtime.lastError?.message);
+          }
+          return currentItems;
+        });
         return;
       }
       if (response && response.success && response.data) {
         setItems(response.data);
+        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+          chrome.storage.local.set({ pm_cached_dashboard_items: response.data }).catch(() => {});
+        }
       } else {
-        setError(response?.error || 'Could not connect to Supabase cloud.');
+        setItems((currentItems) => {
+          if (currentItems.length === 0) {
+            setError(response?.error || 'Could not connect to Supabase cloud.');
+          }
+          return currentItems;
+        });
       }
     });
   };
@@ -105,7 +138,7 @@ export const Popup: React.FC = () => {
   });
 
   return (
-    <div className="w-full h-full min-h-[420px] max-h-screen bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden">
+    <div className="w-full h-full bg-gradient-to-br from-[#0b0f19] via-[#111827] to-[#0f172a] text-slate-100 flex flex-col font-sans selection:bg-pink-500 selection:text-white border border-slate-800 shadow-2xl overflow-hidden flex-1 m-0 p-0">
       {/* Top Glass Header */}
       <div className="px-4 py-3 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 flex items-center justify-between sticky top-0 z-20 flex-shrink-0">
         <div className="flex items-center gap-2.5">

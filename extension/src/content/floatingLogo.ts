@@ -331,8 +331,8 @@ function injectFloatingLogo() {
     const mRight = container && container.style.right ? parseInt(container.style.right, 10) : 24;
     const mBottom = container && container.style.bottom ? parseInt(container.style.bottom, 10) : 24;
 
-    const winBottom = Math.min(window.innerHeight - 510, Math.max(10, mBottom + 58));
-    const winRight = Math.min(window.innerWidth - 390, Math.max(10, mRight));
+    const winBottom = Math.min(window.innerHeight - 490, Math.max(10, mBottom + 58));
+    const winRight = Math.min(window.innerWidth - 370, Math.max(10, mRight));
 
     const win = document.createElement('div');
     win.id = 'pm-mini-dashboard-window';
@@ -340,10 +340,10 @@ function injectFloatingLogo() {
       position: fixed;
       bottom: ${winBottom}px;
       right: ${winRight}px;
-      width: 380px;
+      width: 360px;
       max-width: 92vw;
-      height: 500px;
-      max-height: 80vh;
+      height: 480px;
+      max-height: 480px;
       background: #0b0f19;
       border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.18);
@@ -351,6 +351,8 @@ function injectFloatingLogo() {
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      margin: 0;
+      padding: 0;
       transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     `;
 
@@ -379,7 +381,7 @@ function injectFloatingLogo() {
 
     const iframe = document.createElement('iframe');
     iframe.src = chrome.runtime.getURL('popup.html');
-    iframe.style.cssText = 'width: 100%; flex: 1; border: none; background: #0b0f19; overflow: hidden;';
+    iframe.style.cssText = 'width: 100%; height: 100%; flex: 1; border: none; margin: 0; padding: 0; background: #0b0f19; overflow: hidden; display: block;';
     win.appendChild(iframe);
 
     document.body.appendChild(win);
@@ -400,6 +402,48 @@ function injectFloatingLogo() {
     setTimeout(() => document.addEventListener('mousedown', clickOutside), 100);
   }
 
+  const itemSaveTab = createMenuItem('🔖', 'Save Current Tab', 'indigo', () => {
+    itemSaveTab.innerHTML = `<span>⏳</span><span style="flex: 1;">Saving Tab...</span>`;
+    chrome.runtime.sendMessage({
+      action: 'SAVE_PROMPT',
+      payload: {
+        title: document.title || 'Saved Tab',
+        content: `Bookmark URL: ${window.location.href}\nDescription: ${document.querySelector('meta[name="description"], meta[property="og:description"]')?.getAttribute('content') || 'No description available.'}`,
+        source_link: window.location.href,
+        category: 'Bookmark',
+        platform: window.location.hostname,
+        tags: ['#SavedTab', '#Bookmark']
+      }
+    }, (res) => {
+      if (chrome.runtime.lastError || !res?.success) {
+        itemSaveTab.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error</span>`;
+        showToastMsg('Error saving tab to Vault', true);
+      } else {
+        itemSaveTab.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Tab Saved!</span>`;
+        showToastMsg('Current tab saved to PromptMemory Vault!');
+      }
+      setTimeout(() => {
+        itemSaveTab.innerHTML = `<span>🔖</span><span style="flex: 1;">Save Current Tab</span>`;
+      }, 2500);
+    });
+  }, true);
+
+  const itemSaveWindow = createMenuItem('🗂️', 'Save Window Tabs', 'purple', () => {
+    itemSaveWindow.innerHTML = `<span>⏳</span><span style="flex: 1;">Saving Window...</span>`;
+    chrome.runtime.sendMessage({ action: 'SAVE_WINDOW' }, (res) => {
+      if (chrome.runtime.lastError || !res?.success) {
+        itemSaveWindow.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error</span>`;
+        showToastMsg('Error saving window tabs', true);
+      } else {
+        itemSaveWindow.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Window Saved!</span>`;
+        showToastMsg('All window tabs saved to Vault!');
+      }
+      setTimeout(() => {
+        itemSaveWindow.innerHTML = `<span>🗂️</span><span style="flex: 1;">Save Window Tabs</span>`;
+      }, 2500);
+    });
+  }, true);
+
   const itemOpenMiniDashboard = createMenuItem('✨', 'Open Mini-Dashboard', 'purple', () => {
     toggleMiniDashboardWindow();
   });
@@ -412,16 +456,26 @@ function injectFloatingLogo() {
   headerEl.style.cssText = 'padding: 6px 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px; display:flex; align-items:center; justify-content:space-between;';
   headerEl.innerHTML = `<span style="font-size: 11px; font-weight: 700; color: #a855f7; letter-spacing: 0.5px; text-transform: uppercase;">Quick Actions</span><span style="font-size: 10px; color: #71717a;">PromptMemory</span>`;
 
+  const subHeaderTabs = document.createElement('div');
+  subHeaderTabs.style.cssText = 'padding: 4px 12px 2px; font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.6px; text-transform: uppercase;';
+  subHeaderTabs.innerText = 'Tabs & Window';
+
+  const subHeaderClips = document.createElement('div');
+  subHeaderClips.style.cssText = 'padding: 4px 12px 2px; font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.6px; text-transform: uppercase;';
+  subHeaderClips.innerText = 'Clipping Tools';
+
   popover.appendChild(headerEl);
   popover.appendChild(itemOpenMiniDashboard);
-  popover.appendChild(createSeparator());
-  popover.appendChild(itemSaveMedia);
-  popover.appendChild(createSeparator());
-  popover.appendChild(itemSavePageText);
-  popover.appendChild(createSeparator());
-  popover.appendChild(itemSaveSelection);
-  popover.appendChild(createSeparator());
   popover.appendChild(itemOpenVault);
+  popover.appendChild(createSeparator());
+  popover.appendChild(subHeaderTabs);
+  popover.appendChild(itemSaveTab);
+  popover.appendChild(itemSaveWindow);
+  popover.appendChild(createSeparator());
+  popover.appendChild(subHeaderClips);
+  popover.appendChild(itemSaveMedia);
+  popover.appendChild(itemSavePageText);
+  popover.appendChild(itemSaveSelection);
   container.appendChild(popover);
 
   let isPopoverOpen = false;
@@ -511,8 +565,8 @@ function injectFloatingLogo() {
       // Dynamically anchor and move the mini-dashboard window if open
       const miniWin = document.getElementById('pm-mini-dashboard-window');
       if (miniWin) {
-        const winBottom = Math.min(window.innerHeight - 510, Math.max(10, newBottom + 58));
-        const winRight = Math.min(window.innerWidth - 390, Math.max(10, newRight));
+        const winBottom = Math.min(window.innerHeight - 490, Math.max(10, newBottom + 58));
+        const winRight = Math.min(window.innerWidth - 370, Math.max(10, newRight));
         miniWin.style.bottom = `${winBottom}px`;
         miniWin.style.right = `${winRight}px`;
       }

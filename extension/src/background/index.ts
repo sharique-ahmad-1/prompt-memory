@@ -234,14 +234,66 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         await supabase.from('prompts').delete().eq('id', itemId).then(() => {}, () => {});
         await supabase.from('workspace_items').delete().eq('id', itemId).then(() => {}, () => {});
         sendResponse({ success: true });
+      } else if (request.action === 'SAVE_WINDOW') {
+        try {
+          const user = await getCurrentUser();
+          const userId = user && user.id ? user.id : 'offline';
+          const tabs = await new Promise<chrome.tabs.Tab[]>((resolve) => {
+            chrome.tabs.query({ currentWindow: true }, (t) => resolve(t || []));
+          });
+          const tabList = tabs.map(t => `- [${t.title || t.url}](${t.url})`).join('\n');
+          const insertPayload = {
+            user_id: userId,
+            title: `Browser Window Snapshot (${tabs.length} Tabs)`,
+            content: `All active tabs saved from browser session:\n\n${tabList}`,
+            category: 'Workspace Snapshot',
+            platform: 'Chrome Window',
+            tags: ['#SavedWindow', '#Tabs']
+          };
+          if (userId !== 'offline') {
+            supabase.from('prompts').insert([insertPayload]).then(() => {}, () => {});
+          }
+          const localItem = { ...insertPayload, id: 'win_' + Date.now(), created_at: new Date().toISOString() };
+          if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+            chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
+              const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
+              chrome.storage.local.set({ pm_cached_dashboard_items: [localItem, ...list] }).catch(() => {});
+            });
+          }
+          sendResponse({ success: true, data: localItem });
+        } catch (winErr: any) {
+          sendResponse({ success: false, error: winErr.message });
+        }
       } else if (request.action === 'SAVE_PROMPT' || request.action === 'clipCurrentPage' || request.action === 'SAVE_CONTEXT_PROMPT') {
-        // High-fidelity clipping from socialClipper.ts, floatingLogo.ts, or chatgpt.ts
         try {
           const { payload } = request;
-          const user = await getCurrentUser();
+          const user = (await Promise.race([
+            getCurrentUser(),
+            new Promise<any>((resolve) => setTimeout(() => resolve(null), 2200))
+          ])) as any;
           
           if (!user || !user.id) {
-            sendResponse({ success: false, error: 'User session not synced. Please log in at https://prompt-memory.vercel.app to authenticate your extension.' });
+            const localId = 'local_' + Date.now();
+            const localItem = {
+              id: localId,
+              user_id: 'offline',
+              title: payload.title || (payload.content ? payload.content.slice(0, 50) : 'Untitled Capture'),
+              content: payload.content || '',
+              image_url: payload.image_url || null,
+              embed_url: payload.embed_url || null,
+              source_link: payload.source_link || null,
+              platform: payload.platform || 'Social',
+              category: payload.category || (payload.embed_url || payload.image_url ? 'Social Clip' : 'Prompt'),
+              tags: payload.tags || ['#SocialClip'],
+              created_at: new Date().toISOString()
+            };
+            if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+              chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
+                const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
+                chrome.storage.local.set({ pm_cached_dashboard_items: [localItem, ...list] }).catch(() => {});
+              });
+            }
+            sendResponse({ success: true, data: localItem });
             return;
           }
 
@@ -257,15 +309,29 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             tags: payload.tags || ['#SocialClip']
           };
 
-          const { data, error } = await supabase.from('prompts').insert([insertPayload]).select().single();
+          const insertPromise = supabase.from('prompts').insert([insertPayload]).select().single();
+          const timeoutPromise = new Promise<any>((resolve) => setTimeout(() => resolve({ error: { message: 'CLOUD_TIMEOUT' } }), 2600));
+          const { data, error } = (await Promise.race([insertPromise, timeoutPromise])) as any;
+
           if (error) {
+            if (error.message === 'CLOUD_TIMEOUT') {
+              const localItem = { ...insertPayload, id: 'local_' + Date.now(), created_at: new Date().toISOString() };
+              if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+                chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
+                  const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
+                  chrome.storage.local.set({ pm_cached_dashboard_items: [localItem, ...list] }).catch(() => {});
+                });
+              }
+              sendResponse({ success: true, data: localItem });
+              return;
+            }
             console.error('[Antigravity Background] Supabase insert error:', error);
             sendResponse({ success: false, error: error.message || 'Database insertion failed.' });
             return;
           }
 
           if (insertPayload.category === 'Social Clip' || insertPayload.image_url || insertPayload.embed_url) {
-            await supabase.from('workspace_items').insert([{
+            supabase.from('workspace_items').insert([{
               user_id: user.id,
               title: insertPayload.title,
               content: insertPayload.content,
@@ -276,6 +342,13 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
               category: insertPayload.category,
               tags: insertPayload.tags
             }]).then(() => {}, () => {});
+          }
+
+          if (typeof chrome !== 'undefined' && chrome.storage?.local && data) {
+            chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
+              const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
+              chrome.storage.local.set({ pm_cached_dashboard_items: [data, ...list] }).catch(() => {});
+            });
           }
 
           sendResponse({ success: true, data });

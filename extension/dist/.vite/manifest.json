@@ -6,16 +6,16 @@
     "isEntry": true
   },
   "popup.html": {
-    "file": "assets/popup.html-c_UVDMJI.js",
+    "file": "assets/popup.html-DN-go5Dh.js",
     "name": "popup.html",
     "src": "popup.html",
     "isEntry": true,
     "css": [
-      "assets/popup-D_2eC4tF.css"
+      "assets/popup-BNwR8CHz.css"
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-CAn89MZs.js",
+    "file": "assets/index.ts-cDaomMtn.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true
@@ -33,13 +33,13 @@
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-D5PGoSrZ.js",
+    "file": "assets/floatingLogo.ts-CuhzeyWf.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true
   },
   "src/content/socialClipper.ts": {
-    "file": "assets/socialClipper.ts-BbN4N1Rq.js",
+    "file": "assets/socialClipper.ts-NbOPjkEr.js",
     "name": "socialClipper.ts",
     "src": "src/content/socialClipper.ts",
     "isEntry": true
