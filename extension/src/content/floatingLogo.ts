@@ -78,13 +78,13 @@ function injectFloatingLogo() {
     position: absolute;
     bottom: 60px;
     right: 0;
-    background: rgba(20, 20, 20, 0.8);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
-    padding: 8px;
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
     opacity: 0;
     pointer-events: none;
     transform: translateY(10px) scale(0.95);
@@ -92,8 +92,9 @@ function injectFloatingLogo() {
     transform-origin: bottom right;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     min-width: 220px;
+    z-index: 2147483647;
   `;
 
   const createMenuItem = (icon: string, text: string, theme: 'default' | 'purple' | 'indigo', onClick: () => void, keepOpen = false) => {
@@ -101,13 +102,13 @@ function injectFloatingLogo() {
     item.style.cssText = `
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-radius: 10px;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
       color: #e4e4e7;
       font-size: 13px;
-      font-family: system-ui, -apple-system, sans-serif;
-      font-weight: 500;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 600;
       cursor: pointer;
       background: transparent;
       border: 1px solid transparent;
@@ -117,19 +118,19 @@ function injectFloatingLogo() {
 
     item.onmouseenter = () => {
       if (theme === 'purple') {
-        item.style.background = 'rgba(168, 85, 247, 0.15)';
-        item.style.borderColor = 'rgba(168, 85, 247, 0.3)';
-        item.style.boxShadow = '0 0 16px rgba(168, 85, 247, 0.2)';
+        item.style.background = 'rgba(168, 85, 247, 0.18)';
+        item.style.borderColor = 'rgba(168, 85, 247, 0.35)';
+        item.style.boxShadow = '0 0 20px rgba(168, 85, 247, 0.25)';
         item.style.color = '#f3e8ff';
       } else if (theme === 'indigo') {
-        item.style.background = 'rgba(99, 102, 241, 0.15)';
-        item.style.borderColor = 'rgba(99, 102, 241, 0.3)';
-        item.style.boxShadow = '0 0 16px rgba(99, 102, 241, 0.2)';
+        item.style.background = 'rgba(99, 102, 241, 0.18)';
+        item.style.borderColor = 'rgba(99, 102, 241, 0.35)';
+        item.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.25)';
         item.style.color = '#e0e7ff';
       } else {
-        item.style.background = 'rgba(255, 255, 255, 0.08)';
-        item.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-        item.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+        item.style.background = 'rgba(255, 255, 255, 0.1)';
+        item.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+        item.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25)';
         item.style.color = '#ffffff';
       }
     };
@@ -165,45 +166,99 @@ function injectFloatingLogo() {
 
   const createSeparator = () => {
     const sep = document.createElement('div');
-    sep.style.cssText = 'height: 1px; background: rgba(255, 255, 255, 0.08); margin: 4px 0;';
+    sep.style.cssText = 'height: 1px; background: rgba(255, 255, 255, 0.08); margin: 2px 0;';
     return sep;
   };
 
-  const itemSaveMedia = createMenuItem('🎬', 'Save Media', 'purple', () => {
-    itemSaveMedia.innerHTML = `<span>⏳</span><span style="flex: 1;">Extracting Media...</span>`;
-    let embedUrl = window.location.href;
-    let imageUrl = null;
-    if (document.querySelector('video')) {
-      const vid = document.querySelector('video');
-      embedUrl = vid?.src || window.location.href;
-    } else if (document.querySelector('img[src*="instagram"], img[src*="ytimg"]')) {
-      const img = document.querySelector('img[src*="instagram"], img[src*="ytimg"]') as HTMLImageElement;
-      imageUrl = img?.src || null;
-    }
+  const showToastMsg = (msg: string, isErr = false) => {
+    const toast = document.createElement('div');
+    toast.style.cssText = `position: fixed; bottom: 24px; right: 24px; background: ${isErr ? 'rgba(239, 68, 68, 0.95)' : 'rgba(16, 185, 129, 0.95)'}; color: white; padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 2147483647; box-shadow: 0 10px 25px rgba(0,0,0,0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s; font-family: -apple-system, sans-serif;`;
+    toast.innerHTML = `<span>${isErr ? '❌' : '✅'}</span><span style="margin-left: 8px;">${msg}</span>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  };
 
-    chrome.runtime.sendMessage({
-      action: 'SAVE_PROMPT',
-      payload: {
-        title: `Captured Media: ${document.title.slice(0, 30)}`,
-        content: `Media captured from ${window.location.href}`,
-        image_url: imageUrl,
-        embed_url: embedUrl,
-        source_link: window.location.href,
-        category: 'Social Clip',
-        platform: window.location.hostname,
-        tags: ['#Media', '#Clipped']
+  const itemSaveMedia = createMenuItem('🎬', 'Save Media', 'purple', async () => {
+    itemSaveMedia.innerHTML = `<span>⏳</span><span style="flex: 1;">Extracting Media...</span>`;
+    
+    try {
+      const extractionResult = await Promise.race([
+        new Promise<{ embedUrl: string; imageUrl: string | null }>((resolve) => {
+          let embedUrl = window.location.href;
+          let imageUrl: string | null = null;
+          
+          if (document.querySelector('video')) {
+            const vid = document.querySelector('video');
+            embedUrl = vid?.src || window.location.href;
+          } else if (document.querySelector('img[src*="instagram"], img[src*="ytimg"]')) {
+            const img = document.querySelector('img[src*="instagram"], img[src*="ytimg"]') as HTMLImageElement;
+            imageUrl = img?.src || null;
+          }
+
+          if (!imageUrl && embedUrl === window.location.href) {
+            const ogImg = document.querySelector('meta[property="og:image"], meta[name="og:image"]')?.getAttribute('content');
+            if (ogImg && !ogImg.startsWith('data:')) imageUrl = ogImg;
+          }
+
+          if (imageUrl || (embedUrl && embedUrl !== window.location.href)) {
+            resolve({ embedUrl, imageUrl });
+          } else {
+            // Check once more after brief DOM yield
+            setTimeout(() => {
+              const anyImg = document.querySelector('img') as HTMLImageElement;
+              if (anyImg && anyImg.src && !anyImg.src.startsWith('data:') && (anyImg.naturalWidth || 0) > 100) {
+                resolve({ embedUrl: window.location.href, imageUrl: anyImg.src });
+              } else {
+                resolve({ embedUrl: window.location.href, imageUrl: null });
+              }
+            }, 500);
+          }
+        }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_NO_MEDIA')), 3000))
+      ]);
+
+      if (!extractionResult.imageUrl && extractionResult.embedUrl === window.location.href) {
+        throw new Error('TIMEOUT_NO_MEDIA');
       }
-    }, (res) => {
-      if (chrome.runtime.lastError || !res?.success) {
-        const errMsg = chrome.runtime.lastError?.message || res?.error || 'Save failed';
-        itemSaveMedia.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error: ${errMsg.slice(0, 20)}</span>`;
-      } else {
-        itemSaveMedia.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Media Saved!</span>`;
+
+      await new Promise<void>((resolve, reject) => {
+        chrome.runtime.sendMessage({
+          action: 'SAVE_PROMPT',
+          payload: {
+            title: `Captured Media: ${document.title.slice(0, 30)}`,
+            content: `Media captured from ${window.location.href}`,
+            image_url: extractionResult.imageUrl,
+            embed_url: extractionResult.embedUrl,
+            source_link: window.location.href,
+            category: 'Social Clip',
+            platform: window.location.hostname,
+            tags: ['#Media', '#Clipped']
+          }
+        }, (res) => {
+          if (chrome.runtime.lastError || !res?.success) {
+            reject(new Error(chrome.runtime.lastError?.message || res?.error || 'Save failed'));
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      itemSaveMedia.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Media Saved!</span>`;
+      showToastMsg("Media saved to PromptMemory Vault!");
+    } catch (err: any) {
+      if (err.message === 'TIMEOUT_NO_MEDIA' || err.message?.includes('TIMEOUT')) {
+        itemSaveMedia.innerHTML = `<span>🎬</span><span style="flex: 1;">Save Media</span>`;
+        showToastMsg("No media found on this page.", true);
+        return;
       }
+      const errMsg = err.message || 'Save failed';
+      itemSaveMedia.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error</span>`;
+      showToastMsg(`Error: ${errMsg.slice(0, 35)}`, true);
+    } finally {
       setTimeout(() => {
         itemSaveMedia.innerHTML = `<span>🎬</span><span style="flex: 1;">Save Media</span>`;
       }, 2500);
-    });
+    }
   }, true);
 
   const itemSavePageText = createMenuItem('📄', 'Save Page Text', 'indigo', () => {
@@ -223,9 +278,11 @@ function injectFloatingLogo() {
     }, (res) => {
       if (chrome.runtime.lastError || !res?.success) {
         const errMsg = chrome.runtime.lastError?.message || res?.error || 'Save failed';
-        itemSavePageText.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error: ${errMsg.slice(0, 20)}</span>`;
+        itemSavePageText.innerHTML = `<span>❌</span><span style="flex: 1; color:#ef4444; font-size:11px;">Error</span>`;
+        showToastMsg(`Error: ${errMsg.slice(0, 35)}`, true);
       } else {
         itemSavePageText.innerHTML = `<span>✅</span><span style="flex: 1; color:#10b981;">Text Saved!</span>`;
+        showToastMsg("Page text saved to Vault!");
       }
       setTimeout(() => {
         itemSavePageText.innerHTML = `<span>📄</span><span style="flex: 1;">Save Page Text</span>`;
@@ -233,8 +290,8 @@ function injectFloatingLogo() {
     });
   }, true);
 
-  const itemOpenVault = createMenuItem('💎', 'Open PM Vault', 'default', () => {
-    window.open('http://localhost:3000/clips', '_blank');
+  const itemOpenVault = createMenuItem('💎', 'Open Vault', 'default', () => {
+    window.open('https://prompt-memory.vercel.app/clips', '_blank');
   });
 
   popover.appendChild(itemSaveMedia);

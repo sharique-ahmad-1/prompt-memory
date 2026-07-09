@@ -883,30 +883,52 @@ function injectClipperButtons() {
                                 actionBar.closest('article, section, div[role="main"]') ||
                                 document.body;
 
-        const { text, imageUrl, embedUrl, sourceLink, tags } = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
+        const extractionResult = await Promise.race([
+          new Promise<ReturnType<typeof extractMediaAndEmbed>>((resolve) => {
+            const res = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
+            if (res.imageUrl || (res.embedUrl && res.embedUrl !== window.location.href)) {
+              resolve(res);
+            } else {
+              setTimeout(() => {
+                const resAfterWait = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
+                resolve(resAfterWait);
+              }, 500);
+            }
+          }),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_NO_MEDIA')), 3000))
+        ]);
+
+        if (!extractionResult.imageUrl && (!extractionResult.embedUrl || extractionResult.embedUrl === window.location.href)) {
+          throw new Error('TIMEOUT_NO_MEDIA');
+        }
+
+        const { text, imageUrl, embedUrl, sourceLink, tags } = extractionResult;
         console.log("PM Social Clipper extracting:", { platform, text: text.substring(0, 50), imageUrl, embedUrl, sourceLink, tags });
 
-        const response = await new Promise<any>((resolve) => {
-          chrome.runtime.sendMessage({
-            action: 'SAVE_PROMPT',
-            payload: {
-              platform: platform,
-              role: 'user',
-              content: text,
-              image_url: imageUrl,
-              embed_url: embedUrl,
-              source_link: sourceLink,
-              tags: tags,
-              category: 'Social Clip'
-            }
-          }, (res) => {
-            if (chrome.runtime.lastError) {
-              resolve({ success: false, error: chrome.runtime.lastError.message });
-            } else {
-              resolve(res || { success: false, error: 'No response from background worker.' });
-            }
-          });
-        });
+        const response = await Promise.race([
+          new Promise<any>((resolve) => {
+            chrome.runtime.sendMessage({
+              action: 'SAVE_PROMPT',
+              payload: {
+                platform: platform,
+                role: 'user',
+                content: text,
+                image_url: imageUrl,
+                embed_url: embedUrl,
+                source_link: sourceLink,
+                tags: tags,
+                category: 'Social Clip'
+              }
+            }, (res) => {
+              if (chrome.runtime.lastError) {
+                resolve({ success: false, error: chrome.runtime.lastError.message });
+              } else {
+                resolve(res || { success: false, error: 'No response from background worker.' });
+              }
+            });
+          }),
+          new Promise<any>((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_NO_MEDIA')), 3000))
+        ]);
 
         if (infoToast && infoToast.parentNode) infoToast.remove();
 
@@ -926,6 +948,11 @@ function injectClipperButtons() {
         console.error("PM Social Clipper Error:", err);
         if (infoToast && infoToast.parentNode) infoToast.remove();
         btn.classList.remove('pm-saving');
+        if (err.message === 'TIMEOUT_NO_MEDIA' || err.message?.includes('TIMEOUT')) {
+          btn.innerHTML = `${BOOKMARK_SVG}<span>Save to PM</span>`;
+          showClipperToast("No media found on this page.", 'error');
+          return;
+        }
         btn.classList.add('pm-error');
         btn.innerHTML = `<span>❌</span><span>Error</span>`;
         showClipperToast("Error: " + (err.message || 'Could not save clip.'), 'error');

@@ -80,7 +80,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   try {
     if (info.menuItemId === 'pm-open-vault') {
-      chrome.tabs.create({ url: 'http://localhost:3000/clips' });
+      chrome.tabs.create({ url: 'https://prompt-memory.vercel.app/clips' });
       return;
     }
 
@@ -210,7 +210,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           const user = await getCurrentUser();
           
           if (!user || !user.id) {
-            sendResponse({ success: false, error: 'User session not synced. Please log in at http://localhost:3000 to authenticate your extension.' });
+            sendResponse({ success: false, error: 'User session not synced. Please log in at https://prompt-memory.vercel.app to authenticate your extension.' });
             return;
           }
 

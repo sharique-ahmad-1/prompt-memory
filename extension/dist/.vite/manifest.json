@@ -6,7 +6,7 @@
     "isEntry": true
   },
   "popup.html": {
-    "file": "assets/popup.html-BbACKDyA.js",
+    "file": "assets/popup.html-BjqRiPA5.js",
     "name": "popup.html",
     "src": "popup.html",
     "isEntry": true,
@@ -15,7 +15,7 @@
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-hEZz9cyd.js",
+    "file": "assets/index.ts-DCBXsQ1s.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true
@@ -33,13 +33,13 @@
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-j5x-QlHc.js",
+    "file": "assets/floatingLogo.ts-DLECC7P4.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true
   },
   "src/content/socialClipper.ts": {
-    "file": "assets/socialClipper.ts-BcNEaRa5.js",
+    "file": "assets/socialClipper.ts-R5CidRPD.js",
     "name": "socialClipper.ts",
     "src": "src/content/socialClipper.ts",
     "isEntry": true

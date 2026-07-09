@@ -48,7 +48,7 @@
     },
     {
       "js": [
-        "assets/floatingLogo.ts-j5x-QlHc.js"
+        "assets/floatingLogo.ts-DLECC7P4.js"
       ],
       "matches": [
         "<all_urls>"
@@ -57,7 +57,7 @@
     },
     {
       "js": [
-        "assets/socialClipper.ts-BcNEaRa5.js"
+        "assets/socialClipper.ts-R5CidRPD.js"
       ],
       "matches": [
         "*://*.linkedin.com/*",
@@ -94,7 +94,7 @@
         "<all_urls>"
       ],
       "resources": [
-        "assets/floatingLogo.ts-j5x-QlHc.js"
+        "assets/floatingLogo.ts-DLECC7P4.js"
       ],
       "use_dynamic_url": false
     },
@@ -107,7 +107,7 @@
         "*://*.youtube.com/*"
       ],
       "resources": [
-        "assets/socialClipper.ts-BcNEaRa5.js"
+        "assets/socialClipper.ts-R5CidRPD.js"
       ],
       "use_dynamic_url": false
     }
