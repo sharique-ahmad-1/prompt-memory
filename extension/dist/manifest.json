@@ -49,7 +49,7 @@
     },
     {
       "js": [
-        "assets/floatingLogo.ts-DBG94I6r.js"
+        "assets/floatingLogo.ts-CWn1CZez.js"
       ],
       "matches": [
         "<all_urls>"
@@ -71,6 +71,18 @@
     }
   ],
   "web_accessible_resources": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "resources": [
+        "popup.html",
+        "assets/*",
+        "icon128.png"
+      ],
+      "use_dynamic_url": false
+    },
     {
       "matches": [
         "https://chatgpt.com/*"
@@ -96,7 +108,7 @@
         "<all_urls>"
       ],
       "resources": [
-        "assets/floatingLogo.ts-DBG94I6r.js"
+        "assets/floatingLogo.ts-CWn1CZez.js"
       ],
       "use_dynamic_url": false
     },
