@@ -42,7 +42,6 @@
       ],
       "matches": [
         "https://prompt-memory.vercel.app/*",
-        "https://prompt-memory-*.vercel.app/*",
         "https://*.vercel.app/*",
         "http://localhost:3000/*"
       ],
@@ -97,7 +96,6 @@
       "matches": [
         "http://localhost:3000/*",
         "https://*.vercel.app/*",
-        "https://prompt-memory-*.vercel.app/*",
         "https://prompt-memory.vercel.app/*"
       ],
       "resources": [
