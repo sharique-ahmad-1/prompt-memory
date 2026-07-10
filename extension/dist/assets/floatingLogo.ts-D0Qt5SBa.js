@@ -33,10 +33,10 @@
       <circle cx="8" cy="22" r="1.5" fill="#ffffff" />
       <circle cx="24" cy="22" r="1.5" fill="#ffffff" />
     </svg>
-  `;function t(){let t=document.getElementById(`pm-mini-dashboard-window`);if(t){t.remove();return}let n=e&&e.style.right?parseInt(e.style.right,10):24,r=e&&e.style.bottom?parseInt(e.style.bottom,10):24,i=Math.min(window.innerHeight-460,Math.max(10,r+58)),a=Math.min(window.innerWidth-380,Math.max(10,n)),o=document.createElement(`div`);o.id=`pm-mini-dashboard-window`,o.style.cssText=`
+  `;function t(){let t=document.getElementById(`pm-mini-dashboard-window`);if(t){t.remove();return}let n=e&&e.style.right?parseInt(e.style.right,10):24,r=e&&e.style.bottom?parseInt(e.style.bottom,10):24,i=Math.min(window.innerHeight-460,Math.max(10,r+58)),a=Math.min(window.innerWidth-380,Math.max(10,n)),o=Math.max(20,window.innerHeight-i-460),s=Math.max(20,window.innerWidth-a-380),c=document.createElement(`div`);c.id=`pm-mini-dashboard-window`,c.style.cssText=`
       position: fixed !important;
-      bottom: ${i}px !important;
-      right: ${a}px !important;
+      top: ${o}px !important;
+      left: ${s}px !important;
       width: 380px !important;
       height: 460px !important;
       min-width: 320px !important;
@@ -44,7 +44,7 @@
       max-width: 500px !important;
       max-height: 700px !important;
       resize: both !important;
-      background: rgba(42, 42, 53, 0.85) !important;
+      background: rgba(30, 41, 59, 0.82) !important;
       backdrop-filter: blur(24px) !important;
       -webkit-backdrop-filter: blur(24px) !important;
       border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -57,9 +57,9 @@
       margin: 0;
       padding: 0;
       transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    `;let s=document.createElement(`div`);s.style.cssText=`
+    `;let l=document.createElement(`div`);l.style.cssText=`
       padding: 8px 14px;
-      background: rgba(42, 42, 53, 0.95);
+      background: rgba(30, 41, 59, 0.95);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
@@ -70,13 +70,13 @@
       font-family: -apple-system, sans-serif;
       flex-shrink: 0;
       cursor: move;
-    `,s.innerHTML=`
+    `,l.innerHTML=`
       <div style="display: flex; align-items: center; gap: 6px;">
         <span style="font-size: 14px;">✨</span>
         <span style="background: linear-gradient(to right, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PromptMemory Vault</span>
       </div>
       <button id="pm-close-mini-win" style="background: rgba(255,255,255,0.1); border: none; color: #94a3b8; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s;">✕</button>
-    `,o.appendChild(s);let c=document.createElement(`iframe`);c.src=chrome.runtime.getURL(`popup.html`),c.style.cssText=`width: 100%; height: 100%; flex: 1; border: none; margin: 0; padding: 0; background: transparent; overflow: hidden; display: block;`,o.appendChild(c);let l=document.createElement(`div`);l.style.cssText=`position: absolute; bottom: 3px; right: 3px; width: 14px; height: 14px; pointer-events: none; opacity: 0.6; z-index: 100; background: radial-gradient(circle at 100% 100%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.5) 20%, transparent 20%, transparent 40%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.5) 60%, transparent 60%);`,o.appendChild(l),document.body.appendChild(o);let u=document.getElementById(`pm-close-mini-win`);u&&(u.onclick=()=>o.remove(),u.onmouseenter=()=>{u.style.background=`rgba(239, 68, 68, 0.3)`,u.style.color=`#fff`},u.onmouseleave=()=>{u.style.background=`rgba(255,255,255,0.1)`,u.style.color=`#94a3b8`});let d=t=>{!o.contains(t.target)&&(!e||!e.contains(t.target))&&(o.remove(),document.removeEventListener(`mousedown`,d))};setTimeout(()=>document.addEventListener(`mousedown`,d),100)}e.onmouseenter=()=>{n||(e.style.transform=`scale(1.1) rotate(5deg)`,e.style.boxShadow=`0 6px 16px rgba(168,85,247,0.5)`)},e.onmouseleave=()=>{n||(e.style.transform=`scale(1) rotate(0deg)`,e.style.boxShadow=`0 4px 12px rgba(99,102,241,0.3)`)},e.oncontextmenu=e=>{e.preventDefault(),t()};let n=!1,r=!1,i=0,a=0,o=24,s=24;e.addEventListener(`mousedown`,t=>{if(t.button!==0)return;n=!0,r=!1,i=t.clientX,a=t.clientY;let c=window.getComputedStyle(e);o=parseInt(c.right,10),s=parseInt(c.bottom,10),e.style.cursor=`grabbing`,e.style.transition=`none`,t.preventDefault()}),document.addEventListener(`mousemove`,t=>{if(!n)return;let c=t.clientX-i,l=t.clientY-a;if((Math.abs(c)>3||Math.abs(l)>3)&&(r=!0),r){let t=o-c,n=s-l;e.style.right=`${t}px`,e.style.bottom=`${n}px`;let r=document.getElementById(`pm-mini-dashboard-window`);if(r){let e=Math.min(window.innerHeight-440,Math.max(10,n+58)),i=Math.min(window.innerWidth-365,Math.max(10,t));r.style.setProperty(`bottom`,`${e}px`,`important`),r.style.setProperty(`right`,`${i}px`,`important`)}}}),document.addEventListener(`mouseup`,i=>{n&&i.button===0&&(n=!1,e.style.cursor=`grab`,e.style.transition=`transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease`,r||(e.style.transform=`scale(0.9)`,setTimeout(()=>{e.style.transform=`scale(1.1)`},100),t()))}),document.body.appendChild(e)}function n(){let e=document.createElement(`div`);e.id=`pm-selection-pill`,e.style.cssText=`
+    `,c.appendChild(l);let u=document.createElement(`iframe`);u.src=chrome.runtime.getURL(`popup.html`),u.style.cssText=`width: 100%; height: 100%; flex: 1; border: none; margin: 0; padding: 0; background: transparent; overflow: hidden; display: block;`,c.appendChild(u);let d=document.createElement(`div`);d.style.cssText=`position: absolute; bottom: 0px; right: 0px; width: 18px; height: 18px; pointer-events: auto !important; cursor: nwse-resize !important; z-index: 10000; background: radial-gradient(circle at 100% 100%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.7) 30%, transparent 30%, transparent 60%, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0.7) 80%, transparent 80%); border-bottom-right-radius: 16px;`,c.appendChild(d);let f=!1,p=380,m=460,h=0,g=0;d.addEventListener(`mousedown`,e=>{e.preventDefault(),e.stopPropagation(),f=!0,p=c.offsetWidth,m=c.offsetHeight,h=e.clientX,g=e.clientY,u.style.pointerEvents=`none`;let t=e=>{if(!f)return;let t=Math.min(500,Math.max(320,p+(e.clientX-h))),n=Math.min(700,Math.max(400,m+(e.clientY-g)));c.style.width=`${t}px`,c.style.height=`${n}px`},n=()=>{f=!1,u.style.pointerEvents=`auto`,window.removeEventListener(`mousemove`,t),window.removeEventListener(`mouseup`,n)};window.addEventListener(`mousemove`,t),window.addEventListener(`mouseup`,n)}),document.body.appendChild(c);let _=document.getElementById(`pm-close-mini-win`);_&&(_.onclick=()=>c.remove(),_.onmouseenter=()=>{_.style.background=`rgba(239, 68, 68, 0.3)`,_.style.color=`#fff`},_.onmouseleave=()=>{_.style.background=`rgba(255,255,255,0.1)`,_.style.color=`#94a3b8`});let v=t=>{!f&&!c.contains(t.target)&&(!e||!e.contains(t.target))&&(c.remove(),document.removeEventListener(`mousedown`,v))};setTimeout(()=>document.addEventListener(`mousedown`,v),100)}e.onmouseenter=()=>{n||(e.style.transform=`scale(1.1) rotate(5deg)`,e.style.boxShadow=`0 6px 16px rgba(168,85,247,0.5)`)},e.onmouseleave=()=>{n||(e.style.transform=`scale(1) rotate(0deg)`,e.style.boxShadow=`0 4px 12px rgba(99,102,241,0.3)`)},e.oncontextmenu=e=>{e.preventDefault(),t()};let n=!1,r=!1,i=0,a=0,o=24,s=24;e.addEventListener(`mousedown`,t=>{if(t.button!==0)return;n=!0,r=!1,i=t.clientX,a=t.clientY;let c=window.getComputedStyle(e);o=parseInt(c.right,10),s=parseInt(c.bottom,10),e.style.cursor=`grabbing`,e.style.transition=`none`,t.preventDefault()}),document.addEventListener(`mousemove`,t=>{if(!n)return;let c=t.clientX-i,l=t.clientY-a;if((Math.abs(c)>3||Math.abs(l)>3)&&(r=!0),r){let t=o-c,n=s-l;e.style.right=`${t}px`,e.style.bottom=`${n}px`;let r=document.getElementById(`pm-mini-dashboard-window`);if(r){let e=Math.min(window.innerHeight-440,Math.max(10,n+58)),i=Math.min(window.innerWidth-365,Math.max(10,t));r.style.setProperty(`bottom`,`${e}px`,`important`),r.style.setProperty(`right`,`${i}px`,`important`)}}}),document.addEventListener(`mouseup`,i=>{n&&i.button===0&&(n=!1,e.style.cursor=`grab`,e.style.transition=`transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease`,r||(e.style.transform=`scale(0.9)`,setTimeout(()=>{e.style.transform=`scale(1.1)`},100),t()))}),document.body.appendChild(e)}function n(){let e=document.createElement(`div`);e.id=`pm-selection-pill`,e.style.cssText=`
     position: absolute;
     z-index: 999998;
     background: linear-gradient(135deg, #6366f1, #8b5cf6);

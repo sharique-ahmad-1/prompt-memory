@@ -85,13 +85,15 @@ function injectFloatingLogo() {
 
     const winBottom = Math.min(window.innerHeight - 460, Math.max(10, mBottom + 58));
     const winRight = Math.min(window.innerWidth - 380, Math.max(10, mRight));
+    const winTop = Math.max(20, window.innerHeight - winBottom - 460);
+    const winLeft = Math.max(20, window.innerWidth - winRight - 380);
 
     const win = document.createElement('div');
     win.id = 'pm-mini-dashboard-window';
     win.style.cssText = `
       position: fixed !important;
-      bottom: ${winBottom}px !important;
-      right: ${winRight}px !important;
+      top: ${winTop}px !important;
+      left: ${winLeft}px !important;
       width: 380px !important;
       height: 460px !important;
       min-width: 320px !important;
@@ -99,7 +101,7 @@ function injectFloatingLogo() {
       max-width: 500px !important;
       max-height: 700px !important;
       resize: both !important;
-      background: rgba(42, 42, 53, 0.85) !important;
+      background: rgba(30, 41, 59, 0.82) !important;
       backdrop-filter: blur(24px) !important;
       -webkit-backdrop-filter: blur(24px) !important;
       border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -117,7 +119,7 @@ function injectFloatingLogo() {
     const closeHeader = document.createElement('div');
     closeHeader.style.cssText = `
       padding: 8px 14px;
-      background: rgba(42, 42, 53, 0.95);
+      background: rgba(30, 41, 59, 0.95);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
@@ -144,8 +146,39 @@ function injectFloatingLogo() {
     win.appendChild(iframe);
 
     const resizeHandle = document.createElement('div');
-    resizeHandle.style.cssText = 'position: absolute; bottom: 3px; right: 3px; width: 14px; height: 14px; pointer-events: none; opacity: 0.6; z-index: 100; background: radial-gradient(circle at 100% 100%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.5) 20%, transparent 20%, transparent 40%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.5) 60%, transparent 60%);';
+    resizeHandle.style.cssText = 'position: absolute; bottom: 0px; right: 0px; width: 18px; height: 18px; pointer-events: auto !important; cursor: nwse-resize !important; z-index: 10000; background: radial-gradient(circle at 100% 100%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.7) 30%, transparent 30%, transparent 60%, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0.7) 80%, transparent 80%); border-bottom-right-radius: 16px;';
     win.appendChild(resizeHandle);
+
+    let isResizing = false;
+    let startW = 380, startH = 460, startX = 0, startY = 0;
+    resizeHandle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      isResizing = true;
+      startW = win.offsetWidth;
+      startH = win.offsetHeight;
+      startX = e.clientX;
+      startY = e.clientY;
+      iframe.style.pointerEvents = 'none';
+
+      const onMouseMove = (moveEvt: MouseEvent) => {
+        if (!isResizing) return;
+        const newW = Math.min(500, Math.max(320, startW + (moveEvt.clientX - startX)));
+        const newH = Math.min(700, Math.max(400, startH + (moveEvt.clientY - startY)));
+        win.style.width = `${newW}px`;
+        win.style.height = `${newH}px`;
+      };
+
+      const onMouseUp = () => {
+        isResizing = false;
+        iframe.style.pointerEvents = 'auto';
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    });
 
     document.body.appendChild(win);
 
@@ -157,7 +190,7 @@ function injectFloatingLogo() {
     }
 
     const clickOutside = (e: MouseEvent) => {
-      if (!win.contains(e.target as Node) && (!container || !container.contains(e.target as Node))) {
+      if (!isResizing && !win.contains(e.target as Node) && (!container || !container.contains(e.target as Node))) {
         win.remove();
         document.removeEventListener('mousedown', clickOutside);
       }

@@ -15,13 +15,13 @@
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-CGQm55Qq.js",
+    "file": "assets/index.ts-CxS2SNmv.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true
   },
   "src/content/authBridge.ts": {
-    "file": "assets/authBridge.ts-6WxddN2f.js",
+    "file": "assets/authBridge.ts-DvP48hcS.js",
     "name": "authBridge.ts",
     "src": "src/content/authBridge.ts",
     "isEntry": true
@@ -33,7 +33,7 @@
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-2jiptTPo.js",
+    "file": "assets/floatingLogo.ts-D0Qt5SBa.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true

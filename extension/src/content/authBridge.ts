@@ -2,35 +2,56 @@ console.log("PromptMemory: Auth Bridge Injected");
 
 function syncSession() {
   try {
-    let sessionRaw: string | null = null;
+    let session: any = null;
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && (key.includes('auth-token') || key.includes('supabase.auth.token') || (key.startsWith('sb-') && key.endsWith('-token')))) {
-        sessionRaw = localStorage.getItem(key);
-        break;
+      if (!key) continue;
+      const val = localStorage.getItem(key);
+      if (!val || (!val.includes('access_token') && !val.includes('supabase.auth.token'))) continue;
+      try {
+        const parsed = JSON.parse(val);
+        const candidate = parsed?.access_token ? parsed : (parsed?.session || parsed?.currentSession || null);
+        if (candidate && candidate.access_token) {
+          session = candidate;
+          break;
+        }
+      } catch (e) {}
+    }
+
+    if (!session && typeof sessionStorage !== 'undefined') {
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (!key) continue;
+        const val = sessionStorage.getItem(key);
+        if (!val || !val.includes('access_token')) continue;
+        try {
+          const parsed = JSON.parse(val);
+          const candidate = parsed?.access_token ? parsed : (parsed?.session || parsed?.currentSession || null);
+          if (candidate && candidate.access_token) {
+            session = candidate;
+            break;
+          }
+        } catch (e) {}
       }
     }
 
-    if (sessionRaw) {
-      const parsed = JSON.parse(sessionRaw);
-      const session = parsed?.access_token ? parsed : (parsed?.session || parsed?.currentSession || null);
-      if (session && session.access_token) {
-        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-          chrome.storage.local.set({ 
-            pm_session: session,
-            pm_web_origin: window.location.origin 
-          }).catch(() => {});
-        }
-        chrome.runtime.sendMessage({
-          action: 'SYNC_SESSION',
-          payload: {
-            ...session,
-            origin: window.location.origin
-          }
-        }, () => {
-          void chrome.runtime.lastError;
-        });
+    if (session && session.access_token) {
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        chrome.storage.local.set({ 
+          pm_session: session,
+          pm_web_origin: window.location.origin 
+        }).catch(() => {});
       }
+      chrome.runtime.sendMessage({
+        action: 'SYNC_SESSION',
+        payload: {
+          ...session,
+          origin: window.location.origin
+        }
+      }, () => {
+        void chrome.runtime.lastError;
+      });
     }
   } catch (error) {
     console.error("PromptMemory: Error syncing session", error);

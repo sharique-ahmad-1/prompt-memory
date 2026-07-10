@@ -38,7 +38,7 @@
     },
     {
       "js": [
-        "assets/authBridge.ts-6WxddN2f.js"
+        "assets/authBridge.ts-DvP48hcS.js"
       ],
       "matches": [
         "https://prompt-memory.vercel.app/*",
@@ -48,7 +48,7 @@
     },
     {
       "js": [
-        "assets/floatingLogo.ts-2jiptTPo.js"
+        "assets/floatingLogo.ts-D0Qt5SBa.js"
       ],
       "matches": [
         "<all_urls>"
@@ -97,7 +97,7 @@
         "https://prompt-memory.vercel.app/*"
       ],
       "resources": [
-        "assets/authBridge.ts-6WxddN2f.js"
+        "assets/authBridge.ts-DvP48hcS.js"
       ],
       "use_dynamic_url": false
     },
@@ -106,7 +106,7 @@
         "<all_urls>"
       ],
       "resources": [
-        "assets/floatingLogo.ts-2jiptTPo.js"
+        "assets/floatingLogo.ts-D0Qt5SBa.js"
       ],
       "use_dynamic_url": false
     },

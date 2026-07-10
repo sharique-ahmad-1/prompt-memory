@@ -50,31 +50,36 @@ chrome.runtime.onInstalled.addListener(() => {
 // Helper: Get active authenticated user session
 async function getCurrentUser() {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user && user.id) return user;
-
     const storage = (await chrome.storage.local.get(['pm_session'])) as Record<string, any>;
     const pmSession = storage?.pm_session;
     if (pmSession) {
       if (pmSession.user && pmSession.user.id) {
+        if (pmSession.access_token && pmSession.refresh_token) {
+          supabase.auth.setSession({
+            access_token: pmSession.access_token,
+            refresh_token: pmSession.refresh_token
+          }).catch(() => {});
+        }
         return pmSession.user;
       }
       if (pmSession.access_token) {
         try {
           const payload = JSON.parse(atob(pmSession.access_token.split('.')[1]));
           if (payload && payload.sub) {
+            if (pmSession.refresh_token) {
+              supabase.auth.setSession({
+                access_token: pmSession.access_token,
+                refresh_token: pmSession.refresh_token
+              }).catch(() => {});
+            }
             return { id: payload.sub, email: payload.email || '' };
           }
         } catch (e) {}
       }
-      if (pmSession.access_token && pmSession.refresh_token) {
-        const { data: sessionData } = await supabase.auth.setSession({
-          access_token: pmSession.access_token,
-          refresh_token: pmSession.refresh_token
-        });
-        if (sessionData?.user) return sessionData.user;
-      }
     }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && user.id) return user;
   } catch (err) {
     console.warn('[Antigravity Background] Auth get user warning:', err);
   }
