@@ -69,5 +69,31 @@ window.addEventListener('storage', (event) => {
   }
 });
 
+// Deduplicate bridge instance using a DOM marker `#pm-auth-bridge-marker`
+function ensureBridgeMarker() {
+  if (document.querySelector('#pm-auth-bridge-marker')) return;
+  const marker = document.createElement('div');
+  marker.id = 'pm-auth-bridge-marker';
+  marker.style.display = 'none';
+  marker.setAttribute('data-pm-bridge', 'active');
+  document.body?.appendChild(marker);
+}
+
+// SPA routing listeners for Next.js app transitions
+window.addEventListener('popstate', () => {
+  syncSession();
+  ensureBridgeMarker();
+});
+
+const bridgeObserver = new MutationObserver(() => {
+  ensureBridgeMarker();
+});
+if (document.body) {
+  bridgeObserver.observe(document.body, { childList: true });
+}
+
 // Polling interval to catch internal Supabase state refreshes cleanly
-setInterval(syncSession, 1500);
+setInterval(() => {
+  syncSession();
+  ensureBridgeMarker();
+}, 1500);

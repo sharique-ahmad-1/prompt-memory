@@ -222,7 +222,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             } else {
               resolve({ success: false, error: 'Cloud sync timed out.' });
             }
-          }, 4500));
+          }, 15000));
 
           const fetchPromise = (async () => {
             const user = await getCurrentUser();
@@ -232,15 +232,13 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
               }
               return { success: false, error: 'Offline Mode: Please log into your PromptMemory web dashboard to sync.' };
             }
-            let query = supabase.from('prompts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
+            let query = supabase.from('prompts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(60);
             const { data: promptsData, error } = await query;
-            let clipsQuery = supabase.from('workspace_items').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
-            const { data: clipsData } = await clipsQuery;
 
-            if (error && !clipsData && cachedItems.length === 0) {
+            if (error && cachedItems.length === 0) {
               return { success: false, error: error.message };
             }
-            const combined = [...(promptsData || []), ...(clipsData || []), ...cachedItems].sort((a, b) => {
+            const combined = [...(promptsData || []), ...cachedItems].sort((a, b) => {
               return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
             });
             const seen = new Set();
@@ -264,7 +262,6 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       } else if (request.action === 'deleteItem') {
         const { itemId } = request;
         await supabase.from('prompts').delete().eq('id', itemId).then(() => {}, () => {});
-        await supabase.from('workspace_items').delete().eq('id', itemId).then(() => {}, () => {});
         sendResponse({ success: true });
       } else if (request.action === 'SAVE_WINDOW') {
         try {
@@ -283,26 +280,31 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             tags: ['#SavedWindow', '#Tabs']
           };
           if (userId !== 'offline') {
-            supabase.from('prompts').insert([insertPayload]).then(() => {}, () => {});
+            const { data } = await supabase.from('prompts').insert([insertPayload]).select().single();
+            if (typeof chrome !== 'undefined' && chrome.storage?.local && data) {
+              chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
+                const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
+                chrome.storage.local.set({ pm_cached_dashboard_items: [data, ...list] }).catch(() => {});
+              });
+            }
+            sendResponse({ success: true, data });
+          } else {
+            const localItem = { ...insertPayload, id: 'win_' + Date.now(), created_at: new Date().toISOString() };
+            if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+              chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
+                const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
+                chrome.storage.local.set({ pm_cached_dashboard_items: [localItem, ...list] }).catch(() => {});
+              });
+            }
+            sendResponse({ success: true, data: localItem });
           }
-          const localItem = { ...insertPayload, id: 'win_' + Date.now(), created_at: new Date().toISOString() };
-          if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-            chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
-              const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
-              chrome.storage.local.set({ pm_cached_dashboard_items: [localItem, ...list] }).catch(() => {});
-            });
-          }
-          sendResponse({ success: true, data: localItem });
-        } catch (winErr: any) {
-          sendResponse({ success: false, error: winErr.message });
+        } catch (err: any) {
+          sendResponse({ success: false, error: err.message });
         }
       } else if (request.action === 'SAVE_PROMPT' || request.action === 'clipCurrentPage' || request.action === 'SAVE_CONTEXT_PROMPT') {
         try {
           const { payload } = request;
-          const user = (await Promise.race([
-            getCurrentUser(),
-            new Promise<any>((resolve) => setTimeout(() => resolve(null), 2200))
-          ])) as any;
+          const user = await getCurrentUser();
           
           if (!user || !user.id) {
             const localId = 'local_' + Date.now();
@@ -342,7 +344,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           };
 
           const insertPromise = supabase.from('prompts').insert([insertPayload]).select().single();
-          const timeoutPromise = new Promise<any>((resolve) => setTimeout(() => resolve({ error: { message: 'CLOUD_TIMEOUT' } }), 2600));
+          const timeoutPromise = new Promise<any>((resolve) => setTimeout(() => resolve({ error: { message: 'CLOUD_TIMEOUT' } }), 15000));
           const { data, error } = (await Promise.race([insertPromise, timeoutPromise])) as any;
 
           if (error) {
@@ -360,20 +362,6 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             console.error('[Antigravity Background] Supabase insert error:', error);
             sendResponse({ success: false, error: error.message || 'Database insertion failed.' });
             return;
-          }
-
-          if (insertPayload.category === 'Social Clip' || insertPayload.image_url || insertPayload.embed_url) {
-            supabase.from('workspace_items').insert([{
-              user_id: user.id,
-              title: insertPayload.title,
-              content: insertPayload.content,
-              image_url: insertPayload.image_url,
-              embed_url: insertPayload.embed_url,
-              source_link: insertPayload.source_link,
-              platform: insertPayload.platform,
-              category: insertPayload.category,
-              tags: insertPayload.tags
-            }]).then(() => {}, () => {});
           }
 
           if (typeof chrome !== 'undefined' && chrome.storage?.local && data) {

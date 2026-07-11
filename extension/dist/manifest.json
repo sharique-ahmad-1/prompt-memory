@@ -29,7 +29,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/chatgpt.ts-BL2P_YUv.js"
+        "assets/chatgpt.ts-6Iwlb5i1.js"
       ],
       "matches": [
         "https://chatgpt.com/*"
@@ -38,17 +38,19 @@
     },
     {
       "js": [
-        "assets/authBridge.ts-DvP48hcS.js"
+        "assets/authBridge.ts-D3AttJgB.js"
       ],
       "matches": [
         "https://prompt-memory.vercel.app/*",
-        "https://*.vercel.app/*"
+        "https://*.vercel.app/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*"
       ],
       "run_at": "document_end"
     },
     {
       "js": [
-        "assets/floatingLogo.ts-D0Qt5SBa.js"
+        "assets/floatingLogo.ts-Bdx69Dox.js"
       ],
       "matches": [
         "<all_urls>"
@@ -57,14 +59,32 @@
     },
     {
       "js": [
-        "assets/socialClipper.ts-NbOPjkEr.js"
+        "assets/youtube.ts-Dg1WTAmI.js"
+      ],
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "js": [
+        "assets/gemini.ts-vz5WP4we.js"
+      ],
+      "matches": [
+        "*://gemini.google.com/*",
+        "https://gemini.google.com/*"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "js": [
+        "assets/socialClipper.ts-DLInMvbz.js"
       ],
       "matches": [
         "*://*.linkedin.com/*",
         "*://*.instagram.com/*",
         "*://*.twitter.com/*",
-        "*://*.x.com/*",
-        "*://*.youtube.com/*"
+        "*://*.x.com/*"
       ],
       "run_at": "document_end"
     }
@@ -87,17 +107,19 @@
         "https://chatgpt.com/*"
       ],
       "resources": [
-        "assets/chatgpt.ts-BL2P_YUv.js"
+        "assets/chatgpt.ts-6Iwlb5i1.js"
       ],
       "use_dynamic_url": false
     },
     {
       "matches": [
+        "http://127.0.0.1:3000/*",
+        "http://localhost:3000/*",
         "https://*.vercel.app/*",
         "https://prompt-memory.vercel.app/*"
       ],
       "resources": [
-        "assets/authBridge.ts-DvP48hcS.js"
+        "assets/authBridge.ts-D3AttJgB.js"
       ],
       "use_dynamic_url": false
     },
@@ -106,7 +128,26 @@
         "<all_urls>"
       ],
       "resources": [
-        "assets/floatingLogo.ts-D0Qt5SBa.js"
+        "assets/floatingLogo.ts-Bdx69Dox.js"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "resources": [
+        "assets/youtube.ts-Dg1WTAmI.js"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "*://gemini.google.com/*",
+        "https://gemini.google.com/*"
+      ],
+      "resources": [
+        "assets/gemini.ts-vz5WP4we.js"
       ],
       "use_dynamic_url": false
     },
@@ -115,11 +156,10 @@
         "*://*.instagram.com/*",
         "*://*.linkedin.com/*",
         "*://*.twitter.com/*",
-        "*://*.x.com/*",
-        "*://*.youtube.com/*"
+        "*://*.x.com/*"
       ],
       "resources": [
-        "assets/socialClipper.ts-NbOPjkEr.js"
+        "assets/socialClipper.ts-DLInMvbz.js"
       ],
       "use_dynamic_url": false
     }

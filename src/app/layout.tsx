@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
 import { AppShell } from "@/components/layout/app-shell";
+import { OnboardingModal } from "@/components/onboarding-modal";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
@@ -52,6 +53,7 @@ export default function RootLayout({
             <AppShell>
               {children}
             </AppShell>
+            <OnboardingModal />
             <Toaster theme="dark" position="bottom-right" className="!font-sans" />
           </AuthProvider>
         </ThemeProvider>

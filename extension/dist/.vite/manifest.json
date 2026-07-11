@@ -1,47 +1,59 @@
 {
   "../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-k7kM_jom.js",
+    "file": "assets/crx-manifest.js-DK-N5AVY.js",
     "name": "crx-manifest.js",
     "src": "../../../@crx/manifest",
     "isEntry": true
   },
   "popup.html": {
-    "file": "assets/popup.html-BZbQJ4sg.js",
+    "file": "assets/popup.html-DoBK788b.js",
     "name": "popup.html",
     "src": "popup.html",
     "isEntry": true,
     "css": [
-      "assets/popup-BPJRDRvb.css"
+      "assets/popup-BdWTElSY.css"
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-CxS2SNmv.js",
+    "file": "assets/index.ts-Dy5QgVZ4.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true
   },
   "src/content/authBridge.ts": {
-    "file": "assets/authBridge.ts-DvP48hcS.js",
+    "file": "assets/authBridge.ts-D3AttJgB.js",
     "name": "authBridge.ts",
     "src": "src/content/authBridge.ts",
     "isEntry": true
   },
   "src/content/chatgpt.ts": {
-    "file": "assets/chatgpt.ts-BL2P_YUv.js",
+    "file": "assets/chatgpt.ts-6Iwlb5i1.js",
     "name": "chatgpt.ts",
     "src": "src/content/chatgpt.ts",
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-D0Qt5SBa.js",
+    "file": "assets/floatingLogo.ts-Bdx69Dox.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true
   },
+  "src/content/gemini.ts": {
+    "file": "assets/gemini.ts-vz5WP4we.js",
+    "name": "gemini.ts",
+    "src": "src/content/gemini.ts",
+    "isEntry": true
+  },
   "src/content/socialClipper.ts": {
-    "file": "assets/socialClipper.ts-NbOPjkEr.js",
+    "file": "assets/socialClipper.ts-DLInMvbz.js",
     "name": "socialClipper.ts",
     "src": "src/content/socialClipper.ts",
+    "isEntry": true
+  },
+  "src/content/youtube.ts": {
+    "file": "assets/youtube.ts-Dg1WTAmI.js",
+    "name": "youtube.ts",
+    "src": "src/content/youtube.ts",
     "isEntry": true
   }
 }

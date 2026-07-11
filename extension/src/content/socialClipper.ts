@@ -247,7 +247,14 @@ function getNativeActionSelectors(platform: string): string[] {
   switch (platform) {
     case 'youtube':
       return [
-        '#top-level-buttons-computed'
+        '#top-level-buttons-computed',
+        'ytd-menu-renderer #top-level-buttons-computed',
+        '#actions ytd-menu-renderer',
+        '#actions.ytd-watch-metadata',
+        '#top-row #actions #top-level-buttons-computed',
+        '#owner-and-teaser #actions #top-level-buttons-computed',
+        'ytd-watch-metadata #actions',
+        'ytd-watch-flexy #actions #top-level-buttons-computed'
       ];
     case 'instagram':
       // Handled explicitly via native Save/Bookmark SVG targeting in injectClipperButtons
@@ -633,9 +640,6 @@ function pollForElement(
 
 function injectClipperButtons() {
   const platform = getPlatform();
-  if (platform === 'youtube' && !window.location.pathname.includes('/shorts/') && document.getElementById('pm-save-btn')) {
-    return;
-  }
 
   // 📸 Instagram — Async Polling Injection (Left Action Group)
   if (platform === 'instagram') {
@@ -724,9 +728,6 @@ function injectClipperButtons() {
 
   // 📱 YouTube Shorts — Async Polling Injection (Vertical Action Bar)
   if (platform === 'youtube' && window.location.pathname.includes('/shorts/')) {
-    // If already injected on this page, bail
-    if (document.querySelector('.pm-shorts-btn')) return;
-
     const shortsSelectors = [
       'ytd-reel-video-renderer #actions',
       'ytd-reel-video-renderer[is-active] #actions',
@@ -741,10 +742,8 @@ function injectClipperButtons() {
     pollForElement(
       shortsSelectors,
       () => {
-        // Re-query after poll resolves
         let shortsActionsList = Array.from(document.querySelectorAll(shortsSelectors));
 
-        // Fallback: find #actions inside any reel/shorts renderer
         if (shortsActionsList.length === 0) {
           document.querySelectorAll('#actions').forEach(el => {
             if (el.closest('ytd-reel-video-renderer') || el.closest('ytd-shorts') || el.closest('[is-active]')) {
@@ -753,7 +752,6 @@ function injectClipperButtons() {
           });
         }
 
-        // Last resort: find the like button and navigate to its #actions parent
         if (shortsActionsList.length === 0) {
           const likeBtn = document.querySelector('ytd-reel-video-renderer #like-button, ytd-reel-video-renderer ytd-like-button-renderer, ytd-reel-video-renderer ytd-toggle-button-renderer');
           if (likeBtn) {
@@ -838,7 +836,7 @@ function injectClipperButtons() {
             }
           });
 
-          actionsContainer.appendChild(btn);
+          actionsContainer.insertBefore(btn, actionsContainer.children[1] || actionsContainer.firstChild);
         });
       },
       500, 20 // Poll every 500ms, up to 20 attempts (10 seconds)
@@ -857,16 +855,6 @@ function injectClipperButtons() {
   actionBars.forEach((element) => {
     const actionBar = element as HTMLElement;
     if (actionBar.querySelector('#pm-save-btn') || actionBar.querySelector('.pm-clipper-wrapper')) return;
-
-    const postContainer = actionBar.closest('article') || 
-                          actionBar.closest('[role="article"]') || 
-                          actionBar.closest('ytd-watch-flexy, ytd-reel-video-renderer, ytd-video-renderer, ytd-rich-item-renderer') || 
-                          actionBar.closest('.feed-shared-update-v2, .occludable-update, div._aabd, main section') || 
-                          actionBar.closest('article, section, div[role="main"]') ||
-                          actionBar;
-
-    if (postContainer.hasAttribute('data-pm-injected')) return;
-    postContainer.setAttribute('data-pm-injected', 'true');
 
     const wrapper = document.createElement('div');
     wrapper.className = 'pm-clipper-wrapper';

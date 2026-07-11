@@ -17,7 +17,7 @@ export default function ContinuationGenerator() {
   const [transcript, setTranscript] = useState('')
   const [projects, setProjects] = useState<{id: string, title: string}[]>([])
   const [selectedProjectId, setSelectedProjectId] = useState<string>('none')
-  const [provider, setProvider] = useState<string>('mesh-api')
+  const [provider, setProvider] = useState<string>('openai')
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [isSaved, setIsSaved] = useState(false)
@@ -66,16 +66,10 @@ export default function ContinuationGenerator() {
           }
         : null
 
-      const meshConfig = {
-        apiKey: localStorage.getItem('pm_mesh_api_key') || user?.user_metadata?.mesh_api_key || '',
-        baseUrl: localStorage.getItem('pm_mesh_api_base_url') || user?.user_metadata?.mesh_api_base_url || '',
-        model: localStorage.getItem('pm_mesh_api_model') || user?.user_metadata?.mesh_api_model || 'gpt-4o'
-      }
-
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, provider, projectData, meshConfig })
+        body: JSON.stringify({ transcript, provider, projectData })
       })
       const data = await res.json()
       
@@ -214,7 +208,6 @@ ${result.readyToPasteContinuationPrompt}
               <SelectValue placeholder="AI Provider" />
             </SelectTrigger>
             <SelectContent className="bg-card border-border text-foreground">
-              <SelectItem value="mesh-api" className="focus:bg-secondary">AI Fiesta Mesh API</SelectItem>
               <SelectItem value="openai" className="focus:bg-secondary">OpenAI Direct</SelectItem>
             </SelectContent>
           </Select>
@@ -293,10 +286,10 @@ ${result.readyToPasteContinuationPrompt}
               {apiError.message.includes('API_KEY_MISSING') || apiError.message.includes('not configured') ? (
                 <div className="space-y-4 max-w-md w-full">
                   <div className="bg-card border border-border p-4 rounded-xl text-left shadow-sm">
-                    <p className="text-xs text-muted-foreground mb-1">Fastest fix: Configure your AI Fiesta Mesh API key directly in your workspace settings.</p>
+                    <p className="text-xs text-muted-foreground mb-1">Fastest fix: Ensure your AI provider credentials are configured directly in your environment or workspace.</p>
                   </div>
                   <Button onClick={() => window.location.href = '/settings'} className="w-full gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5">
-                    Go to AI Settings (`/settings`) &rarr;
+                    Go to Settings (`/settings`) &rarr;
                   </Button>
                 </div>
               ) : (

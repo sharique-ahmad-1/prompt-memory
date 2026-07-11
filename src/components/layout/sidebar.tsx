@@ -13,9 +13,8 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Prompt Vault', href: '/vault', icon: Database },
   { name: 'Social Clips', href: '/clips', icon: Camera },
-  { name: 'Workspaces', href: '/workspaces', icon: Layers },
-  { name: 'Projects', href: '/projects', icon: FolderKanban },
-  { name: 'Generator', href: '/generator', icon: Sparkles },
+  { name: 'Windows / Tabs', href: '/workspaces', icon: Layers },
+  { name: 'Context Generator', href: '/generator', icon: Sparkles },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
@@ -32,59 +31,21 @@ export function Sidebar({ setGlobalSearchOpen }: { setGlobalSearchOpen?: (open: 
       <div className={`flex h-14 items-center border-b border-sidebar-border transition-colors ${
         isSidebarOpen ? 'px-3 justify-between' : 'px-2 justify-center relative'
       }`}>
-        <DropdownMenu>
-          <DropdownMenuTrigger render={
-            <button className="flex items-center gap-2.5 overflow-hidden hover:opacity-80 transition-opacity text-left min-w-0 flex-1 cursor-pointer">
-              <Logo size={28} />
-              {isSidebarOpen && (
-                <div className="flex flex-col min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 overflow-hidden">
-                    <span className="font-semibold text-sm text-sidebar-foreground truncate">
-                      {activeWorkspace === 'personal' ? 'Personal Vault' : 'Team Vault'}
-                    </span>
-                    <ChevronsUpDown className="h-3.5 w-3.5 text-sidebar-foreground/40 shrink-0" />
-                  </div>
-                  <span className="text-[10px] text-sidebar-foreground/50 truncate flex items-center gap-1">
-                    {activeWorkspace === 'personal' ? (
-                      <>Private • Free</>
-                    ) : (
-                      <><Users className="h-2.5 w-2.5 text-purple-400" /> Enterprise • {user?.user_metadata?.team_members_count || 1} {user?.user_metadata?.team_members_count === 1 ? 'Member' : 'Members'}</>
-                    )}
-                  </span>
-                </div>
-              )}
-            </button>
-          } />
-          <DropdownMenuContent align="start" className="w-56 bg-card border-border text-foreground shadow-xl p-1.5 font-medium z-50">
-            <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Select Vault Space</div>
-            <DropdownMenuItem 
-              onClick={() => setActiveWorkspace('personal')}
-              className={`flex items-center justify-between p-2 rounded-lg cursor-pointer ${activeWorkspace === 'personal' ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-secondary'}`}
-            >
-              <div className="flex items-center gap-2">
-                <Database className="h-4 w-4 text-primary" />
-                <div className="flex flex-col">
-                  <span className="text-xs">Personal Vault</span>
-                  <span className="text-[10px] text-muted-foreground">Private memory store</span>
-                </div>
+        <div className="flex items-center gap-2.5 overflow-hidden text-left min-w-0 flex-1">
+          <Logo size={28} />
+          {isSidebarOpen && (
+            <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 overflow-hidden">
+                <span className="font-semibold text-sm text-sidebar-foreground truncate">
+                  Personal Vault
+                </span>
               </div>
-              {activeWorkspace === 'personal' && <Check className="h-4 w-4 text-primary" />}
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => setActiveWorkspace('team')}
-              className={`flex items-center justify-between p-2 rounded-lg cursor-pointer mt-1 ${activeWorkspace === 'team' ? 'bg-purple-500/10 text-purple-500 font-semibold' : 'hover:bg-secondary'}`}
-            >
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-purple-500" />
-                <div className="flex flex-col">
-                  <span className="text-xs">Team Vault</span>
-                  <span className="text-[10px] text-muted-foreground">Shared enterprise hub</span>
-                </div>
-              </div>
-              {activeWorkspace === 'team' && <Check className="h-4 w-4 text-purple-500" />}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <span className="text-[10px] text-sidebar-foreground/50 truncate flex items-center gap-1">
+                Private • Free
+              </span>
+            </div>
+          )}
+        </div>
 
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -161,7 +122,7 @@ export function Sidebar({ setGlobalSearchOpen }: { setGlobalSearchOpen?: (open: 
           </Avatar>
           {isSidebarOpen && (
             <div className="flex flex-col text-left flex-1 min-w-0">
-              <span className="text-sm font-medium text-sidebar-foreground truncate">{user?.user_metadata?.full_name || 'Anonymous User'}</span>
+              <span className="text-sm font-medium text-sidebar-foreground truncate">{user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'PromptMemory User'}</span>
               <span className="text-xs text-sidebar-foreground/50 truncate">{user?.email}</span>
             </div>
           )}

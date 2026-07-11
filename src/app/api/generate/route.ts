@@ -52,23 +52,23 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { transcript, projectData, meshConfig, provider } = body
+    const { transcript, projectData, providerConfig, provider } = body
 
     if (!transcript) {
       return NextResponse.json({ error: 'Transcript is required' }, { status: 400 })
     }
 
-    // 2. Resolve AI Fiesta Mesh API Configuration
+    // 2. Resolve AI Configuration
     // Priority: Frontend user settings -> Server environment variables -> Fallback defaults
-    const apiKey = meshConfig?.apiKey || process.env.MESH_API_KEY || process.env.OPENAI_API_KEY
-    const baseURL = meshConfig?.baseUrl || process.env.MESH_API_BASE_URL || 'https://api.aifiesta.ai/v1'
-    const modelName = meshConfig?.model || process.env.MESH_API_MODEL || 'gpt-4o'
+    const apiKey = providerConfig?.apiKey || process.env.OPENAI_API_KEY
+    const baseURL = providerConfig?.baseUrl || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1'
+    const modelName = providerConfig?.model || process.env.OPENAI_MODEL || 'gpt-4o'
 
     if (!apiKey) {
       return NextResponse.json({ 
         error: 'API_KEY_MISSING', 
-        message: 'Mesh API Key is not configured. Please add your AI Fiesta Mesh API Key (`rsk_...`) on the Settings page or via server environment variables.',
-        provider: 'mesh-api'
+        message: 'OpenAI API Key is not configured. Please add OPENAI_API_KEY to your server environment variables.',
+        provider: 'openai'
       }, { status: 400 })
     }
 
@@ -107,12 +107,12 @@ Instructions:
 }`
 
     console.log("======================================================")
-    console.log(`[DEBUG] Sending Prompt to Mesh API via OpenAI SDK`)
+    console.log(`[DEBUG] Sending Prompt via OpenAI SDK`)
     console.log(`[DEBUG] BaseURL: ${baseURL} | Model: ${modelName}`)
     console.log("======================================================")
     console.log("------- User Transcript Length:", transcript.length, "chars -------")
 
-    // 3. Initialize OpenAI Client configured with AI Fiesta Mesh Gateway baseURL
+    // 3. Initialize OpenAI Client
     const openai = new OpenAI({
       apiKey: apiKey,
       baseURL: baseURL,
@@ -133,7 +133,7 @@ Instructions:
 
     const responseText = completion.choices[0]?.message?.content || ''
     
-    console.log("[DEBUG] RAW MESH API RESPONSE LENGTH:", responseText.length)
+    console.log("[DEBUG] RAW API RESPONSE LENGTH:", responseText.length)
     
     let parsed
     try {
@@ -152,21 +152,21 @@ Instructions:
 
   } catch (error: any) {
     // 5. Strict Safe Error Handling (scrubbing API keys)
-    const errorMsg = error.message || 'Unknown error occurred communicating with Mesh API'
+    const errorMsg = error.message || 'Unknown error occurred communicating with AI API'
     const status = error.status || error.statusCode || 500
     
     // Scrub sensitive credentials from log and response strings
     const scrubbedMsg = errorMsg.replace(/rsk_[A-Za-z0-9]+/g, '[REDACTED_KEY]').replace(/sk-[A-Za-z0-9]+/g, '[REDACTED_KEY]')
     
-    console.error(`[MESH API ERROR - Status ${status}]:`, scrubbedMsg)
+    console.error(`[API ERROR - Status ${status}]:`, scrubbedMsg)
     
     let cleanUserMessage = scrubbedMsg
     if (status === 401 || scrubbedMsg.toLowerCase().includes('unauthorized') || scrubbedMsg.toLowerCase().includes('invalid api key')) {
-      cleanUserMessage = 'Authentication failed: Your Mesh API Key (`rsk_...`) is invalid or expired. Please update your key in the AI Settings page.'
+      cleanUserMessage = 'Authentication failed: Your API Key is invalid or expired. Please check your credentials.'
     } else if (status === 404 || scrubbedMsg.toLowerCase().includes('not found')) {
-      cleanUserMessage = `Endpoint not found: Please verify your Mesh API Base URL and Model Name inside Settings.`
+      cleanUserMessage = `Endpoint not found: Please verify your Base URL and Model Name.`
     } else if (status === 429 || scrubbedMsg.toLowerCase().includes('rate limit')) {
-      cleanUserMessage = `Rate limit reached on Mesh API. Please wait a few seconds and try again.`
+      cleanUserMessage = `Rate limit reached. Please wait a few seconds and try again.`
     }
 
     return NextResponse.json({ 

@@ -8,7 +8,6 @@ import { useAuth } from '@/components/auth-provider'
 import { FolderKanban, Database, BrainCircuit, Activity, Loader2, ArrowUpRight, Plus, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { TeamOnboarding, TeamWorkspaceDashboard } from '@/components/team/team-onboarding'
 
 type Project = { id: string, title: string, updated_at: string, created_at?: string }
 type Prompt = { id: string, title: string, project_id: string, created_at?: string, category?: string }
@@ -126,9 +125,9 @@ export default function Dashboard() {
   }, [user, workspace, currentTeam])
 
   const stats = [
-    { name: 'Total Projects', value: counts.projects, icon: FolderKanban, trend: 'Live DB', href: '/projects' },
+    { name: 'Windows / Tabs', value: counts.projects, icon: FolderKanban, trend: 'Live DB', href: '/workspaces' },
     { name: 'Saved Prompts', value: counts.prompts, icon: Database, trend: 'Live DB', href: '/vault' },
-    { name: 'Total Memories', value: counts.memories, icon: BrainCircuit, trend: 'Live DB', href: '/projects' },
+    { name: 'Total Memories', value: counts.memories, icon: BrainCircuit, trend: 'Live DB', href: '/workspaces' },
     { name: 'Generator Usage', value: counts.generatorUsage, icon: Activity, trend: 'Live DB', href: '/generator' },
   ]
 
@@ -162,11 +161,11 @@ export default function Dashboard() {
           </motion.div>
           <motion.button 
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
-            onClick={() => router.push('/projects')}
+            onClick={() => router.push('/generator')}
             className="flex items-center gap-2 bg-gradient-to-r from-primary to-violet-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-primary/20 border border-transparent"
           >
-            <Plus className="h-4 w-4" />
-            New Project
+            <Sparkles className="h-4 w-4" />
+            Launch Context Generator
           </motion.button>
         </div>
 
@@ -196,22 +195,12 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Team Management Section */}
-        {workspace === 'team' && (
-          userTeams.length === 0 || !currentTeam ? (
-            <TeamOnboarding />
-          ) : (
-            <TeamWorkspaceDashboard />
-          )
-        )}
-
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+        <div className="grid grid-cols-1 gap-8">
           {/* Chart Section */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="lg:col-span-2 space-y-4"
+            className="space-y-4"
           >
             <h2 className="text-lg font-semibold tracking-tight px-1">Activity Overview</h2>
             <div className="glass-card rounded-2xl p-6 h-[350px] w-full">
@@ -237,31 +226,6 @@ export default function Dashboard() {
                   <Area type="monotone" dataKey="prompts" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorPrompts)" />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
-          </motion.div>
-
-          {/* Recent Activity Sidebar */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            className="space-y-4"
-          >
-            <h2 className="text-lg font-semibold tracking-tight px-1">Recent Projects</h2>
-            <div className="glass-card rounded-2xl p-1">
-              {recentProjects.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground text-sm">No projects yet.</div>
-              ) : (
-                recentProjects.map((p) => (
-                  <div key={p.id} onClick={() => router.push(`/projects/${p.id}`)} className="flex items-center gap-4 p-4 hover:bg-secondary/50 rounded-xl transition-colors cursor-pointer group">
-                    <div className="h-10 w-10 rounded-xl bg-secondary border border-border flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
-                      <FolderKanban className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{p.title}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">Updated {new Date(p.updated_at).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                ))
-              )}
             </div>
           </motion.div>
         </div>

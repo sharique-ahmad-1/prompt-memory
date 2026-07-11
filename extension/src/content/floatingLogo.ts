@@ -50,6 +50,7 @@ function injectFloatingLogo() {
     cursor: grab;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
     user-select: none;
+    touch-action: none;
   `;
 
   container.innerHTML = `
@@ -80,12 +81,10 @@ function injectFloatingLogo() {
       return;
     }
 
-    const mRight = container && container.style.right ? parseInt(container.style.right, 10) : 24;
-    const mBottom = container && container.style.bottom ? parseInt(container.style.bottom, 10) : 24;
-
-    const winBottom = Math.min(window.innerHeight - 460, Math.max(10, mBottom + 58));
-    const winRight = Math.min(window.innerWidth - 380, Math.max(10, mRight));
-    const winTop = Math.max(20, window.innerHeight - winBottom - 460);
+    const rect = container.getBoundingClientRect();
+    const winBottom = Math.min(window.innerHeight - 440, Math.max(10, window.innerHeight - rect.bottom + 58));
+    const winRight = Math.min(window.innerWidth - 380, Math.max(10, window.innerWidth - rect.right));
+    const winTop = Math.max(20, window.innerHeight - winBottom - 440);
     const winLeft = Math.max(20, window.innerWidth - winRight - 380);
 
     const win = document.createElement('div');
@@ -95,36 +94,36 @@ function injectFloatingLogo() {
       top: ${winTop}px !important;
       left: ${winLeft}px !important;
       width: 380px !important;
-      height: 460px !important;
+      height: 440px !important;
       min-width: 320px !important;
-      min-height: 400px !important;
+      min-height: 280px !important;
       max-width: 500px !important;
       max-height: 700px !important;
       resize: both !important;
-      background: rgba(30, 41, 59, 0.82) !important;
-      backdrop-filter: blur(24px) !important;
-      -webkit-backdrop-filter: blur(24px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      background: rgba(255, 255, 255, 0.90) !important;
+      backdrop-filter: blur(24px) saturate(150%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
       border-radius: 16px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(168, 85, 247, 0.18) !important;
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(99, 102, 241, 0.05) !important;
       z-index: 2147483647;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       margin: 0;
       padding: 0;
-      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: height 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     `;
 
     const closeHeader = document.createElement('div');
     closeHeader.style.cssText = `
       padding: 8px 14px;
-      background: rgba(30, 41, 59, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.5);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      color: white;
+      color: #1e293b;
       font-size: 12px;
       font-weight: 700;
       font-family: -apple-system, sans-serif;
@@ -136,13 +135,13 @@ function injectFloatingLogo() {
         <span style="font-size: 14px;">✨</span>
         <span style="background: linear-gradient(to right, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PromptMemory Vault</span>
       </div>
-      <button id="pm-close-mini-win" style="background: rgba(255,255,255,0.1); border: none; color: #94a3b8; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s;">✕</button>
+      <button id="pm-close-mini-win" style="background: rgba(0,0,0,0.05); border: none; color: #64748b; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s;">✕</button>
     `;
     win.appendChild(closeHeader);
 
     const iframe = document.createElement('iframe');
     iframe.src = chrome.runtime.getURL('popup.html');
-    iframe.style.cssText = 'width: 100%; height: 100%; flex: 1; border: none; margin: 0; padding: 0; background: transparent; overflow: hidden; display: block;';
+    iframe.style.cssText = 'width: 100% !important; height: 100% !important; flex: 1 !important; border: none; margin: 0; padding: 0; background: transparent; overflow: hidden !important; display: block; min-height: 0;';
     win.appendChild(iframe);
 
     const resizeHandle = document.createElement('div');
@@ -150,11 +149,12 @@ function injectFloatingLogo() {
     win.appendChild(resizeHandle);
 
     let isResizing = false;
-    let startW = 380, startH = 460, startX = 0, startY = 0;
+    let startW = 380, startH = 440, startX = 0, startY = 0;
     resizeHandle.addEventListener('mousedown', (e) => {
       e.preventDefault();
       e.stopPropagation();
       isResizing = true;
+      win.setAttribute('data-user-resized', 'true');
       startW = win.offsetWidth;
       startH = win.offsetHeight;
       startX = e.clientX;
@@ -164,7 +164,7 @@ function injectFloatingLogo() {
       const onMouseMove = (moveEvt: MouseEvent) => {
         if (!isResizing) return;
         const newW = Math.min(500, Math.max(320, startW + (moveEvt.clientX - startX)));
-        const newH = Math.min(700, Math.max(400, startH + (moveEvt.clientY - startY)));
+        const newH = Math.min(700, Math.max(280, startH + (moveEvt.clientY - startY)));
         win.style.width = `${newW}px`;
         win.style.height = `${newH}px`;
       };
@@ -199,14 +199,14 @@ function injectFloatingLogo() {
   }
 
   container.onmouseenter = () => {
-    if (!isDragging) {
+    if (!container.getAttribute('data-dragging')) {
       container.style.transform = 'scale(1.1) rotate(5deg)';
       container.style.boxShadow = '0 6px 16px rgba(168,85,247,0.5)';
     }
   };
   
   container.onmouseleave = () => {
-    if (!isDragging) {
+    if (!container.getAttribute('data-dragging')) {
       container.style.transform = 'scale(1) rotate(0deg)';
       container.style.boxShadow = '0 4px 12px rgba(99,102,241,0.3)';
     }
@@ -217,31 +217,50 @@ function injectFloatingLogo() {
     toggleMiniDashboardWindow();
   };
 
+  // Load saved coordinates right when container is created
+  chrome.storage.local.get(['pm_logo_pos_left', 'pm_logo_pos_top'], (res) => {
+    if (typeof res?.pm_logo_pos_left === 'number' && typeof res?.pm_logo_pos_top === 'number') {
+      container.style.right = 'auto';
+      container.style.bottom = 'auto';
+      container.style.left = `${Math.max(0, Math.min(window.innerWidth - 48, res.pm_logo_pos_left))}px`;
+      container.style.top = `${Math.max(0, Math.min(window.innerHeight - 48, res.pm_logo_pos_top))}px`;
+    } else {
+      container.style.right = '24px';
+      container.style.bottom = '24px';
+    }
+  });
+
+  // Pointer Events Drag & Drop logic
   let isDragging = false;
   let hasDragged = false;
   let startX = 0, startY = 0;
-  let initialRight = 24, initialBottom = 24;
+  let offsetX = 0, offsetY = 0;
 
-  container.addEventListener('mousedown', (e) => {
-    if (e.button !== 0) return; // Only left click drags
+  container.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
     isDragging = true;
     hasDragged = false;
+    container.setAttribute('data-dragging', 'true');
     startX = e.clientX;
     startY = e.clientY;
     
-    const style = window.getComputedStyle(container);
-    initialRight = parseInt(style.right, 10);
-    initialBottom = parseInt(style.bottom, 10);
+    const rect = container.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    container.style.right = 'auto';
+    container.style.bottom = 'auto';
+    container.style.left = `${rect.left}px`;
+    container.style.top = `${rect.top}px`;
 
     container.style.cursor = 'grabbing';
-    container.style.transition = 'none'; 
-    
-    e.preventDefault(); 
+    container.style.transition = 'none';
+    try { container.setPointerCapture(e.pointerId); } catch {}
+    e.preventDefault();
   });
 
-  document.addEventListener('mousemove', (e) => {
+  window.addEventListener('pointermove', (e) => {
     if (!isDragging) return;
-
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
 
@@ -250,35 +269,57 @@ function injectFloatingLogo() {
     }
 
     if (hasDragged) {
-      const newRight = initialRight - dx;
-      const newBottom = initialBottom - dy;
-      container.style.right = `${newRight}px`;
-      container.style.bottom = `${newBottom}px`;
+      const newLeft = Math.max(0, Math.min(window.innerWidth - 48, e.clientX - offsetX));
+      const newTop = Math.max(0, Math.min(window.innerHeight - 48, e.clientY - offsetY));
+      container.style.left = `${newLeft}px`;
+      container.style.top = `${newTop}px`;
 
-      // Dynamically anchor and move the mini-dashboard window if open
       const miniWin = document.getElementById('pm-mini-dashboard-window');
-      if (miniWin) {
-        const winBottom = Math.min(window.innerHeight - 440, Math.max(10, newBottom + 58));
-        const winRight = Math.min(window.innerWidth - 365, Math.max(10, newRight));
-        miniWin.style.setProperty('bottom', `${winBottom}px`, 'important');
-        miniWin.style.setProperty('right', `${winRight}px`, 'important');
+      if (miniWin && !miniWin.getAttribute('data-user-resized')) {
+        let winTop = Math.max(10, Math.min(window.innerHeight - miniWin.offsetHeight - 10, newTop - miniWin.offsetHeight - 10));
+        if (winTop < 10) winTop = Math.min(window.innerHeight - miniWin.offsetHeight - 10, newTop + 58);
+        let winLeft = Math.max(10, Math.min(window.innerWidth - miniWin.offsetWidth - 10, newLeft - miniWin.offsetWidth + 48));
+        miniWin.style.setProperty('top', `${winTop}px`, 'important');
+        miniWin.style.setProperty('left', `${winLeft}px`, 'important');
       }
     }
   });
 
-  document.addEventListener('mouseup', (e) => {
-    if (isDragging && e.button === 0) {
-      isDragging = false;
-      container.style.cursor = 'grab';
-      container.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease'; 
-      
-      if (!hasDragged) {
-        container.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-          container.style.transform = 'scale(1.1)';
-        }, 100);
+  window.addEventListener('pointerup', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    container.removeAttribute('data-dragging');
+    try { container.releasePointerCapture(e.pointerId); } catch {}
+    container.style.cursor = 'grab';
+    container.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease';
+
+    if (!hasDragged) {
+      container.style.transform = 'scale(0.9)';
+      setTimeout(() => { container.style.transform = 'scale(1.1)'; }, 100);
+      toggleMiniDashboardWindow();
+    } else {
+      const rect = container.getBoundingClientRect();
+      chrome.storage.local.set({
+        pm_logo_pos_left: rect.left,
+        pm_logo_pos_top: rect.top
+      }).catch(() => {});
+    }
+  });
+
+  // Dynamic auto-sizing listener from Popup.tsx
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.action === 'PM_RESIZE_WINDOW') {
+      const miniWin = document.getElementById('pm-mini-dashboard-window');
+      if (miniWin && !miniWin.getAttribute('data-user-resized')) {
+        const targetHeight = e.data.height || 440;
+        miniWin.style.setProperty('height', `${targetHeight}px`, 'important');
+        miniWin.style.setProperty('min-height', `${Math.min(targetHeight, 280)}px`, 'important');
         
-        toggleMiniDashboardWindow();
+        // Adjust position dynamically
+        const rect = container.getBoundingClientRect();
+        let winTop = Math.max(10, Math.min(window.innerHeight - targetHeight - 10, rect.top - targetHeight - 10));
+        if (winTop < 10) winTop = Math.min(window.innerHeight - targetHeight - 10, rect.bottom + 10);
+        miniWin.style.setProperty('top', `${winTop}px`, 'important');
       }
     }
   });
@@ -286,7 +327,19 @@ function injectFloatingLogo() {
   document.body.appendChild(container);
 }
 
+function isAIPlatform() {
+  const url = window.location.href.toLowerCase();
+  return url.includes('chatgpt.com') ||
+         url.includes('claude.ai') ||
+         url.includes('gemini.google.com') ||
+         url.includes('makersuite.google.com') ||
+         url.includes('aistudio.google.com') ||
+         url.includes('poe.com') ||
+         url.includes('perplexity.ai');
+}
+
 function initSelectionTooltip() {
+  if (!isAIPlatform()) return;
   const selectionPill = document.createElement('div');
   selectionPill.id = 'pm-selection-pill';
   selectionPill.style.cssText = `

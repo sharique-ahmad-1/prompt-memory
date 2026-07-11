@@ -29,7 +29,9 @@
     {
       "matches": [
         "https://prompt-memory.vercel.app/*",
-        "https://*.vercel.app/*"
+        "https://*.vercel.app/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*"
       ],
       "js": ["src/content/authBridge.ts"],
       "run_at": "document_end"
@@ -43,11 +45,25 @@
     },
     {
       "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "js": ["src/content/youtube.ts"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "*://gemini.google.com/*",
+        "https://gemini.google.com/*"
+      ],
+      "js": ["src/content/gemini.ts"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
         "*://*.linkedin.com/*",
         "*://*.instagram.com/*",
         "*://*.twitter.com/*",
-        "*://*.x.com/*",
-        "*://*.youtube.com/*"
+        "*://*.x.com/*"
       ],
       "js": ["src/content/socialClipper.ts"],
       "run_at": "document_end"

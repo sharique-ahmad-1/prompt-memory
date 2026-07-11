@@ -127,7 +127,7 @@ export function GlobalSearch({ open, setOpen }: { open: boolean, setOpen: React.
                   <CommandItem
                     key={`project-${project.id}`}
                     value={`project ${project.title}`}
-                    onSelect={() => runCommand(() => router.push(`/projects/${project.id}`))}
+                    onSelect={() => runCommand(() => router.push(`/workspaces`))}
                   >
                     <FolderKanban className="mr-2 h-4 w-4 text-blue-400" />
                     <span>{project.title}</span>
@@ -157,7 +157,7 @@ export function GlobalSearch({ open, setOpen }: { open: boolean, setOpen: React.
                   <CommandItem
                     key={`mem-${mem.id}`}
                     value={`memory ${mem.projects?.title}`}
-                    onSelect={() => runCommand(() => router.push(`/projects/${mem.project_id}`))}
+                    onSelect={() => runCommand(() => router.push(`/workspaces`))}
                   >
                     <BrainCircuit className="mr-2 h-4 w-4 text-purple-400" />
                     <span>Memory for {mem.projects?.title}</span>

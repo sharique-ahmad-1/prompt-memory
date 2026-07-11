@@ -1,19 +1,190 @@
+// ChatGPT SPA-Aware Content Script for PromptMemory
+// Includes robust message selectors and anchored floating side widget
+
 console.log("PromptMemory: ChatGPT Content Script Injected");
 
+function showToast(message: string, type: 'info' | 'success' | 'error') {
+  let container = document.getElementById('pm-clipper-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'pm-clipper-toast-container';
+    container.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 2147483647;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    `;
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  const bgColors = {
+    info: 'rgba(99, 102, 241, 0.95)',
+    success: 'rgba(16, 185, 129, 0.95)',
+    error: 'rgba(239, 68, 68, 0.95)'
+  };
+  const icons = { info: '⏳', success: '✅', error: '❌' };
+
+  toast.style.cssText = `
+    background: ${bgColors[type]};
+    color: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.25);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  `;
+  toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  });
+
+  setTimeout(() => {
+    toast.style.transform = 'translateY(10px)';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 3200);
+}
+
+function extractChatGPTConversation(): string {
+  const turns: string[] = [];
+  const allTurns = Array.from(document.querySelectorAll('[data-message-author-role], article[data-testid*="turn"], div[data-testid*="user-message"], .group\\/conversation-turn'));
+  allTurns.forEach(turn => {
+    const role = turn.getAttribute('data-message-author-role') || (turn.getAttribute('data-testid') || '').includes('user') ? 'user' : 'assistant';
+    const prefix = role === 'user' ? '### User:\n' : '### ChatGPT:\n';
+    const textElement = turn.querySelector('.whitespace-pre-wrap') || turn;
+    const text = textElement.textContent?.trim() || '';
+    if (text && !turns.includes(prefix + text)) {
+      turns.push(`${prefix}${text}`);
+    }
+  });
+
+  if (turns.length === 0) {
+    const mainText = document.querySelector('main')?.innerText?.trim() || document.body.innerText?.trim() || '';
+    return mainText.substring(0, 8000);
+  }
+
+  return turns.join('\n\n---\n\n') || document.title || 'ChatGPT Conversation';
+}
+
+function injectSideWidget() {
+  if (document.getElementById('pm-chatgpt-side-widget')) return;
+  if (!document.body) return;
+
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    #pm-chatgpt-side-widget {
+      position: fixed !important;
+      right: 20px !important;
+      bottom: 90px !important;
+      z-index: 2147483640 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-end !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      pointer-events: none !important;
+    }
+    #pm-chatgpt-trigger-pill {
+      pointer-events: auto !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 8px 14px !important;
+      background: rgba(255, 255, 255, 0.92) !important;
+      color: #1e293b !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      border-radius: 9999px !important;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.12), 0 0 12px rgba(99, 102, 241, 0.1) !important;
+      cursor: pointer !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      user-select: none !important;
+    }
+    #pm-chatgpt-trigger-pill:hover {
+      transform: translateY(-2px) scale(1.02) !important;
+      box-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.15), 0 0 16px rgba(236, 72, 153, 0.15) !important;
+      border-color: rgba(236, 72, 153, 0.3) !important;
+    }
+  `;
+  document.head.appendChild(styleEl);
+
+  const widget = document.createElement('div');
+  widget.id = 'pm-chatgpt-side-widget';
+
+  const triggerPill = document.createElement('div');
+  triggerPill.id = 'pm-chatgpt-trigger-pill';
+  triggerPill.innerHTML = `
+    <span style="font-size: 14px;">✨</span>
+    <span style="background: linear-gradient(to right, #ec4899, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Clip Chat</span>
+  `;
+
+  widget.appendChild(triggerPill);
+  document.body.appendChild(widget);
+
+  triggerPill.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    showToast("Extracting and syncing ChatGPT conversation...", 'info');
+    try {
+      const chatContent = extractChatGPTConversation();
+      let rawTitle = document.title.replace(/[-–|]\s*(ChatGPT|OpenAI)/gi, '').trim();
+      const title = rawTitle ? `ChatGPT: ${rawTitle}` : 'ChatGPT Conversation';
+
+      await new Promise<void>((resolve, reject) => {
+        chrome.runtime.sendMessage({
+          action: 'SAVE_PROMPT',
+          payload: {
+            title: title,
+            platform: 'chatgpt',
+            content: chatContent,
+            source_link: window.location.href,
+            tags: ['#ChatGPT', '#AIChat', '#Conversation'],
+            category: 'AI Chat'
+          }
+        }, (res) => {
+          if (chrome.runtime.lastError || !res?.success) {
+            reject(new Error(chrome.runtime.lastError?.message || res?.error || 'Failed to sync with PromptMemory Vault'));
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      showToast("ChatGPT conversation saved to PromptMemory Vault!", 'success');
+    } catch (err: any) {
+      showToast("Error: " + (err.message || 'Could not reach Supabase'), 'error');
+    }
+  });
+}
+
 function injectSaveButtons() {
-  // Find all user and assistant messages
-  const messages = document.querySelectorAll('[data-message-author-role]');
+  const messages = document.querySelectorAll('[data-message-author-role], article[data-testid*="turn"], div[data-testid*="user-message"], .group\\/conversation-turn');
   
   messages.forEach((message) => {
-    // Prevent duplicate injections
     if (message.querySelector('.pm-save-btn') || message.querySelector('[data-pm-injected="true"]')) {
       return;
     }
 
-    const role = message.getAttribute('data-message-author-role') || 'unknown';
+    const role = message.getAttribute('data-message-author-role') || (message.getAttribute('data-testid') || '').includes('user') ? 'user' : 'assistant';
     if (role !== 'user') return;
 
-    // Try to find the action bar or bottom of the message
     const container = document.createElement('div');
     container.setAttribute('data-pm-injected', 'true');
     container.style.cssText = `
@@ -27,13 +198,11 @@ function injectSaveButtons() {
     const btn = document.createElement('button');
     btn.className = 'pm-save-btn';
     btn.innerText = '✨ Save to PM';
-    
-    // Indigo / Emerald styling
     btn.style.cssText = `
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6); /* Indigo to Violet */
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
       color: white;
       border: none;
       border-radius: 6px;
@@ -46,26 +215,13 @@ function injectSaveButtons() {
       font-family: system-ui, -apple-system, sans-serif;
     `;
 
-    btn.onmouseover = () => {
-      btn.style.transform = 'translateY(-1px)';
-      btn.style.boxShadow = '0 4px 6px rgba(99,102,241,0.3)';
-    };
-    btn.onmouseout = () => {
-      btn.style.transform = 'translateY(0)';
-      btn.style.boxShadow = '0 2px 4px rgba(99,102,241,0.2)';
-    };
-
     btn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
       
-      // Extract the text of the message
       const textElement = message.querySelector('.whitespace-pre-wrap') || message;
       const textContent = textElement.textContent || '';
       
-      const role = message.getAttribute('data-message-author-role') || 'unknown';
-
-      // Send to background/sidepanel
       chrome.runtime.sendMessage({
         action: 'SAVE_PROMPT',
         payload: {
@@ -77,12 +233,11 @@ function injectSaveButtons() {
         void chrome.runtime.lastError;
       });
 
-      // Provide visual feedback
       const originalText = btn.innerText;
       const originalBg = btn.style.background;
       
       btn.innerText = '✓ Saved';
-      btn.style.background = '#10b981'; /* Emerald 500 */
+      btn.style.background = '#10b981';
       
       setTimeout(() => {
         btn.innerText = originalText;
@@ -91,38 +246,29 @@ function injectSaveButtons() {
     };
 
     container.appendChild(btn);
-    
-    // Append to the bottom of the message element
     message.appendChild(container);
   });
 }
 
-// Initial injection
 (function init() {
   if (document.body) {
     injectSaveButtons();
+    injectSideWidget();
 
-    // Use a MutationObserver to detect when new messages are added to the chat
-    const observer = new MutationObserver((mutations) => {
-      let shouldInject = false;
-      for (const mutation of mutations) {
-        if (mutation.addedNodes.length > 0) {
-          shouldInject = true;
-          break;
-        }
-      }
-      if (shouldInject) {
-        // Small debounce
-        setTimeout(injectSaveButtons, 500);
-      }
+    const observer = new MutationObserver(() => {
+      injectSaveButtons();
+      injectSideWidget();
     });
 
-    // Start observing the chat container
     const chatContainer = document.querySelector('main') || document.body;
     observer.observe(chatContainer, {
       childList: true,
       subtree: true
     });
+    setInterval(() => {
+      injectSaveButtons();
+      injectSideWidget();
+    }, 1500);
   } else {
     setTimeout(init, 100);
   }
