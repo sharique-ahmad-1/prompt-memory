@@ -159,14 +159,6 @@ export default function Dashboard() {
             </h1>
             <p className="text-muted-foreground text-lg">Here's what's happening in your AI workspace.</p>
           </motion.div>
-          <motion.button 
-            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
-            onClick={() => router.push('/generator')}
-            className="flex items-center gap-2 bg-gradient-to-r from-primary to-violet-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-primary/20 border border-transparent"
-          >
-            <Sparkles className="h-4 w-4" />
-            Launch Context Generator
-          </motion.button>
         </div>
 
         {/* Stats Grid */}

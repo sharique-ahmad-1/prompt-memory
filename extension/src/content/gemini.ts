@@ -169,108 +169,158 @@ function extractGeminiChat(): string {
 }
 
 function injectSideWidget() {
-  if (document.getElementById('pm-gemini-side-widget')) return;
+  if (document.getElementById('pm-gemini-buttons-container')) return;
   if (!document.body) return;
 
-  const widget = document.createElement('div');
-  widget.id = 'pm-gemini-side-widget';
-
-  const menuPanel = document.createElement('div');
-  menuPanel.id = 'pm-gemini-menu-panel';
-  menuPanel.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 6px;">
-      <span>✨ PromptMemory Action</span>
-      <span id="pm-close-menu" style="cursor: pointer; font-size: 13px;">✕</span>
-    </div>
-    <div style="font-size: 12px; color: #1e293b; font-weight: 600; line-height: 1.3;">
-      Save active Gemini conversation & prompts directly into your Vault.
-    </div>
-    <button id="pm-save-chat-btn" class="pm-menu-btn">
-      <span>💾 Save Chat to Vault</span>
-    </button>
+  const container = document.createElement('div');
+  container.id = 'pm-gemini-buttons-container';
+  container.style.cssText = `
+    position: fixed !important;
+    right: 20px !important;
+    bottom: 24px !important;
+    z-index: 2147483640 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   `;
 
-  const triggerPill = document.createElement('div');
-  triggerPill.id = 'pm-gemini-trigger-pill';
-  triggerPill.innerHTML = `
-    <span style="font-size: 14px;">✨</span>
-    <span style="background: linear-gradient(to right, #ec4899, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Clip Chat</span>
+  const copyBtn = document.createElement('button');
+  copyBtn.id = 'pm-gemini-copy-btn';
+  copyBtn.style.cssText = `
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 16px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #1e293b !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(12px) !important;
+    transition: all 0.2s !important;
   `;
+  copyBtn.innerHTML = `<span>📋</span><span>Copy Context</span>`;
 
-  widget.appendChild(menuPanel);
-  widget.appendChild(triggerPill);
-  document.body.appendChild(widget);
-
-  triggerPill.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = menuPanel.style.display === 'flex';
-    menuPanel.style.display = isOpen ? 'none' : 'flex';
+  copyBtn.addEventListener('click', async (e) => {
+    e.stopPropagation(); e.preventDefault();
+    if (typeof chrome === 'undefined' || !chrome.runtime) {
+      alert("PromptMemory Extension updated. Please refresh this page to continue saving.");
+      return;
+    }
+    try {
+      const contextText = extractGeminiChat();
+      await navigator.clipboard.writeText(contextText);
+      copyBtn.innerHTML = `<span>✅</span><span>Copied!</span>`;
+      showToast("Context copied to clipboard!", 'success');
+      setTimeout(() => { copyBtn.innerHTML = `<span>📋</span><span>Copy Context</span>`; }, 2000);
+    } catch (err: any) {
+      showToast("Failed to copy context.", 'error');
+    }
   });
 
-  const closeBtn = menuPanel.querySelector('#pm-close-menu');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      menuPanel.style.display = 'none';
-    });
-  }
+  const automateBtn = document.createElement('button');
+  automateBtn.id = 'pm-gemini-automate-btn';
+  automateBtn.style.cssText = `
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 16px !important;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+  `;
+  automateBtn.innerHTML = `<span>⚡</span><span>Automate New Context</span>`;
 
-  const saveBtn = menuPanel.querySelector('#pm-save-chat-btn') as HTMLButtonElement;
-  if (saveBtn) {
-    saveBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (saveBtn.disabled) return;
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = `<span>⏳ Saving to Vault...</span>`;
-      showToast("Extracting and syncing Gemini conversation...", 'info');
+  automateBtn.addEventListener('click', async (e) => {
+    e.stopPropagation(); e.preventDefault();
+    if (typeof chrome === 'undefined' || !chrome.runtime) {
+      alert("PromptMemory Extension updated. Please refresh this page to continue saving.");
+      return;
+    }
+    if (automateBtn.disabled) return;
+    automateBtn.disabled = true;
+    automateBtn.innerHTML = `<span>⏳ Automating...</span>`;
+    showToast("Copying context & starting new chat...", 'info');
 
-      try {
-        const chatContent = extractGeminiChat();
-        let rawTitle = document.title.replace(/Gemini/i, '').replace(/[-–|]/g, '').trim();
-        const title = rawTitle ? `Gemini: ${rawTitle}` : 'Gemini AI Conversation';
+    try {
+      const copiedContext = extractGeminiChat();
+      await navigator.clipboard.writeText(copiedContext).catch(() => {});
 
-        await new Promise<void>((resolve, reject) => {
-          chrome.runtime.sendMessage({
-            action: 'SAVE_PROMPT',
-            payload: {
-              title: title,
-              platform: 'Gemini',
-              content: chatContent,
-              source_link: window.location.href,
-              tags: ['#Gemini', '#AIChat', '#Conversation'],
-              category: 'AI Chat'
-            }
-          }, (res) => {
-            if (chrome.runtime.lastError || !res?.success) {
-              reject(new Error(chrome.runtime.lastError?.message || res?.error || 'Failed to sync with PromptMemory Vault'));
-            } else {
-              resolve();
-            }
-          });
-        });
-
-        saveBtn.innerHTML = `<span>✅ Successfully Saved!</span>`;
-        showToast("Gemini chat saved to PromptMemory Vault!", 'success');
-        setTimeout(() => {
-          menuPanel.style.display = 'none';
-          saveBtn.disabled = false;
-          saveBtn.innerHTML = `<span>💾 Save Chat to Vault</span>`;
-        }, 2000);
-      } catch (err: any) {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = `<span>❌ Error Saving</span>`;
-        showToast("Error: " + (err.message || 'Could not reach Supabase'), 'error');
-        setTimeout(() => {
-          saveBtn.innerHTML = `<span>💾 Save Chat to Vault</span>`;
-        }, 3000);
+      // Click Gemini's New Chat button
+      const newChatBtn = document.querySelector<HTMLElement>('a[href="/app"], button[aria-label*="New chat" i], [data-test-id="new-chat-button"], side-navigation-button');
+      if (newChatBtn) {
+        newChatBtn.click();
+      } else {
+        window.location.href = 'https://gemini.google.com/app';
+        return;
       }
-    });
-  }
+
+      // Initialize a setInterval (polling every 300ms, max 15 attempts) to look for the primary <textarea> in the new chat.
+      let attempts = 0;
+      const checkInput = setInterval(() => {
+        attempts++;
+        const inputArea = document.querySelector<HTMLElement>('rich-textarea [contenteditable="true"], div[role="textbox"][contenteditable="true"], textarea');
+        if (inputArea) {
+          clearInterval(checkInput);
+          inputArea.focus();
+          const fullPrompt = copiedContext + "\n\n - Chat 2";
+          
+          if (inputArea instanceof HTMLTextAreaElement) {
+            inputArea.value = fullPrompt;
+            inputArea.dispatchEvent(new Event('input', { bubbles: true }));
+          } else {
+            inputArea.innerText = fullPrompt;
+            inputArea.dispatchEvent(new InputEvent('input', { bubbles: true, cancelable: true, data: fullPrompt }));
+          }
+
+          setTimeout(() => {
+            // Finally, simulate the Enter key to submit
+            const sendBtn = document.querySelector<HTMLElement>('button[aria-label*="Send" i], button.send-button, [data-test-id="send-button"]');
+            if (sendBtn) {
+              sendBtn.click();
+            } else {
+              inputArea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+            }
+            automateBtn.disabled = false;
+            automateBtn.innerHTML = `<span>✅ Context Sent!</span>`;
+            showToast("Automated new context successfully!", 'success');
+            setTimeout(() => { automateBtn.innerHTML = `<span>⚡</span><span>Automate New Context</span>`; }, 2500);
+          }, 300);
+        } else if (attempts >= 15) {
+          clearInterval(checkInput);
+          automateBtn.disabled = false;
+          automateBtn.innerHTML = `<span>⚡</span><span>Automate New Context</span>`;
+          showToast("Failed to locate new chat text area after 15 attempts.", 'error');
+        }
+      }, 300);
+    } catch (err: any) {
+      automateBtn.disabled = false;
+      automateBtn.innerHTML = `<span>❌ Error</span>`;
+      showToast("Error during automation: " + err.message, 'error');
+      setTimeout(() => { automateBtn.innerHTML = `<span>⚡</span><span>Automate New Context</span>`; }, 3000);
+    }
+  });
+
+  container.appendChild(copyBtn);
+  container.appendChild(automateBtn);
+  document.body.appendChild(container);
 }
 
 // Clean any old duplicate injection buttons from previous versions
 function removeLegacyButtons() {
-  document.querySelectorAll('#pm-inject-btn, .pm-gemini-clip-btn').forEach(b => b.remove());
+  document.querySelectorAll('#pm-inject-btn, .pm-gemini-clip-btn, #pm-gemini-side-widget').forEach(b => b.remove());
 }
 
 window.addEventListener('popstate', () => {

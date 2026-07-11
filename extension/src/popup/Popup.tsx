@@ -229,9 +229,9 @@ export const Popup: React.FC = () => {
       if (actionType === 'window') {
         chrome.runtime.sendMessage({ action: 'SAVE_WINDOW' }, (res) => {
           if (chrome.runtime.lastError || !res?.success) {
-            finishAction(res?.error || 'Error saving window tabs', 'error');
+            finishAction('Failed to save. Check connection.', 'error');
           } else {
-            finishAction('All active window tabs saved to Vault!');
+            finishAction('Saved!', 'success');
             if (res.data) setItems((prev) => [res.data, ...prev]);
           }
         });
@@ -241,16 +241,21 @@ export const Popup: React.FC = () => {
       // For tab, selection, and media we query current tab reliably
       if (typeof chrome.tabs !== 'undefined' && chrome.tabs.query && chrome.tabs.sendMessage) {
         const tabs = await new Promise<chrome.tabs.Tab[]>((resolve) => {
-          chrome.tabs.query({ active: true, lastFocusedWindow: true }, (t1) => {
+          chrome.tabs.query({ active: true, currentWindow: true }, (t1) => {
             if (t1 && t1.length > 0) resolve(t1);
-            else chrome.tabs.query({ active: true, currentWindow: true }, (t2) => resolve(t2 || []));
+            else chrome.tabs.query({ active: true, lastFocusedWindow: true }, (t2) => resolve(t2 || []));
           });
         });
         const activeTabObj = tabs[0];
 
         if (actionType === 'tab') {
-          const title = activeTabObj?.title || document.title || 'Saved Tab';
-          const url = activeTabObj?.url || window.location.href;
+          const tabQueryRes = await new Promise<chrome.tabs.Tab[]>((resolve) => {
+            chrome.tabs.query({ active: true, currentWindow: true }, (t) => resolve(t || []));
+          });
+          const targetTab = tabQueryRes[0] || activeTabObj;
+          const title = targetTab?.title || document.title || 'Saved Tab';
+          const url = targetTab?.url || window.location.href;
+
           chrome.runtime.sendMessage({
             action: 'SAVE_PROMPT',
             payload: {
@@ -263,9 +268,9 @@ export const Popup: React.FC = () => {
             }
           }, (res) => {
             if (chrome.runtime.lastError || !res?.success) {
-              finishAction('Error saving current tab', 'error');
+              finishAction('Failed to save. Check connection.', 'error');
             } else {
-              finishAction('Current tab saved to Vault!');
+              finishAction('Saved!', 'success');
               if (res.data) setItems((prev) => [res.data, ...prev]);
             }
           });
@@ -289,9 +294,9 @@ export const Popup: React.FC = () => {
                 }
               }, (res) => {
                 if (chrome.runtime.lastError || !res?.success) {
-                  finishAction('Error saving selection', 'error');
+                  finishAction('Failed to save. Check connection.', 'error');
                 } else {
-                  finishAction('Selected text saved to Vault!');
+                  finishAction('Saved!', 'success');
                   if (res.data) setItems((prev) => [res.data, ...prev]);
                 }
               });
@@ -318,9 +323,9 @@ export const Popup: React.FC = () => {
                 }
               }, (res) => {
                 if (chrome.runtime.lastError || !res?.success) {
-                  finishAction('Error saving media clip', 'error');
+                  finishAction('Failed to save. Check connection.', 'error');
                 } else {
-                  finishAction('Media clip saved to Vault!');
+                  finishAction('Saved!', 'success');
                   if (res.data) setItems((prev) => [res.data, ...prev]);
                 }
               });

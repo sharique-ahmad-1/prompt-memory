@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Database, FolderKanban, Sparkles, Settings, ChevronsUpDown, Search, Command, PanelLeftClose, PanelLeftOpen, Layers, Users, Check, Camera } from 'lucide-react'
 import { useAuth } from '../auth-provider'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -22,6 +22,7 @@ export function Sidebar({ setGlobalSearchOpen }: { setGlobalSearchOpen?: (open: 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const { user, workspace: activeWorkspace, setWorkspace: setActiveWorkspace } = useAuth()
   const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <div className={`relative flex h-full flex-col bg-sidebar border-r border-sidebar-border text-sidebar-foreground/70 shadow-[1px_0_10px_rgba(0,0,0,0.02)] z-20 transition-all duration-300 ease-in-out shrink-0 ${
@@ -109,11 +110,12 @@ export function Sidebar({ setGlobalSearchOpen }: { setGlobalSearchOpen?: (open: 
       </nav>
 
       {/* User Profile */}
-      <div className={`p-3 border-t border-sidebar-border bg-sidebar-accent/20 ${!isSidebarOpen ? 'flex justify-center' : ''}`}>
-        <button 
-          title={!isSidebarOpen ? `${user?.user_metadata?.full_name || 'User'} (${user?.email || ''})` : undefined}
-          className={`flex items-center gap-3 w-full hover:bg-sidebar-accent rounded-md p-1.5 transition-colors ${!isSidebarOpen ? 'justify-center' : ''}`}
-        >
+      <div 
+        onClick={() => router.push('/settings')}
+        title={!isSidebarOpen ? `${user?.user_metadata?.full_name || 'User'} (${user?.email || ''})` : "Account Settings"}
+        className={`p-3 border-t border-sidebar-border bg-sidebar-accent/20 hover:bg-gray-800/10 dark:hover:bg-gray-800 transition-colors cursor-pointer ${!isSidebarOpen ? 'flex justify-center' : ''}`}
+      >
+        <div className={`flex items-center gap-3 w-full rounded-md p-1.5 ${!isSidebarOpen ? 'justify-center' : ''}`}>
           <Avatar className="h-8 w-8 shrink-0 rounded-md border border-sidebar-border shadow-sm">
             <AvatarImage src={user?.user_metadata?.avatar_url} />
             <AvatarFallback className="rounded-md bg-primary/10 text-primary text-xs font-bold">
@@ -126,7 +128,7 @@ export function Sidebar({ setGlobalSearchOpen }: { setGlobalSearchOpen?: (open: 
               <span className="text-xs text-sidebar-foreground/50 truncate">{user?.email}</span>
             </div>
           )}
-        </button>
+        </div>
       </div>
     </div>
   )

@@ -126,52 +126,150 @@ function injectSideWidget() {
   `;
   document.head.appendChild(styleEl);
 
-  const widget = document.createElement('div');
-  widget.id = 'pm-chatgpt-side-widget';
-
-  const triggerPill = document.createElement('div');
-  triggerPill.id = 'pm-chatgpt-trigger-pill';
-  triggerPill.innerHTML = `
-    <span style="font-size: 14px;">✨</span>
-    <span style="background: linear-gradient(to right, #ec4899, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Clip Chat</span>
+  const container = document.createElement('div');
+  container.id = 'pm-chatgpt-buttons-container';
+  container.style.cssText = `
+    position: fixed !important;
+    right: 20px !important;
+    bottom: 24px !important;
+    z-index: 2147483640 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   `;
 
-  widget.appendChild(triggerPill);
-  document.body.appendChild(widget);
+  const copyBtn = document.createElement('button');
+  copyBtn.id = 'pm-chatgpt-copy-btn';
+  copyBtn.style.cssText = `
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 16px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #1e293b !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(12px) !important;
+    transition: all 0.2s !important;
+  `;
+  copyBtn.innerHTML = `<span>📋</span><span>Copy Context</span>`;
 
-  triggerPill.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    showToast("Extracting and syncing ChatGPT conversation...", 'info');
+  copyBtn.addEventListener('click', async (e) => {
+    e.stopPropagation(); e.preventDefault();
+    if (typeof chrome === 'undefined' || !chrome.runtime) {
+      alert("PromptMemory Extension updated. Please refresh this page to continue saving.");
+      return;
+    }
     try {
-      const chatContent = extractChatGPTConversation();
-      let rawTitle = document.title.replace(/[-–|]\s*(ChatGPT|OpenAI)/gi, '').trim();
-      const title = rawTitle ? `ChatGPT: ${rawTitle}` : 'ChatGPT Conversation';
-
-      await new Promise<void>((resolve, reject) => {
-        chrome.runtime.sendMessage({
-          action: 'SAVE_PROMPT',
-          payload: {
-            title: title,
-            platform: 'chatgpt',
-            content: chatContent,
-            source_link: window.location.href,
-            tags: ['#ChatGPT', '#AIChat', '#Conversation'],
-            category: 'AI Chat'
-          }
-        }, (res) => {
-          if (chrome.runtime.lastError || !res?.success) {
-            reject(new Error(chrome.runtime.lastError?.message || res?.error || 'Failed to sync with PromptMemory Vault'));
-          } else {
-            resolve();
-          }
-        });
-      });
-
-      showToast("ChatGPT conversation saved to PromptMemory Vault!", 'success');
+      const contextText = extractChatGPTConversation();
+      await navigator.clipboard.writeText(contextText);
+      copyBtn.innerHTML = `<span>✅</span><span>Copied!</span>`;
+      showToast("Context copied to clipboard!", 'success');
+      setTimeout(() => { copyBtn.innerHTML = `<span>📋</span><span>Copy Context</span>`; }, 2000);
     } catch (err: any) {
-      showToast("Error: " + (err.message || 'Could not reach Supabase'), 'error');
+      showToast("Failed to copy context.", 'error');
     }
   });
+
+  const automateBtn = document.createElement('button');
+  automateBtn.id = 'pm-chatgpt-automate-btn';
+  automateBtn.style.cssText = `
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 16px !important;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+  `;
+  automateBtn.innerHTML = `<span>⚡</span><span>Automate New Context</span>`;
+
+  automateBtn.addEventListener('click', async (e) => {
+    e.stopPropagation(); e.preventDefault();
+    if (typeof chrome === 'undefined' || !chrome.runtime) {
+      alert("PromptMemory Extension updated. Please refresh this page to continue saving.");
+      return;
+    }
+    if (automateBtn.disabled) return;
+    automateBtn.disabled = true;
+    automateBtn.innerHTML = `<span>⏳ Automating...</span>`;
+    showToast("Copying context & starting new chat...", 'info');
+
+    try {
+      const copiedContext = extractChatGPTConversation();
+      await navigator.clipboard.writeText(copiedContext).catch(() => {});
+
+      // Query DOM for New Chat button
+      const newChatBtn = document.querySelector<HTMLElement>('a[href="/"], a[href="/chat"], button[aria-label*="New chat" i], [data-testid="compose-new-chat-button"]');
+      if (newChatBtn && newChatBtn.getAttribute('href') === '/') {
+        newChatBtn.click();
+      } else {
+        window.location.href = 'https://chatgpt.com/';
+        return;
+      }
+
+      // Initialize a setInterval (polling every 300ms, max 15 attempts) to look for the primary <textarea> in the new chat.
+      let attempts = 0;
+      const checkInput = setInterval(() => {
+        attempts++;
+        const inputArea = document.querySelector<HTMLElement>('#prompt-textarea, div[role="textbox"][contenteditable="true"], textarea');
+        if (inputArea) {
+          clearInterval(checkInput);
+          inputArea.focus();
+          const fullPrompt = copiedContext + "\n\n - Chat 2";
+          
+          if (inputArea instanceof HTMLTextAreaElement) {
+            inputArea.value = fullPrompt;
+            inputArea.dispatchEvent(new Event('input', { bubbles: true }));
+          } else {
+            inputArea.innerText = fullPrompt;
+            inputArea.dispatchEvent(new InputEvent('input', { bubbles: true, cancelable: true, data: fullPrompt }));
+          }
+
+          setTimeout(() => {
+            // Finally, simulate Enter key to submit
+            const sendBtn = document.querySelector<HTMLElement>('button[data-testid="send-button"], button[aria-label*="Send" i]');
+            if (sendBtn && !sendBtn.hasAttribute('disabled')) {
+              sendBtn.click();
+            } else {
+              inputArea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+            }
+            automateBtn.disabled = false;
+            automateBtn.innerHTML = `<span>✅ Context Sent!</span>`;
+            showToast("Automated new context successfully!", 'success');
+            setTimeout(() => { automateBtn.innerHTML = `<span>⚡</span><span>Automate New Context</span>`; }, 2500);
+          }, 300);
+        } else if (attempts >= 15) {
+          clearInterval(checkInput);
+          automateBtn.disabled = false;
+          automateBtn.innerHTML = `<span>⚡</span><span>Automate New Context</span>`;
+          showToast("Failed to locate new chat text area after 15 attempts.", 'error');
+        }
+      }, 300);
+    } catch (err: any) {
+      automateBtn.disabled = false;
+      automateBtn.innerHTML = `<span>❌ Error</span>`;
+      showToast("Error during automation: " + err.message, 'error');
+      setTimeout(() => { automateBtn.innerHTML = `<span>⚡</span><span>Automate New Context</span>`; }, 3000);
+    }
+  });
+
+  container.appendChild(copyBtn);
+  container.appendChild(automateBtn);
+  document.body.appendChild(container);
 }
 
 function injectSaveButtons() {
@@ -218,6 +316,10 @@ function injectSaveButtons() {
     btn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+        alert("PromptMemory Extension updated. Please refresh this page to continue saving.");
+        return;
+      }
       
       const textElement = message.querySelector('.whitespace-pre-wrap') || message;
       const textContent = textElement.textContent || '';
@@ -226,7 +328,6 @@ function injectSaveButtons() {
         action: 'SAVE_PROMPT',
         payload: {
           platform: 'chatgpt',
-          role: role,
           content: textContent.trim()
         }
       }, () => {

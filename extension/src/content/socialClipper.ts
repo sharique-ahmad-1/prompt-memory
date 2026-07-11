@@ -97,133 +97,153 @@ styleEl.textContent = `
     }
   }
 
-  /* 📸 Instagram Native Matching (Strict Icon-Only Sibling) */
-  .pm-social-clip-btn.pm-btn-instagram {
-    background: transparent !important;
-    color: inherit !important;
-    border: none !important;
-    border-radius: 50% !important;
-    padding: 8px !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    width: 40px !important;
-    height: 40px !important;
+  /* 📸 Instagram Native & Reel Matching (Contrasting Pill with Visible Text) */
+  #pm-inject-btn.pm-btn-instagram, .pm-social-clip-btn.pm-btn-instagram {
+    background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 20px !important;
+    padding: 6px 16px !important;
+    margin: 0 6px !important;
+    box-shadow: 0 4px 14px rgba(220, 39, 67, 0.45) !important;
+    width: auto !important;
+    height: 36px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    gap: 6px !important;
     cursor: pointer !important;
-    backdrop-filter: none !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    white-space: nowrap !important;
+    z-index: 100000 !important;
   }
-  .pm-social-clip-btn.pm-btn-instagram:hover {
-    opacity: 0.7;
-    background: transparent !important;
-    transform: scale(1.08);
-    box-shadow: none !important;
+  #pm-inject-btn.pm-btn-instagram *, .pm-social-clip-btn.pm-btn-instagram * {
+    color: #ffffff !important;
+    font-weight: bold !important;
   }
-  .pm-social-clip-btn.pm-btn-instagram:active {
-    transform: scale(0.95);
+  @media (prefers-color-scheme: dark), html[dark], [dark] {
+    #pm-inject-btn.pm-btn-instagram, .pm-social-clip-btn.pm-btn-instagram {
+      color: #ffffff !important;
+      background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+    }
   }
-  .pm-social-clip-btn.pm-btn-instagram svg.pm-ig-icon {
-    width: 24px;
-    height: 24px;
-    stroke: currentColor;
+  #pm-inject-btn.pm-btn-instagram:hover, .pm-social-clip-btn.pm-btn-instagram:hover {
+    transform: translateY(-1px) scale(1.04) !important;
+    box-shadow: 0 6px 18px rgba(220, 39, 67, 0.65) !important;
+  }
+  #pm-inject-btn.pm-btn-instagram svg.pm-ig-icon, .pm-social-clip-btn.pm-btn-instagram svg.pm-ig-icon {
+    width: 18px;
+    height: 18px;
+    stroke: #ffffff !important;
     fill: none;
   }
 
   /* 📱 YouTube Shorts Native Matching */
-  .pm-social-clip-btn.pm-shorts-btn {
+  #pm-inject-btn.pm-shorts-btn, .pm-social-clip-btn.pm-shorts-btn {
     width: 48px !important;
     height: 48px !important;
     border-radius: 50% !important;
-    background: var(--yt-spec-badge-chip-background, rgba(255, 255, 255, 0.1)) !important;
+    background-color: #e50914 !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(229, 9, 20, 0.5) !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     margin-top: 16px !important;
     cursor: pointer !important;
-    border: none !important;
     padding: 0 !important;
-    color: #fff !important;
-    transition: background 0.2s, transform 0.2s !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
-  .pm-social-clip-btn.pm-shorts-btn:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
-    transform: scale(1.05);
+  #pm-inject-btn.pm-shorts-btn:hover, .pm-social-clip-btn.pm-shorts-btn:hover {
+    background-color: #ff0a16 !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 6px 16px rgba(229, 9, 20, 0.7) !important;
   }
-  .pm-social-clip-btn.pm-shorts-btn svg {
+  #pm-inject-btn.pm-shorts-btn svg, .pm-social-clip-btn.pm-shorts-btn svg {
     width: 24px !important;
     height: 24px !important;
-    stroke: currentColor;
+    stroke: #ffffff !important;
     fill: none;
   }
-  .pm-social-clip-btn.pm-btn-instagram.pm-ig-reel {
+  #pm-inject-btn.pm-btn-instagram.pm-ig-reel, .pm-social-clip-btn.pm-btn-instagram.pm-ig-reel {
     margin: 8px 0 !important;
     display: flex !important;
   }
 
   /* 📺 YouTube Watch & Shorts Native Matching */
-  .pm-social-clip-btn.pm-btn-youtube {
-    background: var(--yt-spec-badge-chip-background, rgba(0, 0, 0, 0.05));
-    color: var(--yt-spec-text-primary, #0f0f0f);
-    border: none;
-    border-radius: 18px;
-    font-size: 14px;
-    font-weight: 500;
-    height: 36px;
-    padding: 0 16px;
-    box-shadow: none;
-    font-family: "Roboto", "Arial", sans-serif;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-left: 8px;
-    cursor: pointer;
+  #pm-inject-btn.pm-btn-youtube, .pm-social-clip-btn.pm-btn-youtube {
+    background-color: #e50914 !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 20px !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    height: 36px !important;
+    padding: 0 16px !important;
+    box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4) !important;
+    font-family: "Roboto", "Arial", sans-serif !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin-left: 8px !important;
+    cursor: pointer !important;
   }
-  html[dark] .pm-social-clip-btn.pm-btn-youtube,
-  [dark] .pm-social-clip-btn.pm-btn-youtube,
+  #pm-inject-btn.pm-btn-youtube *, .pm-social-clip-btn.pm-btn-youtube * {
+    color: #ffffff !important;
+    font-weight: bold !important;
+  }
+  html[dark] #pm-inject-btn.pm-btn-youtube,
+  [dark] #pm-inject-btn.pm-btn-youtube,
   @media (prefers-color-scheme: dark) {
-    .pm-social-clip-btn.pm-btn-youtube {
-      background: var(--yt-spec-badge-chip-background, rgba(255, 255, 255, 0.1));
-      color: var(--yt-spec-text-primary, #f1f1f1);
+    #pm-inject-btn.pm-btn-youtube, .pm-social-clip-btn.pm-btn-youtube {
+      background-color: #e50914 !important;
+      color: #ffffff !important;
     }
   }
-  .pm-social-clip-btn.pm-btn-youtube:hover {
-    background: var(--yt-spec-button-chip-background-hover, rgba(0, 0, 0, 0.1));
+  #pm-inject-btn.pm-btn-youtube:hover, .pm-social-clip-btn.pm-btn-youtube:hover {
+    background-color: #ff0a16 !important;
+    border-color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(229, 9, 20, 0.6) !important;
   }
-  html[dark] .pm-social-clip-btn.pm-btn-youtube:hover,
-  [dark] .pm-social-clip-btn.pm-btn-youtube:hover {
-    background: var(--yt-spec-button-chip-background-hover, rgba(255, 255, 255, 0.2));
+  html[dark] #pm-inject-btn.pm-btn-youtube:hover,
+  [dark] #pm-inject-btn.pm-btn-youtube:hover {
+    background-color: #ff0a16 !important;
   }
 
   /* Status Overrides */
-  .pm-social-clip-btn.pm-saving {
-    background: rgba(99, 102, 241, 0.9) !important;
+  #pm-inject-btn.pm-saving, .pm-social-clip-btn.pm-saving {
+    background-color: rgba(99, 102, 241, 0.95) !important;
     border-color: #6366f1 !important;
     color: #fff !important;
     cursor: wait !important;
   }
-  .pm-social-clip-btn.pm-btn-instagram.pm-saving {
-    background: transparent !important;
-    color: #6366f1 !important;
+  #pm-inject-btn.pm-btn-instagram.pm-saving, .pm-social-clip-btn.pm-btn-instagram.pm-saving {
+    background-color: rgba(99, 102, 241, 0.95) !important;
+    color: #fff !important;
   }
-  .pm-social-clip-btn.pm-saved {
-    background: rgba(16, 185, 129, 0.95) !important;
+  #pm-inject-btn.pm-saved, .pm-social-clip-btn.pm-saved {
+    background-color: rgba(16, 185, 129, 0.95) !important;
     border-color: #10b981 !important;
     color: #fff !important;
   }
-  .pm-social-clip-btn.pm-btn-instagram.pm-saved {
-    background: transparent !important;
-    color: #10b981 !important;
+  #pm-inject-btn.pm-btn-instagram.pm-saved, .pm-social-clip-btn.pm-btn-instagram.pm-saved {
+    background-color: rgba(16, 185, 129, 0.95) !important;
+    color: #fff !important;
   }
-  .pm-social-clip-btn.pm-error {
-    background: rgba(239, 68, 68, 0.95) !important;
+  #pm-inject-btn.pm-error, .pm-social-clip-btn.pm-error {
+    background-color: rgba(239, 68, 68, 0.95) !important;
     border-color: #ef4444 !important;
     color: #fff !important;
   }
-  .pm-social-clip-btn.pm-btn-instagram.pm-error {
-    background: transparent !important;
-    color: #ef4444 !important;
+  #pm-inject-btn.pm-btn-instagram.pm-error, .pm-social-clip-btn.pm-btn-instagram.pm-error {
+    background-color: rgba(239, 68, 68, 0.95) !important;
+    color: #fff !important;
   }
   .pm-clipper-wrapper {
     display: inline-flex;
@@ -641,85 +661,80 @@ function pollForElement(
 function injectClipperButtons() {
   const platform = getPlatform();
 
-  // 📸 Instagram — Async Polling Injection (Left Action Group)
+  // 📸 Instagram — Direct Polling Injection with Visible Text & Styling
   if (platform === 'instagram') {
-    // Poll for Instagram bookmark SVG to appear (SPA renders async)
-    pollForElement(
-      'svg[aria-label="Save"], svg[aria-label="Remove"], svg[aria-label*="Save" i], svg[aria-label*="Bookmark" i]',
-      (_svgEl) => {
-        // Re-check after poll resolves — avoid duplicates
-        const allBookmarks = document.querySelectorAll('svg[aria-label="Save"], svg[aria-label="Remove"], svg[aria-label*="Save" i], svg[aria-label*="Bookmark" i], [role="button"] svg[aria-label*="Save" i], [role="button"] svg[aria-label*="Bookmark" i]');
-        allBookmarks.forEach((svg) => {
-          const isArticle = svg.closest('article') || svg.closest('[role="article"]');
-          const isModal = svg.closest('div[role="dialog"], div[role="presentation"]');
-          if (!isArticle && !isModal && !window.location.pathname.includes('/reel')) return;
+    const allBookmarks = document.querySelectorAll('svg[aria-label="Save"], svg[aria-label="Remove"], svg[aria-label*="Save" i], svg[aria-label*="Bookmark" i], [role="button"] svg[aria-label*="Save" i], [role="button"] svg[aria-label*="Bookmark" i]');
+    allBookmarks.forEach((svg) => {
+      const isArticle = svg.closest('article') || svg.closest('[role="article"]');
+      const isModal = svg.closest('div[role="dialog"], div[role="presentation"]');
+      if (!isArticle && !isModal && !window.location.pathname.includes('/reel')) return;
 
-          const actionSection = svg.closest('section') || svg.closest('div[role="group"]') || svg.parentElement?.parentElement?.parentElement;
-          if (!actionSection) return;
-          if (actionSection.querySelector('.pm-btn-instagram')) return;
+      const actionSection = svg.closest('section') || svg.closest('div[role="group"]') || svg.parentElement?.parentElement?.parentElement;
+      if (!actionSection) return;
+      if (actionSection.querySelector('.pm-btn-instagram')) return;
 
-          // Find LEFT action group (Like, Comment, Share).
-          // Instagram: <section> → <span(left group)> + <div(bookmark right)>
-          let leftGroup: Element | null = null;
-          for (const child of Array.from(actionSection.children)) {
-            if (!child.contains(svg)) {
-              leftGroup = child;
-              break;
+      let leftGroup: Element | null = null;
+      for (const child of Array.from(actionSection.children)) {
+        if (!child.contains(svg)) {
+          leftGroup = child;
+          break;
+        }
+      }
+
+      if (!leftGroup) {
+        const saveWrapper = svg.closest('button') || svg.closest('[role="button"]') || svg.parentElement?.parentElement || svg.parentElement;
+        if (saveWrapper && saveWrapper.parentElement) {
+          leftGroup = saveWrapper.parentElement;
+        }
+      }
+      if (!leftGroup) return;
+
+      const btn = document.createElement('button');
+      btn.id = 'pm-inject-btn';
+      btn.className = 'pm-social-clip-btn pm-btn-instagram';
+      btn.title = 'Save to PromptMemory Vault';
+      btn.innerHTML = `${PM_LOGO_ICON_SVG}<span>Save to PM</span>`;
+
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation(); e.preventDefault();
+        if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+          alert("PromptMemory Extension updated. Please refresh this page to continue saving.");
+          return;
+        }
+        if (btn.classList.contains('pm-saving')) return;
+        btn.classList.add('pm-saving'); btn.innerHTML = `<span>⏳</span><span>Saving...</span>`;
+        const infoToast = showClipperToast("Saving Playable Media to PromptMemory...", 'info');
+        try {
+          const targetContainer = actionSection.closest('article') || actionSection.closest('[role="article"]') || actionSection.closest('div[role="dialog"], div[role="presentation"]') || actionSection.closest('section') || document.body;
+          const { text, imageUrl, embedUrl, sourceLink, tags } = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
+          const response = await new Promise<any>((resolve) => {
+            if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+              resolve({ success: false, error: "Extension updated. Please refresh page." });
+              return;
             }
-          }
-
-          // Fallback: insert into section directly
-          if (!leftGroup) {
-            const saveWrapper = svg.closest('button') || svg.closest('[role="button"]') || svg.parentElement?.parentElement || svg.parentElement;
-            if (saveWrapper && saveWrapper.parentElement) {
-              leftGroup = saveWrapper.parentElement;
-            }
-          }
-          if (!leftGroup) return;
-
-          const btn = document.createElement('button');
-          btn.className = 'pm-social-clip-btn pm-btn-instagram';
-          btn.title = 'Save to PromptMemory Vault';
-          btn.innerHTML = PM_LOGO_ICON_SVG;
-
-          btn.addEventListener('click', async (e) => {
-            e.stopPropagation(); e.preventDefault();
-            if (btn.classList.contains('pm-saving')) return;
-            btn.classList.add('pm-saving'); btn.innerHTML = `<span style="font-size: 16px;">⏳</span>`;
-            const infoToast = showClipperToast("Saving Playable Media to PromptMemory...", 'info');
-            try {
-              const targetContainer = actionSection.closest('article') || actionSection.closest('[role="article"]') || actionSection.closest('div[role="dialog"], div[role="presentation"]') || actionSection.closest('section') || document.body;
-              const { text, imageUrl, embedUrl, sourceLink, tags } = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
-              const response = await Promise.race([
-                new Promise<any>((resolve) => {
-                  chrome.runtime.sendMessage({
-                    action: 'SAVE_PROMPT',
-                    payload: { platform: platform, role: 'user', content: text, image_url: imageUrl, embed_url: embedUrl, source_link: sourceLink, tags: tags, category: 'Social Clip' }
-                  }, (res) => {
-                    if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
-                    else resolve(res || { success: true });
-                  });
-                }),
-                new Promise<any>((resolve) => setTimeout(() => resolve({ success: true, localQueue: true }), 2800))
-              ]);
-              if (infoToast && infoToast.parentNode) infoToast.remove();
-              if (response && response.success) {
-                btn.classList.remove('pm-saving'); btn.classList.add('pm-saved'); btn.innerHTML = `<span style="font-size: 16px;">✅</span>`;
-                showClipperToast("Saved to Media Hub! Playable embed ready in PromptMemory.", 'success');
-                setTimeout(() => { btn.classList.remove('pm-saved'); btn.innerHTML = PM_LOGO_ICON_SVG; }, 2500);
-              } else throw new Error(response?.error || "Failed to save clip.");
-            } catch (err: any) {
-              if (infoToast && infoToast.parentNode) infoToast.remove();
-              btn.classList.remove('pm-saving'); btn.classList.add('pm-error'); btn.innerHTML = `<span style="font-size: 16px;">❌</span>`;
-              showClipperToast("Error: " + (err.message || 'Could not save clip.'), 'error');
-              setTimeout(() => { btn.classList.remove('pm-error'); btn.innerHTML = PM_LOGO_ICON_SVG; }, 3000);
-            }
+            chrome.runtime.sendMessage({
+              action: 'SAVE_PROMPT',
+              payload: { platform: platform, content: text, image_url: imageUrl, embed_url: embedUrl, source_link: sourceLink, tags: tags, category: 'Social Clip' }
+            }, (res) => {
+              if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
+              else resolve(res || { success: true });
+            });
           });
-          leftGroup.appendChild(btn);
-        });
-      },
-      500, 20 // Poll every 500ms, up to 20 attempts (10 seconds)
-    );
+          if (infoToast && infoToast.parentNode) infoToast.remove();
+          if (response && response.success) {
+            btn.classList.remove('pm-saving'); btn.classList.add('pm-saved'); btn.innerHTML = `<span>✅</span><span>Saved!</span>`;
+            showClipperToast("Saved to Media Hub! Playable embed ready in PromptMemory.", 'success');
+            setTimeout(() => { btn.classList.remove('pm-saved'); btn.innerHTML = `${PM_LOGO_ICON_SVG}<span>Save to PM</span>`; }, 2500);
+          } else throw new Error(response?.error || "Failed to save clip.");
+        } catch (err: any) {
+          if (infoToast && infoToast.parentNode) infoToast.remove();
+          btn.classList.remove('pm-saving'); btn.classList.add('pm-error'); btn.innerHTML = `<span>❌</span><span>Error</span>`;
+          showClipperToast("Error: " + (err.message || 'Could not save clip.'), 'error');
+          setTimeout(() => { btn.classList.remove('pm-error'); btn.innerHTML = `${PM_LOGO_ICON_SVG}<span>Save to PM</span>`; }, 3000);
+        }
+      });
+      leftGroup.appendChild(btn);
+    });
     return;
   }
 
@@ -761,6 +776,7 @@ function injectClipperButtons() {
           if (actionsContainer.querySelector('.pm-shorts-btn')) return;
 
           const btn = document.createElement('button');
+          btn.id = 'pm-inject-btn';
           btn.className = 'pm-social-clip-btn pm-shorts-btn';
           btn.title = 'Save Short to PromptMemory Hub';
           btn.innerHTML = PM_LOGO_ICON_SVG;
@@ -785,27 +801,27 @@ function injectClipperButtons() {
               const imageUrl = videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : null;
               const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 
-              const response = await Promise.race([
-                new Promise<any>((resolve) => {
-                  chrome.runtime.sendMessage({
-                    action: 'SAVE_PROMPT',
-                    payload: {
-                      platform: 'youtube',
-                      role: 'user',
-                      content: titleText,
-                      image_url: imageUrl,
-                      embed_url: embedUrl,
-                      source_link: href,
-                      tags: ['#YouTube', '#Short', '#Video', '#Vertical'],
-                      category: 'Social Clip'
-                    }
-                  }, (res) => {
-                    if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
-                    else resolve(res || { success: true });
-                  });
-                }),
-                new Promise<any>((resolve) => setTimeout(() => resolve({ success: true, localQueue: true }), 2800))
-              ]);
+              const response = await new Promise<any>((resolve) => {
+                if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+                  resolve({ success: false, error: "Extension updated. Please refresh page." });
+                  return;
+                }
+                chrome.runtime.sendMessage({
+                  action: 'SAVE_PROMPT',
+                  payload: {
+                    platform: 'youtube',
+                    content: titleText,
+                    image_url: imageUrl,
+                    embed_url: embedUrl,
+                    source_link: href,
+                    tags: ['#YouTube', '#Short', '#Video', '#Vertical'],
+                    category: 'Social Clip'
+                  }
+                }, (res) => {
+                  if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
+                  else resolve(res || { success: true });
+                });
+              });
 
               if (infoToast && infoToast.parentNode) infoToast.remove();
               if (response && response.success) {
@@ -857,7 +873,7 @@ function injectClipperButtons() {
     wrapper.className = 'pm-clipper-wrapper';
 
     const btn = document.createElement('button');
-    btn.id = 'pm-save-btn';
+    btn.id = 'pm-inject-btn';
     btn.className = `pm-social-clip-btn pm-btn-${platform}`;
     btn.innerHTML = `${BOOKMARK_SVG}<span>Save to PM</span>`;
     btn.title = 'Clip Playable Media & Text to PromptMemory Vault';
@@ -880,52 +896,45 @@ function injectClipperButtons() {
                                 actionBar.closest('article, section, div[role="main"]') ||
                                 document.body;
 
-        const extractionResult = await Promise.race([
-          new Promise<ReturnType<typeof extractMediaAndEmbed>>((resolve) => {
-            const res = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
-            if (res.imageUrl || (res.embedUrl && res.embedUrl !== window.location.href)) {
-              resolve(res);
-            } else {
-              setTimeout(() => {
-                const resAfterWait = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
-                resolve(resAfterWait);
-              }, 500);
-            }
-          }),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_NO_MEDIA')), 3000))
-        ]);
-
-        if (!extractionResult.imageUrl && (!extractionResult.embedUrl || extractionResult.embedUrl === window.location.href)) {
-          throw new Error('TIMEOUT_NO_MEDIA');
-        }
+        const extractionResult = await new Promise<ReturnType<typeof extractMediaAndEmbed>>((resolve) => {
+          const res = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
+          if (res.imageUrl || (res.embedUrl && res.embedUrl !== window.location.href) || res.text) {
+            resolve(res);
+          } else {
+            setTimeout(() => {
+              const resAfterWait = extractMediaAndEmbed(targetContainer as HTMLElement, platform);
+              resolve(resAfterWait);
+            }, 500);
+          }
+        });
 
         const { text, imageUrl, embedUrl, sourceLink, tags } = extractionResult;
         console.log("PM Social Clipper extracting:", { platform, text: text.substring(0, 50), imageUrl, embedUrl, sourceLink, tags });
 
-        const response = await Promise.race([
-          new Promise<any>((resolve) => {
-            chrome.runtime.sendMessage({
-              action: 'SAVE_PROMPT',
-              payload: {
-                platform: platform,
-                role: 'user',
-                content: text,
-                image_url: imageUrl,
-                embed_url: embedUrl,
-                source_link: sourceLink,
-                tags: tags,
-                category: 'Social Clip'
-              }
-            }, (res) => {
-              if (chrome.runtime.lastError) {
-                resolve({ success: false, error: chrome.runtime.lastError.message });
-              } else {
-                resolve(res || { success: true });
-              }
-            });
-          }),
-          new Promise<any>((resolve) => setTimeout(() => resolve({ success: true, localQueue: true }), 2800))
-        ]);
+        const response = await new Promise<any>((resolve) => {
+          if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+            resolve({ success: false, error: "Extension updated. Please refresh page." });
+            return;
+          }
+          chrome.runtime.sendMessage({
+            action: 'SAVE_PROMPT',
+            payload: {
+              platform: platform,
+              content: text,
+              image_url: imageUrl,
+              embed_url: embedUrl,
+              source_link: sourceLink,
+              tags: tags,
+              category: 'Social Clip'
+            }
+          }, (res) => {
+            if (chrome.runtime.lastError) {
+              resolve({ success: false, error: chrome.runtime.lastError.message });
+            } else {
+              resolve(res || { success: true });
+            }
+          });
+        });
 
         if (infoToast && infoToast.parentNode) infoToast.remove();
 
@@ -1024,11 +1033,14 @@ const ytMenuObserver = new MutationObserver(() => {
         const titleText = titleEl?.textContent?.trim() || titleEl?.getAttribute('title') || 'YouTube Video';
 
         const response = await new Promise<any>((resolve) => {
+          if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+            resolve({ success: false, error: "Extension updated. Please refresh page." });
+            return;
+          }
           chrome.runtime.sendMessage({
             action: 'SAVE_PROMPT',
             payload: {
               platform: 'youtube',
-              role: 'user',
               content: titleText,
               image_url: imageUrl,
               embed_url: embedUrl,

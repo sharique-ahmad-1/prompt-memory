@@ -55,10 +55,12 @@ async function getCurrentUser() {
     if (pmSession) {
       if (pmSession.user && pmSession.user.id) {
         if (pmSession.access_token && pmSession.refresh_token) {
-          supabase.auth.setSession({
-            access_token: pmSession.access_token,
-            refresh_token: pmSession.refresh_token
-          }).catch(() => {});
+          try {
+            await supabase.auth.setSession({
+              access_token: pmSession.access_token,
+              refresh_token: pmSession.refresh_token
+            });
+          } catch (e) {}
         }
         return pmSession.user;
       }
@@ -67,10 +69,12 @@ async function getCurrentUser() {
           const payload = JSON.parse(atob(pmSession.access_token.split('.')[1]));
           if (payload && payload.sub) {
             if (pmSession.refresh_token) {
-              supabase.auth.setSession({
-                access_token: pmSession.access_token,
-                refresh_token: pmSession.refresh_token
-              }).catch(() => {});
+              try {
+                await supabase.auth.setSession({
+                  access_token: pmSession.access_token,
+                  refresh_token: pmSession.refresh_token
+                });
+              } catch (e) {}
             }
             return { id: payload.sub, email: payload.email || '' };
           }
@@ -169,25 +173,29 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   const handleAsync = async () => {
     try {
       if (request.action === 'SYNC_SESSION') {
-        const { payload } = request;
-        if (payload && payload.access_token && payload.refresh_token) {
-          await supabase.auth.setSession({
-            access_token: payload.access_token,
-            refresh_token: payload.refresh_token
-          });
-          const storageUpdate: Record<string, any> = { pm_session: payload };
-          if (payload.origin || (_sender?.tab?.url && _sender.tab.url.startsWith('http'))) {
-            try {
-              storageUpdate.pm_web_origin = payload.origin || new URL(_sender.tab!.url!).origin;
-            } catch {}
+        try {
+          const { payload } = request;
+          if (payload && payload.access_token && payload.refresh_token) {
+            await supabase.auth.setSession({
+              access_token: payload.access_token,
+              refresh_token: payload.refresh_token
+            });
+            const storageUpdate: Record<string, any> = { pm_session: payload };
+            if (payload.origin || (_sender?.tab?.url && _sender.tab.url.startsWith('http'))) {
+              try {
+                storageUpdate.pm_web_origin = payload.origin || new URL(_sender.tab!.url!).origin;
+              } catch {}
+            }
+            await chrome.storage.local.set(storageUpdate);
           }
-          await chrome.storage.local.set(storageUpdate);
+          sendResponse({ success: true });
+        } catch (syncErr: any) {
+          sendResponse({ success: false, error: syncErr.message || 'Session sync failed.' });
         }
-        sendResponse({ success: true });
         return;
       } else if (request.action === 'fetchWorkspaces') {
         try {
-          const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ data: [], error: null }), 3200));
+          const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ data: [], error: { message: 'Timeout' } }), 3200));
           const fetchPromise = (async () => {
             let { data, error } = await supabase
               .from('workspaces')
@@ -209,7 +217,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           const res = (await Promise.race([fetchPromise, timeoutPromise])) as any;
           sendResponse({ success: true, data: res.data || [] });
         } catch (err: any) {
-          sendResponse({ success: true, data: [] });
+          sendResponse({ success: false, error: err.message || 'Failed to fetch workspaces.' });
         }
       } else if (request.action === 'fetchItems' || request.action === 'fetchDashboardData') {
         try {
@@ -260,9 +268,17 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           sendResponse({ success: false, error: err.message || 'Error syncing data.' });
         }
       } else if (request.action === 'deleteItem') {
-        const { itemId } = request;
-        await supabase.from('prompts').delete().eq('id', itemId).then(() => {}, () => {});
-        sendResponse({ success: true });
+        try {
+          const { itemId } = request;
+          const { error } = await supabase.from('prompts').delete().eq('id', itemId);
+          if (error) {
+            sendResponse({ success: false, error: error.message });
+          } else {
+            sendResponse({ success: true });
+          }
+        } catch (deleteErr: any) {
+          sendResponse({ success: false, error: deleteErr.message || 'Delete failed.' });
+        }
       } else if (request.action === 'SAVE_WINDOW') {
         try {
           const user = await getCurrentUser();
@@ -280,7 +296,11 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             tags: ['#SavedWindow', '#Tabs']
           };
           if (userId !== 'offline') {
-            const { data } = await supabase.from('prompts').insert([insertPayload]).select().single();
+            const { data, error } = await supabase.from('prompts').insert([insertPayload]).select().single();
+            if (error) {
+              sendResponse({ success: false, error: error.message || 'Failed to save browser window.' });
+              return;
+            }
             if (typeof chrome !== 'undefined' && chrome.storage?.local && data) {
               chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
                 const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
@@ -299,7 +319,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             sendResponse({ success: true, data: localItem });
           }
         } catch (err: any) {
-          sendResponse({ success: false, error: err.message });
+          sendResponse({ success: false, error: err.message || 'Save window failed.' });
         }
       } else if (request.action === 'SAVE_PROMPT' || request.action === 'clipCurrentPage' || request.action === 'SAVE_CONTEXT_PROMPT') {
         try {
@@ -331,7 +351,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             return;
           }
 
-          const insertPayload = {
+          const insertPayload: any = {
             user_id: user.id,
             title: payload.title || (payload.content ? payload.content.slice(0, 50) : 'Untitled Capture'),
             content: payload.content || '',
@@ -343,38 +363,22 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             tags: payload.tags || ['#SocialClip']
           };
 
-          const insertPromise = supabase.from('prompts').insert([insertPayload]).select().single();
-          const timeoutPromise = new Promise<any>((resolve) => setTimeout(() => resolve({ error: { message: 'CLOUD_TIMEOUT' } }), 4000));
-          const { data, error } = (await Promise.race([insertPromise, timeoutPromise])) as any;
-
+          const { data, error } = await supabase.from('prompts').insert([insertPayload]).select().single();
           if (error) {
-            if (error.message === 'CLOUD_TIMEOUT') {
-              const localItem = { ...insertPayload, id: 'local_' + Date.now(), created_at: new Date().toISOString() };
-              if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-                chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
-                  const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
-                  chrome.storage.local.set({ pm_cached_dashboard_items: [localItem, ...list] }).catch(() => {});
-                });
-              }
-              sendResponse({ success: true, data: localItem });
-              return;
+            console.error('[Antigravity Background] Supabase database insertion failed:', error);
+            sendResponse({ success: false, error: error.message || JSON.stringify(error) });
+          } else {
+            if (typeof chrome !== 'undefined' && chrome.storage?.local && data) {
+              chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
+                const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
+                chrome.storage.local.set({ pm_cached_dashboard_items: [data, ...list] }).catch(() => {});
+              });
             }
-            console.error('[Antigravity Background] Supabase insert error:', error);
-            sendResponse({ success: false, error: error.message || 'Database insertion failed.' });
-            return;
+            sendResponse({ success: true, data });
           }
-
-          if (typeof chrome !== 'undefined' && chrome.storage?.local && data) {
-            chrome.storage.local.get(['pm_cached_dashboard_items'], (res) => {
-              const list: any[] = Array.isArray(res?.pm_cached_dashboard_items) ? res.pm_cached_dashboard_items : [];
-              chrome.storage.local.set({ pm_cached_dashboard_items: [data, ...list] }).catch(() => {});
-            });
-          }
-
-          sendResponse({ success: true, data });
         } catch (insertEx: any) {
-          console.error('[Antigravity Background] SAVE_PROMPT exception:', insertEx);
-          sendResponse({ success: false, error: insertEx.message || 'Failed to save item to PromptMemory Vault.' });
+          console.error('[Antigravity Background] SAVE_PROMPT try/catch exception:', insertEx);
+          sendResponse({ success: false, error: insertEx?.message || 'Database insert exception' });
         }
       } else if (request.action === 'OPEN_SIDE_PANEL') {
         if (typeof chrome !== 'undefined' && chrome.sidePanel && chrome.sidePanel.open && _sender.tab?.id) {

@@ -6,7 +6,7 @@
     "isEntry": true
   },
   "popup.html": {
-    "file": "assets/popup.html-DoBK788b.js",
+    "file": "assets/popup.html-CUmEQ4lN.js",
     "name": "popup.html",
     "src": "popup.html",
     "isEntry": true,
@@ -15,43 +15,43 @@
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-Cn-zqAE7.js",
+    "file": "assets/index.ts-RTE0Z-cS.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true
   },
   "src/content/authBridge.ts": {
-    "file": "assets/authBridge.ts-D3AttJgB.js",
+    "file": "assets/authBridge.ts-C6Ckrj-4.js",
     "name": "authBridge.ts",
     "src": "src/content/authBridge.ts",
     "isEntry": true
   },
   "src/content/chatgpt.ts": {
-    "file": "assets/chatgpt.ts-6Iwlb5i1.js",
+    "file": "assets/chatgpt.ts-DLDE1FEF.js",
     "name": "chatgpt.ts",
     "src": "src/content/chatgpt.ts",
     "isEntry": true
   },
   "src/content/floatingLogo.ts": {
-    "file": "assets/floatingLogo.ts-Bdx69Dox.js",
+    "file": "assets/floatingLogo.ts-cMl6dP7_.js",
     "name": "floatingLogo.ts",
     "src": "src/content/floatingLogo.ts",
     "isEntry": true
   },
   "src/content/gemini.ts": {
-    "file": "assets/gemini.ts-vz5WP4we.js",
+    "file": "assets/gemini.ts-BgGjaeby.js",
     "name": "gemini.ts",
     "src": "src/content/gemini.ts",
     "isEntry": true
   },
   "src/content/socialClipper.ts": {
-    "file": "assets/socialClipper.ts-CLqks-2V.js",
+    "file": "assets/socialClipper.ts-BBSuiqLC.js",
     "name": "socialClipper.ts",
     "src": "src/content/socialClipper.ts",
     "isEntry": true
   },
   "src/content/youtube.ts": {
-    "file": "assets/youtube.ts-DuQ7Wmpg.js",
+    "file": "assets/youtube.ts-B1frFBfF.js",
     "name": "youtube.ts",
     "src": "src/content/youtube.ts",
     "isEntry": true

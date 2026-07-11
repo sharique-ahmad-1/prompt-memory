@@ -29,7 +29,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/chatgpt.ts-6Iwlb5i1.js"
+        "assets/chatgpt.ts-DLDE1FEF.js"
       ],
       "matches": [
         "https://chatgpt.com/*"
@@ -38,7 +38,7 @@
     },
     {
       "js": [
-        "assets/authBridge.ts-D3AttJgB.js"
+        "assets/authBridge.ts-C6Ckrj-4.js"
       ],
       "matches": [
         "https://prompt-memory.vercel.app/*",
@@ -50,7 +50,7 @@
     },
     {
       "js": [
-        "assets/floatingLogo.ts-Bdx69Dox.js"
+        "assets/floatingLogo.ts-cMl6dP7_.js"
       ],
       "matches": [
         "<all_urls>"
@@ -59,7 +59,7 @@
     },
     {
       "js": [
-        "assets/youtube.ts-DuQ7Wmpg.js"
+        "assets/youtube.ts-B1frFBfF.js"
       ],
       "matches": [
         "*://*.youtube.com/*"
@@ -68,7 +68,7 @@
     },
     {
       "js": [
-        "assets/gemini.ts-vz5WP4we.js"
+        "assets/gemini.ts-BgGjaeby.js"
       ],
       "matches": [
         "*://gemini.google.com/*",
@@ -78,7 +78,7 @@
     },
     {
       "js": [
-        "assets/socialClipper.ts-CLqks-2V.js"
+        "assets/socialClipper.ts-BBSuiqLC.js"
       ],
       "matches": [
         "*://*.linkedin.com/*",
@@ -107,7 +107,7 @@
         "https://chatgpt.com/*"
       ],
       "resources": [
-        "assets/chatgpt.ts-6Iwlb5i1.js"
+        "assets/chatgpt.ts-DLDE1FEF.js"
       ],
       "use_dynamic_url": false
     },
@@ -119,7 +119,7 @@
         "https://prompt-memory.vercel.app/*"
       ],
       "resources": [
-        "assets/authBridge.ts-D3AttJgB.js"
+        "assets/authBridge.ts-C6Ckrj-4.js"
       ],
       "use_dynamic_url": false
     },
@@ -128,7 +128,7 @@
         "<all_urls>"
       ],
       "resources": [
-        "assets/floatingLogo.ts-Bdx69Dox.js"
+        "assets/floatingLogo.ts-cMl6dP7_.js"
       ],
       "use_dynamic_url": false
     },
@@ -137,7 +137,7 @@
         "*://*.youtube.com/*"
       ],
       "resources": [
-        "assets/youtube.ts-DuQ7Wmpg.js"
+        "assets/youtube.ts-B1frFBfF.js"
       ],
       "use_dynamic_url": false
     },
@@ -147,7 +147,7 @@
         "https://gemini.google.com/*"
       ],
       "resources": [
-        "assets/gemini.ts-vz5WP4we.js"
+        "assets/gemini.ts-BgGjaeby.js"
       ],
       "use_dynamic_url": false
     },
@@ -159,7 +159,7 @@
         "*://*.x.com/*"
       ],
       "resources": [
-        "assets/socialClipper.ts-CLqks-2V.js"
+        "assets/socialClipper.ts-BBSuiqLC.js"
       ],
       "use_dynamic_url": false
     }

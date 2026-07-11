@@ -225,22 +225,36 @@ export function SidePanel() {
 
   const handleSaveWorkspace = () => {
     setSavingWorkspace(true);
-    chrome.runtime.sendMessage({ action: 'SAVE_WORKSPACE' }, (res) => {
+    try {
+      chrome.runtime.sendMessage({ action: 'SAVE_WORKSPACE' }, (res) => {
+        setSavingWorkspace(false);
+        if (chrome.runtime.lastError || !res?.success) {
+          alert('Failed to save. Check connection.');
+        } else if (res && res.success && session) {
+          fetchPrompts(session);
+        }
+      });
+    } catch (err) {
       setSavingWorkspace(false);
-      if (res && res.success && session) {
-        fetchPrompts(session);
-      }
-    });
+      alert('Failed to save. Check connection.');
+    }
   };
 
   const handleSaveSingleTab = () => {
     setSavingSingleTab(true);
-    chrome.runtime.sendMessage({ action: 'SAVE_SINGLE_TAB' }, (res) => {
+    try {
+      chrome.runtime.sendMessage({ action: 'SAVE_SINGLE_TAB' }, (res) => {
+        setSavingSingleTab(false);
+        if (chrome.runtime.lastError || !res?.success) {
+          alert('Failed to save. Check connection.');
+        } else if (res && res.success && session) {
+          fetchPrompts(session);
+        }
+      });
+    } catch (err) {
       setSavingSingleTab(false);
-      if (res && res.success && session) {
-        fetchPrompts(session);
-      }
-    });
+      alert('Failed to save. Check connection.');
+    }
   };
 
   const workspacePrompts = (prompts || []).filter(p => p?.category?.toLowerCase() === 'workspace' || p?.platform?.toLowerCase() === 'workspace');

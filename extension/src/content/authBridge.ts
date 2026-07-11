@@ -43,15 +43,17 @@ function syncSession() {
           pm_web_origin: window.location.origin 
         }).catch(() => {});
       }
-      chrome.runtime.sendMessage({
-        action: 'SYNC_SESSION',
-        payload: {
-          ...session,
-          origin: window.location.origin
-        }
-      }, () => {
-        void chrome.runtime.lastError;
-      });
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage({
+          action: 'SYNC_SESSION',
+          payload: {
+            ...session,
+            origin: window.location.origin
+          }
+        }, () => {
+          void chrome.runtime.lastError;
+        });
+      }
     }
   } catch (error) {
     console.error("PromptMemory: Error syncing session", error);

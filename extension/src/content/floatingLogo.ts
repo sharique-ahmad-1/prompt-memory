@@ -345,21 +345,22 @@ function initSelectionTooltip() {
   selectionPill.style.cssText = `
     position: absolute;
     z-index: 999998;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-family: system-ui, sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(99,102,241,0.3);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: #ffffff !important;
+    padding: 6px 16px !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.5) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     transform: translateY(10px) scale(0.95);
   `;
   
@@ -419,6 +420,10 @@ function initSelectionTooltip() {
 
   selectionPill.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+      alert("PromptMemory Extension updated. Please refresh this page to continue saving.");
+      return;
+    }
     if (activeText) {
       const url = window.location.href;
       let platform = 'Unknown';
@@ -437,7 +442,6 @@ function initSelectionTooltip() {
         action: 'SAVE_PROMPT',
         payload: {
           platform,
-          role: 'user', 
           content: activeText
         }
       }, (response) => {
