@@ -643,9 +643,6 @@ function injectClipperButtons() {
 
   // 📸 Instagram — Async Polling Injection (Left Action Group)
   if (platform === 'instagram') {
-    // If we already injected, bail out early
-    if (document.querySelector('.pm-btn-instagram')) return;
-
     // Poll for Instagram bookmark SVG to appear (SPA renders async)
     pollForElement(
       'svg[aria-label="Save"], svg[aria-label="Remove"], svg[aria-label*="Save" i], svg[aria-label*="Bookmark" i]',
@@ -655,9 +652,9 @@ function injectClipperButtons() {
         allBookmarks.forEach((svg) => {
           const isArticle = svg.closest('article') || svg.closest('[role="article"]');
           const isModal = svg.closest('div[role="dialog"], div[role="presentation"]');
-          if (!isArticle && !isModal && !window.location.pathname.includes('/reel/')) return;
+          if (!isArticle && !isModal && !window.location.pathname.includes('/reel')) return;
 
-          const actionSection = svg.closest('section');
+          const actionSection = svg.closest('section') || svg.closest('div[role="group"]') || svg.parentElement?.parentElement?.parentElement;
           if (!actionSection) return;
           if (actionSection.querySelector('.pm-btn-instagram')) return;
 

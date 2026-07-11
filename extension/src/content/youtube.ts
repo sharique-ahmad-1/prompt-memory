@@ -136,22 +136,14 @@ function cleanDuplicates() {
 function injectYouTubeButton() {
   const currentUrl = window.location.href;
   
-  // If URL changed on SPA navigation, wipe previous stale buttons
   if (currentUrl !== lastInjectedUrl) {
     document.querySelectorAll('#pm-inject-btn, .pm-yt-clip-btn').forEach(btn => btn.remove());
     lastInjectedUrl = currentUrl;
   }
 
-  // Deduplication check (`#pm-inject-btn`)
-  if (document.querySelector('#pm-inject-btn')) {
-    cleanDuplicates();
-    return;
-  }
-
   const isShorts = window.location.pathname.includes('/shorts/');
 
   if (isShorts) {
-    // Shorts Vertical Actions Bar
     const shortsSelectors = [
       'ytd-reel-video-renderer[is-active] #actions',
       'ytd-reel-video-renderer #actions',
@@ -168,6 +160,11 @@ function injectYouTubeButton() {
 
     if (!actionsBar) return;
     if (actionsBar.querySelector('#pm-inject-btn')) return;
+
+    // Clean up any stray buttons outside active bar
+    document.querySelectorAll('#pm-inject-btn.pm-shorts').forEach(btn => {
+      if (!actionsBar?.contains(btn)) btn.remove();
+    });
 
     const btn = document.createElement('button');
     btn.id = 'pm-inject-btn';
@@ -232,7 +229,7 @@ function injectYouTubeButton() {
     return;
   }
 
-  // Regular Watch Page (`/watch?v=...`)
+  // Regular Watch Page (`/watch`)
   if (window.location.pathname.includes('/watch')) {
     const watchSelectors = [
       '#actions-inner #menu ytd-menu-renderer #top-level-buttons-computed',
@@ -252,6 +249,11 @@ function injectYouTubeButton() {
 
     if (!topButtons) return;
     if (topButtons.querySelector('#pm-inject-btn')) return;
+
+    // Clean up any stray buttons outside active topButtons container
+    document.querySelectorAll('#pm-inject-btn').forEach(btn => {
+      if (!topButtons?.contains(btn)) btn.remove();
+    });
 
     const btn = document.createElement('button');
     btn.id = 'pm-inject-btn';
@@ -338,8 +340,9 @@ window.addEventListener('locationchange', () => {
   setTimeout(injectYouTubeButton, 1000);
 });
 
-// Periodic observer and interval loop
+// Periodic observer and interval loop watching ytd-app and body
 const ytObserver = new MutationObserver(() => injectYouTubeButton());
-ytObserver.observe(document.body, { childList: true, subtree: true });
-setInterval(injectYouTubeButton, 1000);
+const targetRoot = document.querySelector('ytd-app') || document.body;
+ytObserver.observe(targetRoot, { childList: true, subtree: true });
+setInterval(injectYouTubeButton, 500);
 injectYouTubeButton();

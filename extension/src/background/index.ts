@@ -222,7 +222,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             } else {
               resolve({ success: false, error: 'Cloud sync timed out.' });
             }
-          }, 15000));
+          }, 4000));
 
           const fetchPromise = (async () => {
             const user = await getCurrentUser();
@@ -344,7 +344,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           };
 
           const insertPromise = supabase.from('prompts').insert([insertPayload]).select().single();
-          const timeoutPromise = new Promise<any>((resolve) => setTimeout(() => resolve({ error: { message: 'CLOUD_TIMEOUT' } }), 15000));
+          const timeoutPromise = new Promise<any>((resolve) => setTimeout(() => resolve({ error: { message: 'CLOUD_TIMEOUT' } }), 4000));
           const { data, error } = (await Promise.race([insertPromise, timeoutPromise])) as any;
 
           if (error) {
@@ -377,7 +377,6 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           sendResponse({ success: false, error: insertEx.message || 'Failed to save item to PromptMemory Vault.' });
         }
       } else if (request.action === 'OPEN_SIDE_PANEL') {
-        // If user explicitly requests opening side panel from floating logo / menu
         if (typeof chrome !== 'undefined' && chrome.sidePanel && chrome.sidePanel.open && _sender.tab?.id) {
           chrome.sidePanel.open({ tabId: _sender.tab.id }).catch(() => {});
         }

@@ -59,7 +59,7 @@
     },
     {
       "js": [
-        "assets/youtube.ts-Dg1WTAmI.js"
+        "assets/youtube.ts-DuQ7Wmpg.js"
       ],
       "matches": [
         "*://*.youtube.com/*"
@@ -78,7 +78,7 @@
     },
     {
       "js": [
-        "assets/socialClipper.ts-DLInMvbz.js"
+        "assets/socialClipper.ts-CLqks-2V.js"
       ],
       "matches": [
         "*://*.linkedin.com/*",
@@ -137,7 +137,7 @@
         "*://*.youtube.com/*"
       ],
       "resources": [
-        "assets/youtube.ts-Dg1WTAmI.js"
+        "assets/youtube.ts-DuQ7Wmpg.js"
       ],
       "use_dynamic_url": false
     },
@@ -159,7 +159,7 @@
         "*://*.x.com/*"
       ],
       "resources": [
-        "assets/socialClipper.ts-DLInMvbz.js"
+        "assets/socialClipper.ts-CLqks-2V.js"
       ],
       "use_dynamic_url": false
     }

@@ -15,7 +15,7 @@
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-Dy5QgVZ4.js",
+    "file": "assets/index.ts-Cn-zqAE7.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true
@@ -45,13 +45,13 @@
     "isEntry": true
   },
   "src/content/socialClipper.ts": {
-    "file": "assets/socialClipper.ts-DLInMvbz.js",
+    "file": "assets/socialClipper.ts-CLqks-2V.js",
     "name": "socialClipper.ts",
     "src": "src/content/socialClipper.ts",
     "isEntry": true
   },
   "src/content/youtube.ts": {
-    "file": "assets/youtube.ts-Dg1WTAmI.js",
+    "file": "assets/youtube.ts-DuQ7Wmpg.js",
     "name": "youtube.ts",
     "src": "src/content/youtube.ts",
     "isEntry": true
