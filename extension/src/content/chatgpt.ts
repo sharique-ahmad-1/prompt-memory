@@ -63,23 +63,23 @@ function showToast(message: string, type: 'info' | 'success' | 'error') {
 
 function extractChatGPTConversation(): string {
   const turns: string[] = [];
-  const allTurns = Array.from(document.querySelectorAll('[data-message-author-role], article[data-testid*="turn"], div[data-testid*="user-message"], .group\\/conversation-turn'));
+  const allTurns = Array.from(document.querySelectorAll('[data-message-author-role="user"], [data-message-author-role="assistant"]'));
   allTurns.forEach(turn => {
-    const role = turn.getAttribute('data-message-author-role') || (turn.getAttribute('data-testid') || '').includes('user') ? 'user' : 'assistant';
-    const prefix = role === 'user' ? '### User:\n' : '### ChatGPT:\n';
-    const textElement = turn.querySelector('.whitespace-pre-wrap') || turn;
-    const text = textElement.textContent?.trim() || '';
+    const roleAttr = turn.getAttribute('data-message-author-role');
+    const isUser = roleAttr === 'user';
+    const prefix = isUser ? 'User: ' : 'AI: ';
+    const contentNode = turn.querySelector('.markdown, .whitespace-pre-wrap, [class*="message-content"]') || turn;
+    const text = (contentNode as HTMLElement).innerText?.trim() || turn.textContent?.trim() || '';
     if (text && !turns.includes(prefix + text)) {
       turns.push(`${prefix}${text}`);
     }
   });
 
   if (turns.length === 0) {
-    const mainText = document.querySelector('main')?.innerText?.trim() || document.body.innerText?.trim() || '';
-    return mainText.substring(0, 8000);
+    return 'No chat history messages found in the current conversation.';
   }
 
-  return turns.join('\n\n---\n\n') || document.title || 'ChatGPT Conversation';
+  return turns.join('\n\n');
 }
 
 function injectSideWidget() {

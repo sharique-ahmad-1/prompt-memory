@@ -29,7 +29,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/chatgpt.ts-DLDE1FEF.js"
+        "assets/chatgpt.ts-DGwnbx6G.js"
       ],
       "matches": [
         "https://chatgpt.com/*"
@@ -59,7 +59,7 @@
     },
     {
       "js": [
-        "assets/youtube.ts-B1frFBfF.js"
+        "assets/youtube.ts-ZfM6bToY.js"
       ],
       "matches": [
         "*://*.youtube.com/*"
@@ -68,7 +68,7 @@
     },
     {
       "js": [
-        "assets/gemini.ts-BgGjaeby.js"
+        "assets/gemini.ts-B9CqJndj.js"
       ],
       "matches": [
         "*://gemini.google.com/*",
@@ -78,7 +78,7 @@
     },
     {
       "js": [
-        "assets/socialClipper.ts-BBSuiqLC.js"
+        "assets/socialClipper.ts-Cps4-0NR.js"
       ],
       "matches": [
         "*://*.linkedin.com/*",
@@ -107,7 +107,7 @@
         "https://chatgpt.com/*"
       ],
       "resources": [
-        "assets/chatgpt.ts-DLDE1FEF.js"
+        "assets/chatgpt.ts-DGwnbx6G.js"
       ],
       "use_dynamic_url": false
     },
@@ -137,7 +137,7 @@
         "*://*.youtube.com/*"
       ],
       "resources": [
-        "assets/youtube.ts-B1frFBfF.js"
+        "assets/youtube.ts-ZfM6bToY.js"
       ],
       "use_dynamic_url": false
     },
@@ -147,7 +147,7 @@
         "https://gemini.google.com/*"
       ],
       "resources": [
-        "assets/gemini.ts-BgGjaeby.js"
+        "assets/gemini.ts-B9CqJndj.js"
       ],
       "use_dynamic_url": false
     },
@@ -159,7 +159,7 @@
         "*://*.x.com/*"
       ],
       "resources": [
-        "assets/socialClipper.ts-BBSuiqLC.js"
+        "assets/socialClipper.ts-Cps4-0NR.js"
       ],
       "use_dynamic_url": false
     }

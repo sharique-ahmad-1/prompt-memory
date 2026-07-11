@@ -150,22 +150,21 @@ function showToast(message: string, type: 'info' | 'success' | 'error') {
 
 function extractGeminiChat(): string {
   const turns: string[] = [];
-  const allTurns = Array.from(document.querySelectorAll('user-query, model-response, .user-query, .model-response, message-content'));
+  const allTurns = Array.from(document.querySelectorAll('user-query, model-response, .user-query, .model-response, message-content, [data-message-author-role]'));
   allTurns.forEach(turn => {
-    const isUser = turn.tagName.toLowerCase().includes('user') || turn.className.toLowerCase().includes('user') || turn.getAttribute('role') === 'user';
-    const prefix = isUser ? '### User:\n' : '### Gemini:\n';
-    const text = turn.textContent?.trim() || '';
+    const isUser = turn.tagName.toLowerCase().includes('user') || turn.className.toLowerCase().includes('user') || turn.getAttribute('role') === 'user' || turn.getAttribute('data-message-author-role') === 'user';
+    const prefix = isUser ? 'User: ' : 'AI: ';
+    const text = (turn as HTMLElement).innerText?.trim() || turn.textContent?.trim() || '';
     if (text && !turns.includes(prefix + text)) {
       turns.push(`${prefix}${text}`);
     }
   });
 
   if (turns.length === 0) {
-    const mainText = document.querySelector('main')?.innerText?.trim() || document.body.innerText?.trim() || '';
-    return mainText.substring(0, 8000);
+    return 'No chat history messages found in the current conversation.';
   }
 
-  return turns.join('\n\n---\n\n') || document.title || 'Gemini Chat Conversation';
+  return turns.join('\n\n');
 }
 
 function injectSideWidget() {

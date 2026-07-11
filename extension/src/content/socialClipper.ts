@@ -69,32 +69,22 @@ styleEl.textContent = `
     }
   }
 
-  /* 🐦 X / Twitter Native Matching */
+  /* 🐦 X / Twitter High Contrast Matching */
   .pm-social-clip-btn.pm-btn-twitter {
-    background: transparent;
-    color: #0f1419;
-    border: 1px solid rgba(15, 20, 25, 0.3);
-    border-radius: 9999px;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 6px 14px;
-    box-shadow: none;
-    font-family: "TwitterChirp", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    .pm-social-clip-btn.pm-btn-twitter {
-      color: rgb(239, 243, 244);
-      border-color: rgba(239, 243, 244, 0.3);
-    }
+    background: linear-gradient(135deg, #1d9bf0, #6366f1) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 9999px !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    padding: 6px 14px !important;
+    box-shadow: 0 4px 14px rgba(29, 155, 240, 0.4) !important;
+    font-family: "TwitterChirp", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   }
   .pm-social-clip-btn.pm-btn-twitter:hover {
-    background: rgba(15, 20, 25, 0.1);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pm-social-clip-btn.pm-btn-twitter:hover {
-      background: rgba(239, 243, 244, 0.1);
-      border-color: rgb(239, 243, 244);
-    }
+    background: linear-gradient(135deg, #0c8ce9, #4f46e5) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(29, 155, 240, 0.6) !important;
   }
 
   /* 📸 Instagram Native & Reel Matching (Contrasting Pill with Visible Text) */
@@ -693,7 +683,7 @@ function injectClipperButtons() {
       btn.id = 'pm-inject-btn';
       btn.className = 'pm-social-clip-btn pm-btn-instagram';
       btn.title = 'Save to PromptMemory Vault';
-      btn.innerHTML = `${PM_LOGO_ICON_SVG}<span>Save to PM</span>`;
+      btn.innerHTML = `${PM_LOGO_ICON_SVG}<span style="color: #ffffff !important; font-weight: bold;">Save to PromptMemory</span>`;
 
       btn.addEventListener('click', async (e) => {
         e.stopPropagation(); e.preventDefault();
@@ -702,7 +692,7 @@ function injectClipperButtons() {
           return;
         }
         if (btn.classList.contains('pm-saving')) return;
-        btn.classList.add('pm-saving'); btn.innerHTML = `<span>⏳</span><span>Saving...</span>`;
+        btn.classList.add('pm-saving'); btn.innerHTML = `<span>⏳</span><span style="color: #ffffff !important; font-weight: bold;">Saving...</span>`;
         const infoToast = showClipperToast("Saving Playable Media to PromptMemory...", 'info');
         try {
           const targetContainer = actionSection.closest('article') || actionSection.closest('[role="article"]') || actionSection.closest('div[role="dialog"], div[role="presentation"]') || actionSection.closest('section') || document.body;
@@ -722,15 +712,15 @@ function injectClipperButtons() {
           });
           if (infoToast && infoToast.parentNode) infoToast.remove();
           if (response && response.success) {
-            btn.classList.remove('pm-saving'); btn.classList.add('pm-saved'); btn.innerHTML = `<span>✅</span><span>Saved!</span>`;
+            btn.classList.remove('pm-saving'); btn.classList.add('pm-saved'); btn.innerHTML = `<span>✅</span><span style="color: #ffffff !important; font-weight: bold;">Saved!</span>`;
             showClipperToast("Saved to Media Hub! Playable embed ready in PromptMemory.", 'success');
-            setTimeout(() => { btn.classList.remove('pm-saved'); btn.innerHTML = `${PM_LOGO_ICON_SVG}<span>Save to PM</span>`; }, 2500);
+            setTimeout(() => { btn.classList.remove('pm-saved'); btn.innerHTML = `${PM_LOGO_ICON_SVG}<span style="color: #ffffff !important; font-weight: bold;">Save to PromptMemory</span>`; }, 2500);
           } else throw new Error(response?.error || "Failed to save clip.");
         } catch (err: any) {
           if (infoToast && infoToast.parentNode) infoToast.remove();
-          btn.classList.remove('pm-saving'); btn.classList.add('pm-error'); btn.innerHTML = `<span>❌</span><span>Error</span>`;
+          btn.classList.remove('pm-saving'); btn.classList.add('pm-error'); btn.innerHTML = `<span>❌</span><span style="color: #ffffff !important; font-weight: bold;">Error</span>`;
           showClipperToast("Error: " + (err.message || 'Could not save clip.'), 'error');
-          setTimeout(() => { btn.classList.remove('pm-error'); btn.innerHTML = `${PM_LOGO_ICON_SVG}<span>Save to PM</span>`; }, 3000);
+          setTimeout(() => { btn.classList.remove('pm-error'); btn.innerHTML = `${PM_LOGO_ICON_SVG}<span style="color: #ffffff !important; font-weight: bold;">Save to PromptMemory</span>`; }, 3000);
         }
       });
       leftGroup.appendChild(btn);
@@ -875,7 +865,7 @@ function injectClipperButtons() {
     const btn = document.createElement('button');
     btn.id = 'pm-inject-btn';
     btn.className = `pm-social-clip-btn pm-btn-${platform}`;
-    btn.innerHTML = `${BOOKMARK_SVG}<span>Save to PM</span>`;
+    btn.innerHTML = `${BOOKMARK_SVG}<span style="color: #ffffff !important; font-weight: bold;">Save to PromptMemory</span>`;
     btn.title = 'Clip Playable Media & Text to PromptMemory Vault';
 
     btn.addEventListener('click', async (e) => {
@@ -884,7 +874,7 @@ function injectClipperButtons() {
 
       if (btn.classList.contains('pm-saving')) return;
       btn.classList.add('pm-saving');
-      btn.innerHTML = `<span>⏳</span><span>Saving...</span>`;
+      btn.innerHTML = `<span>⏳</span><span style="color: #ffffff !important; font-weight: bold;">Saving...</span>`;
 
       const infoToast = showClipperToast("Saving Playable Media to PromptMemory...", 'info');
 
@@ -941,11 +931,11 @@ function injectClipperButtons() {
         if (response && response.success) {
           btn.classList.remove('pm-saving');
           btn.classList.add('pm-saved');
-          btn.innerHTML = `<span>✅</span><span>Saved!</span>`;
+          btn.innerHTML = `<span>✅</span><span style="color: #ffffff !important; font-weight: bold;">Saved!</span>`;
           showClipperToast("Saved to Media Hub! Playable embed ready in PromptMemory.", 'success');
           setTimeout(() => {
             btn.classList.remove('pm-saved');
-            btn.innerHTML = `${BOOKMARK_SVG}<span>Save to PM</span>`;
+            btn.innerHTML = `${BOOKMARK_SVG}<span style="color: #ffffff !important; font-weight: bold;">Save to PromptMemory</span>`;
           }, 2500);
         } else {
           throw new Error(response?.error || 'Failed to save media clip.');

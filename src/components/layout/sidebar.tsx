@@ -13,7 +13,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Prompt Vault', href: '/vault', icon: Database },
   { name: 'Social Clips', href: '/clips', icon: Camera },
-  { name: 'Windows / Tabs', href: '/workspaces', icon: Layers },
+  { name: 'Saved Windows / Tabs', href: '/workspaces', icon: Layers },
   { name: 'Context Generator', href: '/generator', icon: Sparkles },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -110,10 +110,10 @@ export function Sidebar({ setGlobalSearchOpen }: { setGlobalSearchOpen?: (open: 
       </nav>
 
       {/* User Profile */}
-      <div 
-        onClick={() => router.push('/settings')}
+      <Link 
+        href="/settings"
         title={!isSidebarOpen ? `${user?.user_metadata?.full_name || 'User'} (${user?.email || ''})` : "Account Settings"}
-        className={`p-3 border-t border-sidebar-border bg-sidebar-accent/20 hover:bg-gray-800/10 dark:hover:bg-gray-800 transition-colors cursor-pointer ${!isSidebarOpen ? 'flex justify-center' : ''}`}
+        className={`block p-3 border-t border-sidebar-border bg-sidebar-accent/20 hover:bg-sidebar-accent/80 transition-all duration-200 cursor-pointer ${!isSidebarOpen ? 'flex justify-center' : ''}`}
       >
         <div className={`flex items-center gap-3 w-full rounded-md p-1.5 ${!isSidebarOpen ? 'justify-center' : ''}`}>
           <Avatar className="h-8 w-8 shrink-0 rounded-md border border-sidebar-border shadow-sm">
@@ -124,12 +124,12 @@ export function Sidebar({ setGlobalSearchOpen }: { setGlobalSearchOpen?: (open: 
           </Avatar>
           {isSidebarOpen && (
             <div className="flex flex-col text-left flex-1 min-w-0">
-              <span className="text-sm font-medium text-sidebar-foreground truncate">{user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'PromptMemory User'}</span>
+              <span className="text-sm font-medium text-sidebar-foreground group-hover:text-primary transition-colors truncate">{user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'PromptMemory User'}</span>
               <span className="text-xs text-sidebar-foreground/50 truncate">{user?.email}</span>
             </div>
           )}
         </div>
-      </div>
+      </Link>
     </div>
   )
 }

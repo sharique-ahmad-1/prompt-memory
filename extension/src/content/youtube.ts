@@ -191,7 +191,7 @@ function injectYouTubeButton() {
     btn.id = 'pm-inject-btn';
     btn.className = 'pm-yt-clip-btn pm-shorts';
     btn.title = 'Clip YouTube Short to PromptMemory';
-    btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`;
+    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg><span style="font-size: 13px; font-weight: bold; color: #ffffff !important;">Save Video to PromptMemory</span>`;
 
     btn.addEventListener('click', async (e) => {
       e.stopPropagation(); e.preventDefault();
@@ -201,7 +201,7 @@ function injectYouTubeButton() {
       }
       if (btn.classList.contains('pm-saving')) return;
       btn.classList.add('pm-saving');
-      btn.innerHTML = `<span style="font-size: 16px;">⏳</span>`;
+      btn.innerHTML = `<span style="font-size: 16px;">⏳</span><span style="font-size: 13px; font-weight: bold; color: #ffffff !important;">Saving...</span>`;
       showToast("Saving YouTube Short to PromptMemory...", 'info');
 
       try {
@@ -235,19 +235,19 @@ function injectYouTubeButton() {
         });
 
         btn.classList.remove('pm-saving'); btn.classList.add('pm-saved');
-        btn.innerHTML = `<span style="font-size: 16px;">✅</span>`;
+        btn.innerHTML = `<span style="font-size: 16px;">✅</span><span style="font-size: 13px; font-weight: bold; color: #ffffff !important;">Saved!</span>`;
         showToast("YouTube Short saved to PromptMemory Vault!", 'success');
         setTimeout(() => {
           btn.classList.remove('pm-saved');
-          btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`;
+          btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg><span style="font-size: 13px; font-weight: bold; color: #ffffff !important;">Save Video to PromptMemory</span>`;
         }, 2000);
       } catch (err: any) {
         btn.classList.remove('pm-saving'); btn.classList.add('pm-error');
-        btn.innerHTML = `<span style="font-size: 16px;">❌</span>`;
+        btn.innerHTML = `<span style="font-size: 16px;">❌</span><span style="font-size: 13px; font-weight: bold; color: #ffffff !important;">Error</span>`;
         showToast("Error: " + err.message, 'error');
         setTimeout(() => {
           btn.classList.remove('pm-error');
-          btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`;
+          btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg><span style="font-size: 13px; font-weight: bold; color: #ffffff !important;">Save Video to PromptMemory</span>`;
         }, 3000);
       }
     });
@@ -287,7 +287,7 @@ function injectYouTubeButton() {
     btn.id = 'pm-inject-btn';
     btn.className = 'yt-spec-button-shape-next yt-spec-button-shape-next--tonal yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m pm-youtube-btn';
     btn.title = 'Save video to PromptMemory Vault';
-    const defaultHTML = `<div class="yt-spec-button-shape-next__button-text-content" style="color: inherit !important; font-size: 14px; font-weight: 600; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 6px;"><span style="font-size: 16px;">💾</span><span>Save to PM</span></div>`;
+    const defaultHTML = `<div class="yt-spec-button-shape-next__button-text-content" style="color: #ffffff !important; font-size: 14px; font-weight: bold; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 6px;"><span style="font-size: 16px;">💾</span><span>Save Video to PromptMemory</span></div>`;
     btn.innerHTML = defaultHTML;
 
     btn.addEventListener('click', async (e) => {
@@ -298,7 +298,7 @@ function injectYouTubeButton() {
       }
       if (btn.classList.contains('pm-saving')) return;
       btn.classList.add('pm-saving');
-      btn.innerHTML = `<div class="yt-spec-button-shape-next__button-text-content" style="color: inherit !important; font-size: 14px; font-weight: 600; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 6px;"><span>⏳</span><span>Saving...</span></div>`;
+      btn.innerHTML = `<div class="yt-spec-button-shape-next__button-text-content" style="color: #ffffff !important; font-size: 14px; font-weight: bold; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 6px;"><span>⏳</span><span>Saving...</span></div>`;
       showToast("Saving YouTube Video to PromptMemory...", 'info');
 
       let isSuccess = false;
@@ -341,11 +341,11 @@ function injectYouTubeButton() {
 
         isSuccess = true;
         btn.classList.remove('pm-saving'); btn.classList.add('pm-saved');
-        btn.innerHTML = `<div class="yt-spec-button-shape-next__button-text-content" style="color: inherit !important; font-size: 14px; font-weight: 600; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 6px;"><span>✅</span><span>Saved to PM</span></div>`;
+        btn.innerHTML = `<div class="yt-spec-button-shape-next__button-text-content" style="color: #ffffff !important; font-size: 14px; font-weight: bold; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 6px;"><span>✅</span><span>Saved to PromptMemory</span></div>`;
         showToast("Saved YouTube Video to Media Hub!", 'success');
       } catch (err: any) {
         btn.classList.remove('pm-saving'); btn.classList.add('pm-error');
-        btn.innerHTML = `<div class="yt-spec-button-shape-next__button-text-content" style="color: inherit !important; font-size: 14px; font-weight: 600; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 6px;"><span>❌</span><span>Error</span></div>`;
+        btn.innerHTML = `<div class="yt-spec-button-shape-next__button-text-content" style="color: #ffffff !important; font-size: 14px; font-weight: bold; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 6px;"><span>❌</span><span>Error</span></div>`;
         showToast("Failed to save. Check connection.", 'error');
       } finally {
         setTimeout(() => {
@@ -355,7 +355,7 @@ function injectYouTubeButton() {
       }
     });
 
-    topButtons.appendChild(btn);
+    topButtons.insertBefore(btn, topButtons.firstChild);
     cleanDuplicates();
   }
 
@@ -365,7 +365,7 @@ function injectYouTubeButton() {
     const menuItem = document.createElement('div');
     menuItem.className = 'pm-yt-menu-item style-scope ytd-menu-service-item-renderer';
     menuItem.style.cssText = 'display: flex; items-center; padding: 12px 16px; cursor: pointer; color: var(--yt-spec-text-primary); font-size: 1.4rem; font-weight: 500; gap: 12px; hover:background: var(--yt-spec-10-percent-layer);';
-    menuItem.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg><span>Save to PM</span>`;
+    menuItem.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg><span>Save Video to PromptMemory</span>`;
     menuItem.addEventListener('click', (e) => {
       e.stopPropagation();
       document.querySelector<HTMLButtonElement>('#pm-inject-btn')?.click();
